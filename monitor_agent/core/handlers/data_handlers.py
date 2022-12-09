@@ -1,8 +1,4 @@
 import asyncio
-import subprocess
-
-import asyncssh
-from asyncssh import SSHKnownHosts
 
 from ..decorators import timed_lru_cache
 from ..exceptions import NoKeyscanData
@@ -44,7 +40,7 @@ class ScankeyGenerator:
         if len(stdout.decode('utf-8')) == 0:
             raise NoKeyscanData(host, port)
 
-        key = iva_dashboard.import_known_hosts(stdout.decode('utf-8'))
+        key = asyncssh.import_known_hosts(stdout.decode('utf-8'))
         self.__data.update({"key": key})
         return self.__data
 
