@@ -1,0 +1,38 @@
+version: '3.9'
+
+services:
+  iva_log_db:
+    image: postgres:alpine
+    container_name: postgres_test
+    env_file:
+      - postgres/postgres.env
+    volumes:
+      - ./postgres/docker-entrypoint-initdb.d/:/docker-entrypoint-initdb.d
+      - ./postgres/data:/var/lib/postgresql/data
+    networks:
+      iva_dashboard_net:
+        ipv4_address: 2.0.96.2
+    ports:
+      - "8002:5432"
+    restart: always
+  monitor_agent:
+    build:
+      context: .
+      dockerfile: monitor_agent.Dockerfile
+    container_name: monitor_agent
+    volumes:
+      - ./monitor_agent/:/app
+    networks:
+      iva_dashboard_net:
+        ipv4_address: 2.0.96.1
+    ports:
+      - "8001:8000"
+    restart: always
+
+
+networks:
+  iva_dashboard_net:
+    ipam:
+      config:
+        - subnet: 2.0.96.0/28
+          gateway: 2.0.96.14
