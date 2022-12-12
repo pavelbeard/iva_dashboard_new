@@ -1,0 +1,9 @@
+.servers {
+    width: 100px;
+    height: 500px;
+}
+.service {
+    width: 150px;
+    height: 100px;
+    background: #bfffa3;
+}

@@ -2,7 +2,7 @@ import asyncio
 import subprocess
 import unittest
 
-import iva_dashboard
+import asyncssh
 
 # from multiprocessing import ProcessError
 from monitor_agent.core.handlers.data_handlers import ScankeyGenerator
@@ -11,7 +11,7 @@ from monitor_agent.core.handlers.data_handlers import ScankeyGenerator
 class MonitorTests(unittest.TestCase):
     # def test_known_hosts_diff(self):
     #     async def main():
-    #         with open('../../monitor_srv/hosts.yml', 'r') as hosts:
+    #         with open('../../monitor_srv/server_config.yml', 'r') as hosts:
     #             tmp_hosts = yaml.safe_load(hosts).get('hosts')
     #
     #             hosts = [list(host.values())[1:] for host in tmp_hosts]

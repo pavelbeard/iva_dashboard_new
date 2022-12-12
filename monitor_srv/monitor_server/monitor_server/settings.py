@@ -13,7 +13,6 @@ import os
 
 import yaml
 from pathlib import Path
-from monitor_srv.monitor_server.monitoring_targets import get_hosts, get_known_hosts
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -124,14 +123,16 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.1/howto/static-files/
 
-STATIC_URL = 'static/'
+STATIC_URL = "static/"
+STATICFILES_DIRS = [
+    BASE_DIR / STATIC_URL
+]
+
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-hosts_path = os.path.join("C:\\", "Users", "pavel", ".iva_monitoring", "hosts.yml")
-
-MONITORING_TARGETS = get_hosts(hosts_path)
-KNOWN_HOSTS_FILE = get_known_hosts(hosts_path)
+SERVER_CONFIG_FILE = os.getenv("IVA_DASHBOARD_SERVER_CONFIG_FILE")
+KNOWN_HOSTS_FILE = os.getenv("IVA_DASHBOARD_KNOWN_HOSTS_FILE")

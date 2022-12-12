@@ -1,2 +1,3 @@
 from .core import app
-from .ssh_client.ssh_client import run_client
+from .exceptions import NoConnectionWithServer
+from .ssh_client import run_cmd_on_client

@@ -1,10 +1,10 @@
 from django.urls import path
-
+from django.views import generic
 from . import views
 
-app_name = 'servers'
+app_name = 'servers.html'
 
 urlpatterns = [
-    # path('', views.ServerServicesStates.as_view(), name="index")
-    path('', views.ServerSystemctlStatus.as_view(), name="index")
+    path('', generic.TemplateView.as_view(template_name="servers.html"), name="servers_index"),
+    path('metrics/', views.ServersMetricsLogicView.as_view(), name="servers_metrics"),
 ]
