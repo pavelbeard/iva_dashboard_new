@@ -44,3 +44,8 @@ class Tests(unittest.TestCase):
             assert type(results) == list
 
         asyncio.run(tst_interface_with_api())
+
+
+class TestingViews(TestCase):
+    def test_servers_processes_view(self):
+        pass

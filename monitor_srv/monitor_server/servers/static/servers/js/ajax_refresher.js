@@ -1,7 +1,8 @@
 $(document).ready(function () {
+
     function getMetrics() {
         $.ajax({
-            url: "metrics/",
+            url: "/processes/",
             method: "GET",
             dataType: "json",
             success: (data) => {
@@ -9,11 +10,10 @@ $(document).ready(function () {
             },
             error: (data) => {
                 $(".servers").text(data.error)
-
             }
 
         })
     }
 
-    getMetrics()
+    setInterval(getMetrics, 5000)
 })

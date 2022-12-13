@@ -1,20 +1,12 @@
 import json
 
-import aiohttp
-import yaml
 from django import http
-from django.shortcuts import render
-from django.views import generic
 from django.conf import settings
-
-from monitor_srv.monitor_server.servers.logic import IvaMetrics
-
+from django.views import generic
+from monitor_srv.monitor_server.servers.logic import IvaMetrics, IvaMetricsHandler
+from .mixins import ServerInfoMixin
 
 # Create your views here.
-
-
-# class ServersMetricsLogicView(ServerMixin):
-#     monitor_url = "http://localhost:8000/api/monitor/metrics"
 
 
 class ServersMetricsLogicView(generic.ListView):
@@ -24,6 +16,7 @@ class ServersMetricsLogicView(generic.ListView):
     async def get(self, request, *args, **kwargs):
         scraper = IvaMetrics(server_config_path=self.server_config_file,
                              known_hosts_path=self.known_hosts_path)
+        data_handler = IvaMetricsHandler()
 
         commands = [
             "uname -n && service --status-all",
@@ -33,18 +26,22 @@ class ServersMetricsLogicView(generic.ListView):
 
         scraped_data = await scraper.get_metrics_from_target_hosts('uname -n && service --status-all')
 
+        # TODO: настроить отображение данных
+
+        # data_handler.service_status_all()
+
         response = []
         for data in scraped_data:
             if isinstance(data, Exception):
                 response.append({"err_message": data.args[0]})
+            elif isinstance(data[1], dict):
+                response.append(data[1].get('message'))
             else:
-                response.append(data[1].split("\n"))
-
-            # async with aiohttp.ClientSession() as session:
-            #     async with session.post(url=scraper_url, data=)
+                response.append(data_handler.service_status_all(data))
 
         return http.JsonResponse(json.dumps(response), safe=False)
 
 
-def server_metrics_view(request):
-    return None
+class ServerProcesses(ServerInfoMixin):
+    cmd = "uname -n && service --status-all"
+    cb_handler = IvaMetricsHandler.service_status_all

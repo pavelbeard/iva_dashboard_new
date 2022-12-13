@@ -5,6 +5,6 @@ from . import views
 app_name = 'servers.html'
 
 urlpatterns = [
-    path('', generic.TemplateView.as_view(template_name="servers.html"), name="servers_index"),
-    path('metrics/', views.ServersMetricsLogicView.as_view(), name="servers_metrics"),
+    path('metrics/', generic.TemplateView.as_view(template_name="servers.html"), name="servers_index"),
+    path('metrics/processes/', views.ServerProcesses.as_view(), name="servers_processes"),
 ]

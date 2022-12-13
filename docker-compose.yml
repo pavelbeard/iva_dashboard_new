@@ -1,11 +1,19 @@
 version: '3.9'
 
 services:
-  iva_log_db:
+  monitor-cache-db:
+    image: redis:7.0.5-alpine
+    container_name: monitor-redis
+    ports:
+      - "8003:6379"
+    networks:
+      iva_dashboard_net:
+        ipv4_address: 2.0.96.3
+  monitor-db:
     image: postgres:alpine
-    container_name: postgres_test
+    container_name: monitor-postgres
     env_file:
-      - postgres/postgres.env
+      - postgres.env
     volumes:
       - ./postgres/docker-entrypoint-initdb.d/:/docker-entrypoint-initdb.d
       - ./postgres/data:/var/lib/postgresql/data
@@ -15,11 +23,13 @@ services:
     ports:
       - "8002:5432"
     restart: always
-  monitor_agent:
+  monitor-agent:
     build:
       context: .
       dockerfile: monitor_agent.Dockerfile
-    container_name: monitor_agent
+    container_name: monitor-agent
+    env_file:
+      - monitor_agent.env
     volumes:
       - ./monitor_agent/:/app
     networks:

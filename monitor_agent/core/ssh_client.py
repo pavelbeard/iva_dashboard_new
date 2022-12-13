@@ -1,5 +1,5 @@
 import asyncssh
-
+import aioredis
 
 async def run_cmd_on_client(data: dict) -> str | TimeoutError:
     """
@@ -15,3 +15,8 @@ async def run_cmd_on_client(data: dict) -> str | TimeoutError:
     ) as session:
         result = await session.run(cmd)
         return result.stdout
+
+
+async def scankey_client(data: dict):
+
+    pass

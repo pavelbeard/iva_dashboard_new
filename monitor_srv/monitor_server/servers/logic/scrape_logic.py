@@ -84,8 +84,9 @@ class IvaMetrics:
             raise aiohttp.ClientResponseError
 
 
-class IvaMetricsHandler(IvaMetrics):
-    def systemctl_list_units_parser(self, data: str) -> {}:
+class IvaMetricsHandler:
+    @classmethod
+    def systemctl_list_units_parser(cls, data: str) -> {}:
         """
         Парсит команду systemctl list-units --type=service.\n
         :param data: Данные, выведенные командой
@@ -99,15 +100,16 @@ class IvaMetricsHandler(IvaMetrics):
             unit, load, active, sub, *desc = tmp
             tmp_list.append({"unit": unit, "load": load, "active": active, "sub": sub})
 
-        return {"hostname": hostname, "task": self.systemctl_list_units_parser.__name__, "data": tmp_list}
+        return {"hostname": hostname, "task": cls.systemctl_list_units_parser.__name__, "data": tmp_list}
 
-    def service_status_all(self, data: str) -> {}:
+    @classmethod
+    def service_status_all(cls, data: tuple) -> {}:
         """
         Парсит команду service --status-all.\n
         :param data: Данные, выведенные командой
         :return: {}
         """
-        hostname, *other_data = data.split("\n")
+        hostname, *other_data = data[1].split("\n")
 
         tmp_list = []
         for d in other_data[:-1]:
@@ -121,4 +123,4 @@ class IvaMetricsHandler(IvaMetrics):
             if status == "[?]":
                 tmp_list.append({"service": service, "status": "not determined"})
 
-        return {"hostname": hostname, "task": self.service_status_all.__name__, "data": tmp_list}
+        return {"hostname": hostname, "task": cls.service_status_all.__name__, "data": tmp_list}

@@ -1,1 +1,1 @@
-from .known_hosts_handler import write_to_file, known_hosts_diff, scan_hosts
+from .known_hosts_handler import scan_hosts
