@@ -1,13 +1,19 @@
 import asyncio
+import concurrent.futures
 import os
 
+import paramiko
 import uvicorn
-
-from core import run_cmd_on_client
-from core import app
-from core import NoConnectionWithServer
-from starlette.requests import Request
+from asyncio.events import AbstractEventLoop
+from functools import partial
+from typing import List
 from fastapi.middleware.cors import CORSMiddleware
+from starlette.requests import Request
+from .core import NoConnectionWithServer
+from .core import app
+from .core import run_cmd_on_target_host
+
+
 
 origins = [
     "http://localhost:8080",
@@ -25,21 +31,36 @@ app.add_middleware(
 )
 
 
-@app.on_event("startup")
-
-
+# @app.on_event("startup")
 @app.post("/api/monitor/metrics")
 async def request_for_metrics(request: Request):
+    """
+    Обратывает запрос на получение метрик из целевых хостов
+    :param request:
+    :return:
+    """
     body = await request.json()
 
-    try:
-        # TODO: опять здесь нужен сканкей
+    hosts = body.get('hosts')
 
+    with concurrent.futures.ProcessPoolExecutor(max_workers=5) as process_pool:
+        loop: AbstractEventLoop = asyncio.get_running_loop()
+        calls: List[partial[tuple]] = [partial(run_cmd_on_target_host, host) for host in hosts]
+        call_coros = [loop.run_in_executor(process_pool, call) for call in calls]
 
-        result = await asyncio.wait_for(run_cmd_on_client(body), timeout=5)
-        return result
-    except TimeoutError:
-        raise NoConnectionWithServer(body.get('host'), body.get('port'))
+        task_results = await asyncio.gather(*call_coros, return_exceptions=True)
+        results = []
+
+        for result, host in zip(task_results, hosts):
+            host, port, *_ = list(host.values())
+            if isinstance(result, paramiko.ssh_exception.AuthenticationException):
+                results.append({"message": f"bad credentials for {host}:{port}"})
+            elif isinstance(result, type(paramiko.ssh_exception.SSHException)):
+                results.append({"message": f"no connection to server: {host}:{port}"})
+            else:
+                results.append(result)
+
+        return results
 
 
 if __name__ == '__main__':
