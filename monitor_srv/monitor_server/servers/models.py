@@ -13,6 +13,9 @@ class Target(models.Model):
     username = fields.CharField(max_length=32, null=False, verbose_name="Логин сервера")
     password = fields.CharField(max_length=32, null=False, verbose_name="Пароль сервера")
 
+    def __str__(self):
+        return f"Target(address={self.address}, port={self.port}, username={self.username})"
+
 
 class Server(models.Model):
     uuid = fields.UUIDField(default=uuid.uuid4().hex, primary_key=True)

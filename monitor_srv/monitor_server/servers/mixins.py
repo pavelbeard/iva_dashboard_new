@@ -1,32 +1,39 @@
 import json
 from typing import Callable
-from django.conf import settings
+
+import aiohttp.client_exceptions
 from django.views import generic
+from django.conf import settings
 from django import http
-from .logic import IvaMetrics, IvaMetricsHandler
+from . import models
+from .logic import IvaMetrics
 
 
 class ServerInfoMixin(generic.ListView):
-    server_config_file = settings.SERVER_CONFIG_FILE
-    known_hosts_path = settings.KNOWN_HOSTS_FILE
     cmd: str = None
     cb_handler: Callable = None
+    server_config_file = settings.SERVER_CONFIG_FILE
 
     async def get(self, request, *args, **kwargs):
-        scraper = IvaMetrics(
-            server_config_path=self.server_config_file,
-            known_hosts_path=self.known_hosts_path
-        )
+        query = models.Target.objects.all()
+        targets = [
+            {
+                "address": q.address,
+                "port": q.port,
+                "username": q.username,
+                "password": q.password,
+                "cmd": self.cmd
+            } async for q in query
+        ]
 
-        scraped_data = await scraper.get_metrics_from_target_hosts(self.cmd)
+        scraper = IvaMetrics(targets={"hosts": targets}, server_config_path=self.server_config_file)
+        try:
+            data = await scraper.scrape_metrics_from_agent()
+            response_data = [self.cb_handler(d) for d in data]
+            return http.JsonResponse(json.dumps(response_data), safe=False)
+        except aiohttp.client_exceptions.ClientConnectionError:
+            return http.JsonResponse(json.dumps({"ClientConnectionError": f"{scraper.monitor_url} is unreachable."}), safe=False)
 
-        response_body = []
-        for data in scraped_data:
-            if isinstance(data, Exception):
-                response_body.append({"err_message": data.args[0]})
-            elif isinstance(data[1], dict):
-                response_body.append(data[1].get('message'))
-            else:
-                response_body.append(self.cb_handler(data))
 
-        return http.JsonResponse(json.dumps(response_body), safe=False)
+
+

@@ -9,7 +9,6 @@ import paramiko
 import uvicorn
 from fastapi.middleware.cors import CORSMiddleware
 from starlette.requests import Request
-
 from core import app
 from core import run_cmd_on_target_host
 
@@ -52,9 +51,9 @@ async def request_for_metrics(request: Request):
         for result, host in zip(task_results, hosts):
             host, port, *_ = list(host.values())
             if isinstance(result, paramiko.ssh_exception.AuthenticationException):
-                results.append({"message": f"bad credentials for {host}:{port}"})
-            elif isinstance(result, type(paramiko.ssh_exception.SSHException)):
-                results.append({"message": f"no connection to server: {host}:{port}"})
+                results.append(f"{host}:{port}\nbad credentials.")
+            elif isinstance(result, (paramiko.ssh_exception.SSHException, TimeoutError)):
+                results.append(f"{host}:{port}\nno connection with server.")
             else:
                 results.append(result)
 

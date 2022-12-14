@@ -2,3 +2,5 @@
 /get_processes_status.http
 /monitor_srv/monitor_server/servers/migrations
 /postgres
+/packages/monitor-agent-packages/*
+/packages/monitor-server-packages/*

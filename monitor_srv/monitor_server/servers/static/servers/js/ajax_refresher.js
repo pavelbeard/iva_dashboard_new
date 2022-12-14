@@ -1,8 +1,8 @@
 $(document).ready(function () {
-
-    function getMetrics() {
+    // current url /metrics/
+    function getMetrics(url) {
         $.ajax({
-            url: "/processes/",
+            url: "processes/",
             method: "GET",
             dataType: "json",
             success: (data) => {

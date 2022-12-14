@@ -2,9 +2,9 @@ FROM python:3.11.1-slim-bullseye
 
 WORKDIR /app
 
-COPY monitor_agent/reqs.txt /app
+COPY packages/monitor-agent-packages/ /app
 
-RUN pip install $(grep -ivE "pywin32" reqs.txt)
+RUN pip install $(ls); rm *
 
 EXPOSE 8000/tcp
 

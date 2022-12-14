@@ -54,4 +54,6 @@ def run_cmd_on_target_host(conn_data: dict) -> str | Type[SSHException]:
         except paramiko.ssh_exception.AuthenticationException:
             raise paramiko.ssh_exception.AuthenticationException
         except paramiko.ssh_exception.SSHException:
-            return paramiko.ssh_exception.SSHException
+            raise paramiko.ssh_exception.SSHException
+        except TimeoutError:
+            raise TimeoutError
