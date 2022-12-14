@@ -123,11 +123,18 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.1/howto/static-files/
 
-STATIC_URL = "static/"
-STATICFILES_DIRS = [
-    BASE_DIR / STATIC_URL
+STATICFILES_FINDERS = [
+    'django.contrib.staticfiles.finders.FileSystemFinder',
+    'django.contrib.staticfiles.finders.AppDirectoriesFinder',
 ]
 
+STATIC_URL = "static/"
+STATIC_ROOT = "/www/iva_dashboard/static"
+
+STATICFILES_DIRS = [
+    os.path.join(STATIC_ROOT, "servers", "static"),
+    os.path.join(STATIC_ROOT, "static"),
+]
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.1/ref/settings/#default-auto-field

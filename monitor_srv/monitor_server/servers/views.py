@@ -1,5 +1,5 @@
 from django.views import generic
-from monitor_srv.monitor_server.servers.logic import IvaMetricsHandler
+from .logic import IvaMetricsHandler
 from .mixins import ServerInfoMixin
 from . import models
 

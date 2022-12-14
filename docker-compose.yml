@@ -24,8 +24,8 @@ services:
     env_file:
       - monitor_agent.env
     volumes:
-      - /monitor_srv/monitor_server/:/app
-      - /monitor_srv/etc:/etc/iva_dashboard
+      - ./monitor_srv/monitor_server/:/app
+      - ./monitor_srv/etc:/etc/iva_dashboard
     networks:
       iva_dashboard_net:
         ipv4_address: 2.0.96.3
