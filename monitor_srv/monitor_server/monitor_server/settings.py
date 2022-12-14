@@ -80,11 +80,11 @@ WSGI_APPLICATION = 'monitor_server.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'test_db',
-        'USER': 'test_db',
-        'PASSWORD': 'test_db',
-        'HOST': 'localhost',
-        'PORT': '8002',
+        'NAME': os.getenv('POSTGRES_DB_NAME'),
+        'USER': os.getenv('POSTGRES_DB_USER'),
+        'PASSWORD': os.getenv('POSTGRES_DB_PASSWORD'),
+        'HOST': os.getenv('POSTGRES_DB_HOST'),
+        'PORT': os.getenv('POSTGRES_DB_PORT'),
     }
 }
 
@@ -137,7 +137,6 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 # custom settings
 
 SERVER_CONFIG_FILE = os.getenv("IVA_DASHBOARD_SERVER_CONFIG_FILE")
-KNOWN_HOSTS_FILE = os.getenv("IVA_DASHBOARD_KNOWN_HOSTS_FILE")
 
 PASSWORD_HASHERS = [
   'django.contrib.auth.hashers.PBKDF2PasswordHasher',

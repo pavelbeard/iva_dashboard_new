@@ -23,7 +23,7 @@ class Tests(unittest.TestCase):
         async def tst_interface_with_api():
             from logic.scrape_logic import IvaMetrics, IvaMetricsHandler
 
-            scraper = IvaMetrics("C:\\Users\\pavel\\.iva_monitoring\\server_config.yml",
+            scraper = IvaMetrics("C:\\Users\\pavel\\.iva_monitoring\\server-config.yml",
                                  "C:\\Users\\pavel\\.iva_monitoring\\iva_known_hosts")
 
             with open("C:\\Users\\pavel\\.iva_monitoring\\iva_known_hosts", 'r') as f:
