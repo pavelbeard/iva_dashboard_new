@@ -1,14 +1,6 @@
 version: '3.9'
 
 services:
-  monitor-cache-db:
-    image: redis:7.0.5-alpine
-    container_name: monitor-redis
-    ports:
-      - "8003:6379"
-    networks:
-      iva_dashboard_net:
-        ipv4_address: 2.0.96.3
   monitor-db:
     image: postgres:alpine
     container_name: monitor-postgres
