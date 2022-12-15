@@ -1,0 +1,23 @@
+{% extends "index.html" %}
+{% csrf_token %}
+
+{% load static %}
+
+{% block css %}
+    <link rel="stylesheet" href="{% static "servers/css/servers.css" %}">
+{% endblock css %}
+{% block javascript %}
+    <script src="{% static "jquery/jquery-3.6.1-min.js"  %}"></script>
+    <script src="{% static "servers/js/ajax_refresher.js"  %}"></script>
+{% endblock %}
+{% block servers_block %}
+
+    <div class="controls">
+        <div class="refs">
+            <a class="row" href="{% url 'servers.html:servers_index' %}">Главная</a>
+        </div>
+        <div class="servers">
+
+        </div>
+    </div>
+{% endblock %}

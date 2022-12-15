@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    {% load static %}
+    <meta charset="UTF-8">
+    <title>Iva monitoring</title>
+    <link rel="stylesheet" href="{% static "bootstrap/css/bootstrap.css" %}">
+    {% block css %}{% endblock css %}
+    {% block javascript %}{% endblock javascript %}
+</head>
+<body>
+    <div class="container-fluid">
+    {% block servers %}{% endblock %}
+    </div>
+</body>
+
+</html>
