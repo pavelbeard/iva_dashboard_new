@@ -1,7 +1,6 @@
-import uuid
-
 from django.db import models
 from django.db.models import fields
+import uuid
 
 
 # Create your models here.
@@ -12,9 +11,6 @@ class Target(models.Model):
     port = fields.SmallIntegerField(null=False, verbose_name="Порт сервера")
     username = fields.CharField(max_length=32, null=False, verbose_name="Логин сервера")
     password = fields.CharField(max_length=32, null=False, verbose_name="Пароль сервера")
-
-    def __str__(self):
-        return f"Target(address={self.address}, port={self.port}, username={self.username})"
 
 
 class Server(models.Model):

@@ -9,9 +9,12 @@ class IvaMetrics:
         self.targets = targets
         self.server_config_path = server_config_path
 
-        with open(self.server_config_path) as file:
-            self.__config = yaml.safe_load(file)
-            self.monitor_url = self.__config.get('settings').get('scraper_url')
+        try:
+            with open(self.server_config_path) as file:
+                self.__config = yaml.safe_load(file)
+                self.monitor_url = self.__config.get('settings').get('scraper_url')
+        except FileNotFoundError:
+            raise FileNotFoundError
 
     async def scrape_metrics_from_agent(self):
         """Собирает метрики с агента"""

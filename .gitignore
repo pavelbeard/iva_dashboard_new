@@ -1,9 +1,9 @@
 /.idea
-/get_processes_status.http
-/monitor_server/servers/migrations
+/envs
 /postgres
+/monitor_serv/.idea
+/get_processes_status.http
 /packages/monitor-agent-packages/*
 /packages/monitor-server-packages/*
-/envs
-/docker-compose.yml
 /postgres/docker-entrypoint-initdb.d/init-user-db.sh
+/docker-compose.yml

@@ -2,7 +2,7 @@ $(document).ready(function () {
     // current url /metrics/
     function getMetrics(url) {
         $.ajax({
-            url: "metrics/processes",
+            url: "processes/",
             method: "GET",
             dataType: "json",
             success: (data) => {

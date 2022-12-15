@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+
+{% csrf_token %}
+
+{% load static %}
+{% block css %}
+    <link rel="stylesheet" href="{% static "dashboard/css/dashboard.css" %}">
+{% endblock %}
+{% block js %}
+    <script src="{% static "dashboard/js/ajax_refresher.js" %}"></script>
+{% endblock %}
+{% block dashboard %}
+    <div class="servers">
+
+    </div>
+{% endblock %}

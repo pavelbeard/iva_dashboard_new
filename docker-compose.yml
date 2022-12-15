@@ -20,14 +20,14 @@ services:
   monitor-server:
     build:
       context: .
-      dockerfile: dockerfiles/monitor_server.Dockerfile
+      dockerfile: dockerfiles/monitor_serv.Dockerfile
     container_name: monitor-server
     command: uvicorn monitor_server.asgi:application --host 0.0.0.0 --port 8000 --reload
     env_file:
-      - envs/monitor_server.env
+      - envs/monitor_serv.env
     volumes:
-      - ./monitor_server/:/home/monitor-server-app/web
-      - ./configs/monitor_server/:/etc/iva_dashboard
+      - ./monitor_serv/:/home/monitor-server-app/web
+      - ./configs/monitor_serv/:/etc/iva_dashboard
       - static_files:/home/monitor-server-app/web/staticfiles
     networks:
       iva_dashboard_net:

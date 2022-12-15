@@ -11,7 +11,7 @@ from functools import partial
 from logging import DEBUG
 from typing import List
 
-import asyncssh
+import iva_dashboard
 import paramiko
 
 
@@ -32,9 +32,9 @@ class AutoAddPolicy(paramiko.MissingHostKeyPolicy):
 class MonitorTests(unittest.TestCase):
     def test_known_hosts(self):
         async def run_client(host):
-            async with asyncssh.connect(host="192.168.248.3", port=2249, username="pavelbeard",
-                                        password="Rt3$YiOO",
-                                        known_hosts=asyncssh.import_known_hosts(host)) as ssh:
+            async with iva_dashboard.connect(host="192.168.248.3", port=2249, username="pavelbeard",
+                                             password="Rt3$YiOO",
+                                             known_hosts=iva_dashboard.import_known_hosts(host)) as ssh:
                 result = await ssh.run("uname -n")
                 return result.stdout
 

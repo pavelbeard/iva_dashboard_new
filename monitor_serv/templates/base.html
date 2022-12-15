@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    {% load static %}
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="{% static "bootstrap/css/bootstrap.css" %}">
+    <script src="{% static "jquery/jquery-3.6.1-min.js" %}"></script>
+    {% block css %}{% endblock %}
+    {% block js %}{% endblock %}
+    <title>{% block title %}Title{% endblock %}</title>
+</head>
+<body>
+    {% block dashboard %}{% endblock %}
+</body>
+</html>

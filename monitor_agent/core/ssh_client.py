@@ -2,7 +2,7 @@ from binascii import hexlify
 from logging import DEBUG
 from typing import Type
 
-import asyncssh
+import iva_dashboard
 import paramiko
 from paramiko.ssh_exception import SSHException
 
@@ -27,9 +27,9 @@ async def run_cmd_on_client(data: dict) -> str | TimeoutError:
     """
     host, port, username, password, keys, cmd = list(data.values())
 
-    async with asyncssh.connect(
+    async with iva_dashboard.connect(
             host=host, port=int(port), username=username, password=password,
-            known_hosts=asyncssh.import_known_hosts(keys)
+            known_hosts=iva_dashboard.import_known_hosts(keys)
     ) as session:
         result = await session.run(cmd)
         return result.stdout
