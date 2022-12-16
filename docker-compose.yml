@@ -1,6 +1,33 @@
 version: '3.9'
 
 services:
+  ssh1:
+    image: ssh_test
+    container_name: ssh_test_1
+    networks:
+      iva_dashboard_net:
+        ipv4_address: 2.0.96.5
+    ports:
+      - "2000:22"
+
+  ssh2:
+    image: ssh_test
+    container_name: ssh_test_2
+    networks:
+      iva_dashboard_net:
+        ipv4_address: 2.0.96.6
+    ports:
+      - "2001:22"
+
+  ssh3:
+    image: ssh_test
+    container_name: ssh_test_3
+    networks:
+      iva_dashboard_net:
+        ipv4_address: 2.0.96.7
+    ports:
+      - "2002:22"
+
   monitor-nginx:
     build:
       context: .

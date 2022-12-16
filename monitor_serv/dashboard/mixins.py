@@ -3,6 +3,7 @@ import json
 from typing import Callable
 from django import http
 from django.conf import settings
+from django.shortcuts import render
 from django.views import generic
 from django.db import utils
 from .logic import IvaMetrics, TargetsIsEmpty
@@ -15,6 +16,9 @@ class ServersInfoMixin(generic.ListView):
     server_config_file = settings.SERVER_CONFIG_FILE
 
     async def get(self, request, *args, **kwargs):
+        if not request.headers.get('X-Requested-With') == "XMLHttpRequest":
+            return render(request, template_name="base.html")
+
         scraper = None
         try:
             query = models.Target.objects.all()

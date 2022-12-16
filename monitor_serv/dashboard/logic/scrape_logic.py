@@ -66,19 +66,34 @@ class IvaMetricsHandler:
 
         hostname, *other_data = data.split("\n")
 
-        tmp_list = []
+        processes_list = []
         if other_data[0] == "no connection with server." or other_data[0] == "bad credentials.":
-            tmp_list.append(other_data[0])
+            processes_list.append(other_data[0])
         else:
             for d in other_data[:-1]:
                 *status, service = d.split()
                 status = str().join(status)
 
                 if status == "[-]":
-                    tmp_list.append({"service": service, "status": "stopped"})
+                    processes_list.append({"service": service, "status": "stopped"})
                 elif status == "[+]":
-                    tmp_list.append({"service": service, "status": "running"})
+                    processes_list.append({"service": service, "status": "running"})
                 if status == "[?]":
-                    tmp_list.append({"service": service, "status": "not determined"})
+                    processes_list.append({"service": service, "status": "not determined"})
 
-        return {"hostname": hostname, "task": cls.service_status_all.__name__, "data": tmp_list}
+        return {"hostname": hostname, "task": cls.service_status_all.__name__, "data": processes_list}
+
+    @classmethod
+    def cpu_utilization(cls, data: str) -> {}:
+        """
+        Выводит информацию о загрузке процессора.\n
+        :param data: Данные о загрузке процессора
+        """
+        if type(data) == dict:
+            return {"hostname": "no_data", "task": cls.cpu_utilization.__name__,
+                    "data": [{"no_data": "no_data"}]}
+
+        hostname, cpu_load = data.split("\n")
+
+        return {"hostname": hostname, "task": cls.cpu_utilization.__name__, "data": cpu_load}
+

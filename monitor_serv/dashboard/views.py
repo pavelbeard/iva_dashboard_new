@@ -11,5 +11,5 @@ class Processes(mixins.ServersInfoMixin):
 
 
 class CPU(mixins.ServersInfoMixin):
-    cmd = "uname -n && service --status-all"
-    callback_iva_metrics_handler = IvaMetricsHandler.service_status_all
+    cmd = "uname -n && echo $[100-$(vmstat 1 2|tail -1|awk '{print $15}')]"
+    callback_iva_metrics_handler = IvaMetricsHandler.cpu_utilization
