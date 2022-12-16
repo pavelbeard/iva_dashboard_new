@@ -1,16 +1,17 @@
 import asyncio
 import concurrent.futures
+import logging
 import os
+import paramiko
+import uvicorn
+
 from asyncio.events import AbstractEventLoop
 from functools import partial
 from typing import List
-
-import paramiko
-import uvicorn
 from fastapi.middleware.cors import CORSMiddleware
 from starlette.requests import Request
-from core import app
-from core import run_cmd_on_target_host
+from agent import run_cmd_on_target_host, app, get_logger
+
 
 origins = [
     "http://localhost:8080",
@@ -28,7 +29,9 @@ app.add_middleware(
 )
 
 
-# @app.on_event("startup")
+logger = get_logger(__name__)
+
+
 @app.post("/api/monitor/metrics")
 async def request_for_metrics(request: Request):
     """
@@ -50,9 +53,17 @@ async def request_for_metrics(request: Request):
 
         for result, host in zip(task_results, hosts):
             host, port, *_ = list(host.values())
+            print(result)
+            # TODO: настроить логирование
             if isinstance(result, paramiko.ssh_exception.AuthenticationException):
                 results.append(f"{host}:{port}\nbad credentials.")
-            elif isinstance(result, (paramiko.ssh_exception.SSHException, TimeoutError)):
+            elif isinstance(result, (
+                    paramiko.ssh_exception.NoValidConnectionsError,
+                    TypeError,
+                    TimeoutError,
+                    PermissionError,
+                    OSError
+            )):
                 results.append(f"{host}:{port}\nno connection with server.")
             else:
                 results.append(result)

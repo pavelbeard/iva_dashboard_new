@@ -4,8 +4,8 @@
   * Licensed under MIT (https://github.com/twbs/bootstrap/blob/main/LICENSE)
   */
 (function (global, factory) {
-  typeof exports === 'object' && typeof module !== 'undefined' ? module.exports = factory(require('@popperjs/core')) :
-  typeof define === 'function' && define.amd ? define(['@popperjs/core'], factory) :
+  typeof exports === 'object' && typeof module !== 'undefined' ? module.exports = factory(require('@popperjs/agent')) :
+  typeof define === 'function' && define.amd ? define(['@popperjs/agent'], factory) :
   (global = typeof globalThis !== 'undefined' ? globalThis : global || self, global.bootstrap = factory(global.Popper));
 })(this, (function (Popper) { 'use strict';
 
@@ -197,7 +197,7 @@
   const findShadowRoot = element => {
     if (!document.documentElement.attachShadow) {
       return null;
-    } // Can find the shadow root otherwise it'll return the document
+    } // Can find the shadow agent otherwise it'll return the document
 
 
     if (typeof element.getRootNode === 'function') {
@@ -207,7 +207,7 @@
 
     if (element instanceof ShadowRoot) {
       return element;
-    } // when we don't find a shadow root
+    } // when we don't find a shadow agent
 
 
     if (!element.parentNode) {

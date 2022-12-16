@@ -5,7 +5,7 @@ from django import http
 from django.conf import settings
 from django.views import generic
 from django.db import utils
-from .logic import IvaMetrics
+from .logic import IvaMetrics, TargetsIsEmpty
 from . import models
 
 
@@ -28,6 +28,9 @@ class ServersInfoMixin(generic.ListView):
                 } async for q in query
             ]
 
+            if len(targets) == 0:
+                raise TargetsIsEmpty(message="The table 'Targets' is empty!")
+
             scraper = IvaMetrics(targets={"hosts": targets}, server_config_path=self.server_config_file)
             data = await scraper.scrape_metrics_from_agent()
 
@@ -37,8 +40,10 @@ class ServersInfoMixin(generic.ListView):
             return http.JsonResponse(json.dumps({"ClientConnectionError": f"{scraper.monitor_url} is unreachable."}),
                                      safe=False)
         except utils.ProgrammingError:
-            return http.JsonResponse(json.dumps({"ProgrammingError": "The table 'Targets' is not exists"}),
+            return http.JsonResponse(json.dumps({"ProgrammingError": "The table 'Targets' is not exists!"}),
                                      safe=False)
         except FileNotFoundError:
-            return http.JsonResponse(json.dumps({"FileNotFoundError": "Config file not found"}),
+            return http.JsonResponse(json.dumps({"FileNotFoundError": "Config file not found."}),
                                      safe=False)
+        except TargetsIsEmpty as tie:
+            return http.JsonResponse(json.dumps({"TargetsIsEmpty": tie.message}), safe=False)

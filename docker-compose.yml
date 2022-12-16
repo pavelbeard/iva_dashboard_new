@@ -55,6 +55,7 @@ services:
     restart: always
 
   monitor-agent:
+#    image: pavelbeard/monitor-agent:v1
     build:
       context: .
       dockerfile: dockerfiles/monitor_agent.Dockerfile
@@ -63,7 +64,8 @@ services:
     env_file:
       - envs/monitor_agent.env
     volumes:
-      - ./monitor_agent/:/app
+      - ./monitor_agent/:/home/monitor-agent-app/api
+      - ./monitor_agent_logs/:/home/monitor-agent-app/api/logs
     networks:
       iva_dashboard_net:
         ipv4_address: 2.0.96.1

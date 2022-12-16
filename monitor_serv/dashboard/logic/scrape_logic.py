@@ -60,6 +60,10 @@ class IvaMetricsHandler:
         :param data: Данные, выведенные командой
         :return: {}
         """
+        if type(data) == dict:
+            return {"hostname": "no_data", "task": cls.service_status_all.__name__,
+                    "data": [{"no_data": "no_data"}]}
+
         hostname, *other_data = data.split("\n")
 
         tmp_list = []

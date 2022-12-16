@@ -3,7 +3,8 @@
 /postgres
 /monitor_serv/.idea
 /get_processes_status.http
-/packages/monitor-agent-packages/*
-/packages/monitor-server-packages/*
+/requirements/monitor-agent-packages/*
+/requirements/monitor-server-packages/*
 /postgres/docker-entrypoint-initdb.d/init-user-db.sh
 /docker-compose.yml
+/monitor_agent_logs

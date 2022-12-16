@@ -177,7 +177,7 @@
   const findShadowRoot = element => {
     if (!document.documentElement.attachShadow) {
       return null;
-    } // Can find the shadow root otherwise it'll return the document
+    } // Can find the shadow agent otherwise it'll return the document
 
 
     if (typeof element.getRootNode === 'function') {
@@ -187,7 +187,7 @@
 
     if (element instanceof ShadowRoot) {
       return element;
-    } // when we don't find a shadow root
+    } // when we don't find a shadow agent
 
 
     if (!element.parentNode) {

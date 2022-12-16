@@ -842,7 +842,7 @@ function Sizzle( selector, context, results, seed ) {
 				newSelector = selector;
 				newContext = context;
 
-				// qSA considers elements outside a scoping root when evaluating child or
+				// qSA considers elements outside a scoping agent when evaluating child or
 				// descendant combinators, which is not what we want.
 				// In such cases, we work around the behavior by prefixing every selector in the
 				// list with an ID selector referencing the scope context.
@@ -1167,7 +1167,7 @@ setDocument = Sizzle.setDocument = function( node ) {
 	// Safari 4 - 5 only, Opera <=11.6 - 12.x only
 	// IE/Edge & older browsers don't support the :scope pseudo-class.
 	// Support: Safari 6.0 only
-	// Safari 6.0 supports :scope but it's an alias of :root there.
+	// Safari 6.0 supports :scope but it's an alias of :agent there.
 	support.scope = assert( function( el ) {
 		docElem.appendChild( el ).appendChild( document.createElement( "div" ) );
 		return typeof el.querySelectorAll !== "undefined" &&
@@ -3125,7 +3125,7 @@ jQuery.fn.extend( {
 // Initialize a jQuery object
 
 
-// A central reference to the root jQuery(document)
+// A central reference to the agent jQuery(document)
 var rootjQuery,
 
 	// A simple way to check for HTML strings
@@ -10565,7 +10565,7 @@ jQuery.fn.extend( {
 		} else {
 			offset = this.offset();
 
-			// Account for the *real* offset parent, which can be the document or its root element
+			// Account for the *real* offset parent, which can be the document or its agent element
 			// when a statically positioned element is identified
 			doc = elem.ownerDocument;
 			offsetParent = elem.offsetParent || doc.documentElement;

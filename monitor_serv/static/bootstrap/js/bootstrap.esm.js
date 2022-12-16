@@ -3,7 +3,7 @@
   * Copyright 2011-2022 The Bootstrap Authors (https://github.com/twbs/bootstrap/graphs/contributors)
   * Licensed under MIT (https://github.com/twbs/bootstrap/blob/main/LICENSE)
   */
-import * as Popper from '@popperjs/core';
+import * as Popper from '@popperjs/agent';
 
 /**
  * --------------------------------------------------------------------------
@@ -173,7 +173,7 @@ const isDisabled = element => {
 const findShadowRoot = element => {
   if (!document.documentElement.attachShadow) {
     return null;
-  } // Can find the shadow root otherwise it'll return the document
+  } // Can find the shadow agent otherwise it'll return the document
 
 
   if (typeof element.getRootNode === 'function') {
@@ -183,7 +183,7 @@ const findShadowRoot = element => {
 
   if (element instanceof ShadowRoot) {
     return element;
-  } // when we don't find a shadow root
+  } // when we don't find a shadow agent
 
 
   if (!element.parentNode) {

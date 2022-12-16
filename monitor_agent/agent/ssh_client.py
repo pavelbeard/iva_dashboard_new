@@ -1,10 +1,13 @@
+import logging
+import paramiko
 from binascii import hexlify
 from logging import DEBUG
 from typing import Type
-
-import iva_dashboard
-import paramiko
 from paramiko.ssh_exception import SSHException
+from .agent_logger import get_logger
+
+
+logger = get_logger(__name__)
 
 
 class AutoAddPolicy(paramiko.MissingHostKeyPolicy):
@@ -17,22 +20,6 @@ class AutoAddPolicy(paramiko.MissingHostKeyPolicy):
 
         client._log(DEBUG, f"Adding {key.get_name()} host key for {hostname}: "
                            f"{hexlify(key.get_fingerprint())}")
-
-
-async def run_cmd_on_client(data: dict) -> str | TimeoutError:
-    """
-    Функция запускает ssh-соединение и вытаскивает с хоста нужную информацию.\n
-    :param data: Данные для подключения и команды для выполнения на удаленном хосте.
-    :return: str | TimeoutError
-    """
-    host, port, username, password, keys, cmd = list(data.values())
-
-    async with iva_dashboard.connect(
-            host=host, port=int(port), username=username, password=password,
-            known_hosts=iva_dashboard.import_known_hosts(keys)
-    ) as session:
-        result = await session.run(cmd)
-        return result.stdout
 
 
 def run_cmd_on_target_host(conn_data: dict) -> str | Type[SSHException]:
@@ -52,8 +39,18 @@ def run_cmd_on_target_host(conn_data: dict) -> str | Type[SSHException]:
             return bytes.decode(stdout.read(), encoding='utf-8')
 
         except paramiko.ssh_exception.AuthenticationException:
+            logger.error("AuthenticationException", exc_info=True)
             raise paramiko.ssh_exception.AuthenticationException
-        except paramiko.ssh_exception.SSHException:
-            raise paramiko.ssh_exception.SSHException
+        except paramiko.ssh_exception.NoValidConnectionsError:
+            logger.error("NoValidConnectionsError", exc_info=True)
+            raise paramiko.ssh_exception.NoValidConnectionsError
         except TimeoutError:
+            logger.error("TimeoutError", exc_info=True)
             raise TimeoutError
+        except PermissionError:
+            logger.error("PermissionError", exc_info=True)
+            raise PermissionError
+        except OSError:
+            logger.error("OSError", exc_info=True)
+            raise OSError
+
