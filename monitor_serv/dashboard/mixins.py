@@ -39,6 +39,10 @@ class ServersInfoMixin(generic.ListView):
             data = await scraper.scrape_metrics_from_agent()
 
             response_data = [self.callback_iva_metrics_handler(d) for d in data]
+
+            for rd, target in zip(response_data, targets):
+                rd['id'] = f"{target.get('address')}:{target.get('port')}"
+
             return http.JsonResponse(json.dumps(response_data), safe=False)
         except aiohttp.ClientConnectionError:
             return http.JsonResponse(json.dumps({"ClientConnectionError": f"{scraper.monitor_url} is unreachable."}),
