@@ -10,7 +10,55 @@
     <script src="{% static "dashboard/js/refresher.js" %}"></script>
 {% endblock %}
 {% block dashboard %}
-    <section class="row" id="servers">
+    <section class="flex-shrink-0" id="servers">
+        <div class="row container-fluid servers-container">
+            <div class="col-md-6">
+                <div class="bg-info flex-fill"><h4 class="text-light">Мониторинг серверов</h4></div>
+                <div class="servers flex-shrink-0">
+                    {% for address in addresses %}
+                        <div class="server" id="{{ address }}">
+                            <div class="server-left-part">
+                                <div class="server-img border border-dark  border-2">
+                                    <img class="img" src="{% static "dashboard/images/icons8-server-64.png" %}"
+                                             alt="server-image">
+                                    <div class="server-hostname">Host undefined</div>
+                                    <div class="server-address">{{ address }}</div>
+                                </div>
+                                <div class="server-status justify-content-center border border-dark  border-2">
+                                    <img class="server-info-icon"
+                                         src="{% static "dashboard/images/icons8-unlike-64.png" %}"
+                                         alt="server-status"><p>?</p>
+                                </div>
+                            </div>
+                            <div class="server-info">
+                                <div class="server-cpu border border-dark  border-2">
+                                        <img class="server-info-icon"
+                                             src="{% static "dashboard/images/icons8-cpu-64.png" %}"
+                                             alt="server-cpu"><p>0%</p></div>
+                                <div class="server-ram border border-dark  border-2">
+                                    <img class="server-info-icon"
+                                         src="{% static "dashboard/images/icons8-ram-64.png" %}"
+                                                                  alt="server-ram"><p>0%</p></div>
+                                <div class="server-disk border border-dark  border-2">
+                                    <img class="server-info-icon"
+                                         src="{% static "dashboard/images/icons8-disk-64.png" %}"
+                                                                  alt="server-disk"><p>0%</p></div>
+                                <div class="server-processes border border-dark  border-2">
+                                    <img class="server-info-icon"
+                                         src="{% static "dashboard/images/icons8-code-64.png" %}"
+                                                                  alt="server-processes"><p>0</p></div>
+                                <div class="server-network border border-dark  border-2">
+                                    <img class="server-info-icon"
+                                         src="{% static "dashboard/images/icons8-ethernet-64.png" %}"
+                                                                  alt="server-network"><p>?</p></div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {# еще один div col-md-6 #}
+        </div>
+
 
 
     </section>

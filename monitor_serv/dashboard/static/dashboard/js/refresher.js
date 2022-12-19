@@ -1,4 +1,6 @@
-function processesData(data) {
+function processesData(data, host) {
+    let connErr = (data[0].status === undefined) ? "" : 0
+
     let processesArray = data.map(el => {
         let st = ''
         switch (el.status) {
@@ -12,41 +14,47 @@ function processesData(data) {
                 st += ' [?]'
                 break
         }
-        return `${el.service}: ${el.status}${st}`
+        return `${el.service}: ${el.status}${st}`;
     });
-    return "".concat(processesArray).replaceAll(',', '\n')
+    let processesTooltip, processesCount;
+    [processesTooltip, processesCount] = ["".concat(processesArray).replaceAll(',', '\n'),
+        processesArray.length];
+
+    //processes
+    host.childNodes[3].childNodes[7].childNodes[2].textContent = (connErr !== "") ?
+        processesCount : 0;
+    host.childNodes[3].childNodes[7].style.backgroundColor = (connErr !== "") ?
+        "#69ff4e" : "#777676";
+
 }
 
-function makeServerNode(hostname, data, id, callback) {
-    let oldHost = document.getElementById(id);
-    if (oldHost != null)
-        oldHost.remove();
+function updateServerNode(hostname, data, id, callback) {
+    let host = document.getElementById(id);
 
-    let newDiv = document.createElement('div');
-    let host = document.createTextNode(hostname);
+    // set hostname
+    let connError = "no connection with server."
+    host.childNodes[1].childNodes[1].childNodes[3].textContent = (data[0] !== connError) ?
+        hostname : "Хост недоступен\n";
 
-    newDiv.appendChild(host);
-    newDiv.id = id;
-    newDiv.addEventListener('mousemove', (e) => {
-        newDiv.title = callback(data)
-    });
-    newDiv.addEventListener('mouseout', (e) => {
-        newDiv.title = ''
-    });
-    newDiv.setAttribute('data-toggle', 'tooltip');
-    newDiv.setAttribute('data-placement', 'right');
+    // set status
+    host.childNodes[1].childNodes[3].childNodes[1].src = (data[0] !== connError) ?
+        "/static/dashboard/images/icons8-like-64.png" : "/static/dashboard/images/icons8-unlike-64.png";
+    host.childNodes[1].childNodes[3].childNodes[2].textContent = (data[0] !== connError) ?
+        "UP\n" : "DOWN\n";
+    host.childNodes[1].childNodes[3].style.backgroundColor = (data[0] !== connError) ?
+        "#69ff4e" : "#ff0000"
 
-    return newDiv;
+    callback(data, host, connError)
+
 }
 
-function drawTable(data, callback) {
+function reDrawTableElements(data, callback) {
     let parsedData = JSON.parse(data);
-    let servers = document.getElementById('servers');
-    const serversElementsArray = parsedData.map(el => makeServerNode(el.hostname, el.data, el.id, callback));
+    parsedData.forEach(el => updateServerNode(el.hostname, el.data, el.id, callback));
 
-    serversElementsArray.forEach(el => servers.appendChild(el))
+    // serversElementsArray.forEach(el => servers.appendChild(el))
 
-    $('[data-toggle="tooltip"]').tooltip();
+    // $('[data-toggle="tooltip"]').tooltip();
 }
 
 async function getMetrics (url, method, headers) {
@@ -62,7 +70,7 @@ async function getMetrics (url, method, headers) {
 
 async function inspectServers() {
     let data = await getMetrics("processes/", "GET");
-    drawTable(data, processesData);
+    reDrawTableElements(data, processesData);
 }
 
 // main //

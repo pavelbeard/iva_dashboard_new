@@ -4,7 +4,7 @@ services:
   monitor-nginx:
     build:
       context: .
-      dockerfile: dockerfiles/monitor_nginx.Dockerfile
+      dockerfile: monitor_nginx/monitor_nginx.Dockerfile
     container_name: monitor-nginx
     volumes:
       - static_files:/home/monitor-server-app/web/staticfiles
@@ -20,11 +20,11 @@ services:
   monitor-server:
     build:
       context: .
-      dockerfile: dockerfiles/monitor_serv.Dockerfile
+      dockerfile: monitor_serv/monitor_serv.Dockerfile
     container_name: monitor-server
     command: uvicorn monitor_server.asgi:application --host 0.0.0.0 --port 8000 --reload
     env_file:
-      - envs/prod.monitor_serv.env
+      - monitor_serv/prod.monitor_serv.env
     volumes:
       - ./monitor_serv/:/home/monitor-server-app/web
       - ./configs/monitor_serv/:/etc/iva_dashboard
@@ -42,7 +42,7 @@ services:
     image: postgres:alpine
     container_name: monitor-postgres
     env_file:
-      - envs/prod.postgres.env
+      - postgres/prod.postgres.env
     volumes:
       - ./postgres/docker-entrypoint-initdb.d/:/docker-entrypoint-initdb.d
       - postgres_files:/var/lib/postgresql/data
@@ -56,11 +56,11 @@ services:
   monitor-agent:
     build:
       context: .
-      dockerfile: dockerfiles/monitor_agent.Dockerfile
+      dockerfile: monitor_agent/monitor_agent.Dockerfile
     command: uvicorn main:app --reload --host 2.0.96.1 --port 8000
     container_name: monitor-agent
     env_file:
-      - envs/prod.monitor_agent.env
+      - monitor_agent/prod.monitor_agent.env
     volumes:
       - ./monitor_agent/:/app
     networks:

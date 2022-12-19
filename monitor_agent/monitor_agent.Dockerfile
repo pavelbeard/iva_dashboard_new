@@ -3,7 +3,7 @@ FROM python:3.11.1-alpine3.16 as builder
 
 WORKDIR /usr/src/app
 
-COPY ../requirements/reqs-monitor-agent.txt .
+COPY reqs-monitor-agent.txt .
 RUN pip3.11 wheel \
     --no-cache-dir \
     --no-deps \

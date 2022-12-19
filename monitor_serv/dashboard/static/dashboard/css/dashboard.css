@@ -1,6 +1,71 @@
+.servers-container {
+    padding-right: 0;
+    padding-left: 0;
+    margin-right: 0;
+    margin-left: 0;
+}
 
 .servers {
-    width: 400px;
-    height: 400px;
-    background: cyan;
+    padding: 20px;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 20px;
 }
+
+/*SERVER CARD*/
+.server {
+    display: grid;
+    grid-template-columns: auto auto;
+
+    height: 200px;
+    border-radius: 8px;
+
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.server-left-part {
+    display: grid;
+    grid-template-rows: auto 40px;
+}
+
+/*SERVER*/
+.server-img {
+    background: rgba(102, 16, 242, 0.71);
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+}
+/*SERVER*/
+
+/*SERVER INFO*/
+.server-info {
+    grid-template-rows: 50px auto;
+}
+
+.server-info-icon {
+    padding-left: 10px;
+    margin-top: 3px;
+    margin-bottom: 3px;
+    width: 40px;
+}
+.server-status, .server-cpu, .server-ram, .server-disk, .server-processes, .server-network {
+    display: flex;
+    align-items: center;
+
+    background: #777676;
+}
+/*SERVER INFO*/
+.server-status > p, .server-cpu > p, .server-ram > p, .server-disk > p, .server-processes > p, .server-network > p{
+    margin-bottom: 0;
+    padding-left: 10px;
+}
+
+/*SERVER STATUS*/
+.server-status {
+    background: #777676;
+}
+/*SERVER STATUS*/
+/*SERVER CARD*/

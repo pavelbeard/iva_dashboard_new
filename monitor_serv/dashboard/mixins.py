@@ -16,9 +16,6 @@ class ServersInfoMixin(generic.ListView):
     server_config_file = settings.SERVER_CONFIG_FILE
 
     async def get(self, request, *args, **kwargs):
-        if not request.headers.get('X-Requested-With') == "XMLHttpRequest":
-            return render(request, template_name="base.html")
-
         scraper = None
         try:
             query = models.Target.objects.all()

@@ -6,7 +6,7 @@ ENV PYTHONUNBUFFERED 1
 
 WORKDIR /usr/src/app
 
-COPY ../requirements/reqs-monitor-server.txt .
+COPY reqs-monitor-server.txt .
 RUN python3.11 -m venv /opt/venv; apt update; apt install gcc build-essential -y
 ENV PATH=/opt/venv/bin:$PATH
 RUN pip3.11 install $(grep -ivE "pywin32" reqs-monitor-server.txt)
