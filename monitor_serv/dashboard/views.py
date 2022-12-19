@@ -18,6 +18,6 @@ class Processes(mixins.ServersInfoMixin):
 
 
 class CPU(mixins.ServersInfoMixin):
-    cmd = "uname -n && echo $[100-$(vmstat 1 2|tail -1|awk '{print $15}')]"
+    cmd = "uname -n && echo $[100-$(vmstat 1 2|tail -1|awk '{print $15}')] && lscpu | egrep 'CPU\(s\):'"
     callback_iva_metrics_handler = IvaMetricsHandler.cpu_utilization
 

@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="h-100">
 <head>
     {% load static %}
     <meta charset="UTF-8">
@@ -11,28 +11,32 @@
     {% block js %}{% endblock %}
     <title>{% block title %}Title{% endblock %}</title>
 </head>
-<body>
-    <div class="container-fluid">
-        <header class="row">
-            <nav class="navbar navbar-expand-lg navbar-light header">
-                <div class="container-fluid">
-                    <div class="navbar-header">
-                        <a href="{% url "dashboard:index" %}"
-                           class="navbar-brand header-text">ЦУ МСК IVA-R Dashboard</a>
-                    </div>
-                    <div>
+<body class="d-flex flex-column h-100">
+    <header class="flex-shrink-0">
+        <nav class="navbar navbar-expand-lg navbar-dark header">
+            <div class="container-fluid">
+                <div class="navbar-header">
+                    <a href="{% url "dashboard:index" %}"
+                       class="navbar-brand header-text">ЦУ МСК IVA-R Dashboard
+                    </a>
+                </div>
+                <div>
+                    <ul class="navbar-nav me-auto mb-2 mb-lg-0">
                         <ul class="navbar-nav me-auto mb-2 mb-lg-0">
                             <li class="nav-item"><a href="{% url "dashboard:index" %}"
                                                     class="nav-link header-text">Главная</a></li>
                             <li class="nav-item"><a href="{% url "admin:index" %}"
                                                     class="nav-link header-text">Панель админа</a></li>
                         </ul>
-                    </div>
+                    </ul>
                 </div>
-            </nav>
-        </header>
+            </div>
+        </nav>
+    </header>
     {% block dashboard %}
     {% endblock %}
-    </div>
+    <footer class="footer mt-auto py-3 bg-light container-fluid">
+        <div class="container text-center">created by pavel borodin</div>
+    </footer>
 </body>
 </html>

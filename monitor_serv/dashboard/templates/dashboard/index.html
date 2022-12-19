@@ -12,8 +12,8 @@
 {% block dashboard %}
     <section class="flex-shrink-0" id="servers">
         <div class="row container-fluid servers-container">
-            <div class="col-md-6">
-                <div class="bg-info flex-fill"><h4 class="text-light">Мониторинг серверов</h4></div>
+            <div class="col-md-6 left">
+                <div><h4 class="text-dark text-center">Мониторинг серверов</h4></div>
                 <div class="servers flex-shrink-0">
                     {% for address in addresses %}
                         <div class="server" id="{{ address }}">
@@ -21,7 +21,7 @@
                                 <div class="server-img border border-dark  border-2">
                                     <img class="img" src="{% static "dashboard/images/icons8-server-64.png" %}"
                                              alt="server-image">
-                                    <div class="server-hostname">Host undefined</div>
+                                    <div class="server-hostname text-center">Host undefined</div>
                                     <div class="server-address">{{ address }}</div>
                                 </div>
                                 <div class="server-status justify-content-center border border-dark  border-2">
@@ -58,8 +58,5 @@
             </div>
             {# еще один div col-md-6 #}
         </div>
-
-
-
     </section>
 {% endblock %}

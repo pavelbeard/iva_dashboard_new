@@ -93,7 +93,14 @@ class IvaMetricsHandler:
             return {"hostname": "no_data", "task": cls.cpu_utilization.__name__,
                     "data": [{"no_data": "no_data"}]}
 
-        hostname, cpu_load = data.split("\n")
+        hostname, cpu_load, *__cores__ = data.split("\n")
 
-        return {"hostname": hostname, "task": cls.cpu_utilization.__name__, "data": cpu_load}
+        cores = __cores__[0].split()[1]
+
+        tmp_data = [
+            {"cpu_load": cpu_load},
+            {"cores": cores},
+        ]
+
+        return {"hostname": hostname, "task": cls.cpu_utilization.__name__, "data": tmp_data}
 

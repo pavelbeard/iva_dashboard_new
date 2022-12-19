@@ -28,6 +28,15 @@ services:
     ports:
       - "2002:22"
 
+  ssh4:
+    image: ssh_test
+    container_name: ssh_test_4
+    networks:
+      iva_dashboard_net:
+        ipv4_address: 2.0.96.8
+    ports:
+      - "2003:22"
+
   monitor-nginx:
     build:
       context: .

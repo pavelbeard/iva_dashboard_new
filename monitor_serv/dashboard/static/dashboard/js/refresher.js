@@ -1,3 +1,13 @@
+function cpuData(data, host) {
+    let connErr = (data[0].status === undefined) ? "" : 0
+
+    host.childNodes[3].childNodes[1].style.backgroundColor = "#69ff4e"
+
+    host.childNodes[3].childNodes[1].childNodes[2].textContent = `${data[0].cpu_load}%`
+    host.childNodes[3].childNodes[1].title = `CPU cores: ${data[1].cores}`
+
+}
+
 function processesData(data, host) {
     let connErr = (data[0].status === undefined) ? "" : 0
 
@@ -21,10 +31,13 @@ function processesData(data, host) {
         processesArray.length];
 
     //processes
+    host.childNodes[3].childNodes[7].title = (connErr !== "") ?
+        processesTooltip : "";
     host.childNodes[3].childNodes[7].childNodes[2].textContent = (connErr !== "") ?
         processesCount : 0;
     host.childNodes[3].childNodes[7].style.backgroundColor = (connErr !== "") ?
-        "#69ff4e" : "#777676";
+        "#69ff4e" : "#bebdbd";
+
 
 }
 
@@ -48,16 +61,37 @@ function updateServerNode(hostname, data, id, callback) {
 
 }
 
-function reDrawTableElements(data, callback) {
-    let parsedData = JSON.parse(data);
-    parsedData.forEach(el => updateServerNode(el.hostname, el.data, el.id, callback));
-
-    // serversElementsArray.forEach(el => servers.appendChild(el))
-
-    // $('[data-toggle="tooltip"]').tooltip();
+function monitorUnavailable(servers) {
+    let bg_unavailable = "#bebdbd"
+    for (let server of servers) {
+        // title
+        server.childNodes[1].childNodes[1].childNodes[3].textContent = "Агент мониторинга недоступен"
+        // status
+        server.childNodes[1].childNodes[3].style.backgroundColor = bg_unavailable
+        server.childNodes[1].childNodes[3].childNodes[1].src = "/static/dashboard/images/icons8-unlike-64.png"
+        server.childNodes[1].childNodes[3].childNodes[2].textContent = "?  "
+        // server info
+        let server_info_pane = server.childNodes[3].childNodes
+        for (let i = 1; i < server_info_pane.length; i += 2) {
+            // server_info_pane[i].style.backgroundColor = bg_unavailable
+            server_info_pane[i].title = ""
+            server_info_pane[i].childNodes[2].textContent = "?  "
+        }
+    }
 }
 
-async function getMetrics (url, method, headers) {
+function reDrawTableElements(data, callback) {
+    let parsedData = JSON.parse(data);
+
+    ///если мониторинг пал
+    if (parsedData['ClientConnectionError'] !== undefined)
+        monitorUnavailable(document.getElementsByClassName('server'))
+
+    parsedData.forEach(el => updateServerNode(el.hostname, el.data, el.id, callback));
+
+}
+
+async function getMetrics (url, method, callback) {
     let response = await fetch(url, {
         method: method, headers: {
             'X-Requested-With': 'XMLHttpRequest',
@@ -65,12 +99,14 @@ async function getMetrics (url, method, headers) {
         }
     });
 
-    return await response.json();
+    let data = await response.json()
+    reDrawTableElements(data, callback);
 }
 
 async function inspectServers() {
-    let data = await getMetrics("processes/", "GET");
-    reDrawTableElements(data, processesData);
+    await getMetrics("processes/", "GET", processesData);
+    await getMetrics("cpu-info/", "GET", cpuData);
+
 }
 
 // main //
