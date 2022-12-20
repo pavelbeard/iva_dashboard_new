@@ -95,12 +95,17 @@ class IvaMetricsHandler:
 
         hostname, cpu_load, *__cores__ = data.split("\n")
 
-        cores = __cores__[0].split()[1]
+        tmp_data = None
 
-        tmp_data = [
-            {"cpu_load": cpu_load},
-            {"cores": cores},
-        ]
+        try:
+            cores = __cores__[0].split()[1]
+        except IndexError:
+            tmp_data = ["no connection with server."]
+        else:
+            tmp_data = [
+                {"cpu_load": cpu_load},
+                {"cores": cores},
+            ]
 
         return {"hostname": hostname, "task": cls.cpu_utilization.__name__, "data": tmp_data}
 

@@ -1,3 +1,0 @@
-settings:
-  scraper_url: http://localhost:8900/api/monitor/metrics
-  interval: 15

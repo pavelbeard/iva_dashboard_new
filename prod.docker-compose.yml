@@ -40,11 +40,11 @@ services:
 
   monitor-db:
     image: postgres:alpine
-    container_name: monitor-postgres
+    container_name: monitor-postgres_assemble_files
     env_file:
-      - postgres/prod.postgres.env
+      - postgres_assemble_files/prod.postgres.env
     volumes:
-      - ./postgres/docker-entrypoint-initdb.d/:/docker-entrypoint-initdb.d
+      - ./postgres_assemble_files/docker-entrypoint-initdb.d/:/docker-entrypoint-initdb.d
       - postgres_files:/var/lib/postgresql/data
     networks:
       iva_dashboard_net:
@@ -56,11 +56,11 @@ services:
   monitor-agent:
     build:
       context: .
-      dockerfile: monitor_agent/monitor_agent.Dockerfile
+      dockerfile: monitor_agent_assemble_files/monitor_agent.Dockerfile
     command: uvicorn main:app --reload --host 2.0.96.1 --port 8000
     container_name: monitor-agent
     env_file:
-      - monitor_agent/prod.monitor_agent.env
+      - monitor_agent_assemble_files/prod.monitor_agent.env
     volumes:
       - ./monitor_agent/:/app
     networks:

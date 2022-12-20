@@ -1,10 +1,14 @@
 function cpuData(data, host) {
-    let connErr = (data[0].status === undefined) ? "" : 0
+    let connErr = (data[0].cpu_load === undefined) ? "" : 0
 
-    host.childNodes[3].childNodes[1].style.backgroundColor = "#69ff4e"
+    host.childNodes[3].childNodes[1].style.backgroundColor = (connErr !== "") ?
+        "#69ff4e" : "#bebdbd"
 
-    host.childNodes[3].childNodes[1].childNodes[2].textContent = `${data[0].cpu_load}%`
-    host.childNodes[3].childNodes[1].title = `CPU cores: ${data[1].cores}`
+    host.childNodes[3].childNodes[1].childNodes[2].textContent = (connErr !== "") ?
+        `${data[0].cpu_load}%` : "0%"
+
+    host.childNodes[3].childNodes[1].title = (connErr !== "") ?
+        `CPU cores: ${data[1].cores}` : ""
 
 }
 

@@ -39,8 +39,8 @@ services:
 
   monitor-nginx:
     build:
-      context: .
-      dockerfile: monitor_nginx/monitor_nginx.Dockerfile
+      context: monitor_nginx
+      dockerfile: monitor_nginx.Dockerfile
     container_name: monitor-nginx
     volumes:
       - static_files:/home/monitor-server-app/web/staticfiles
@@ -55,12 +55,12 @@ services:
 
   monitor-server:
     build:
-      context: .
-      dockerfile: monitor_serv/monitor_serv.Dockerfile
+      context: monitor_serv_assemble_files
+      dockerfile: monitor_serv.Dockerfile
     container_name: monitor-server
-    command: uvicorn monitor_server.asgi:application --host 0.0.0.0 --port 8000 --reload
+    command: uvicorn monitor_serv.asgi:application --host 0.0.0.0 --port 8000 --reload
     env_file:
-      - monitor_serv/monitor_serv.env
+      - monitor_serv_assemble_files/monitor_serv.env
     volumes:
       - ./monitor_serv/:/home/monitor-server-app/web
       - ./configs/monitor_serv/:/etc/iva_dashboard
@@ -77,11 +77,11 @@ services:
 
   monitor-db:
     image: postgres:alpine
-    container_name: monitor-postgres
+    container_name: monitor-postgres_assemble_files
     env_file:
-      - postgres/postgres.env
+      - postgres_assemble_files/postgres.env
     volumes:
-      - ./postgres/docker-entrypoint-initdb.d/:/docker-entrypoint-initdb.d
+      - ./postgres_assemble_files/docker-entrypoint-initdb.d/:/docker-entrypoint-initdb.d
       - postgres_files:/var/lib/postgresql/data
     networks:
       iva_dashboard_net:
@@ -93,12 +93,12 @@ services:
   monitor-agent:
 #    image: pavelbeard/monitor-agent:v1
     build:
-      context: .
-      dockerfile: monitor_agent/monitor_agent.Dockerfile
+      context: monitor_agent_assemble_files
+      dockerfile: monitor_agent.Dockerfile
     command: uvicorn main:app --reload --host 2.0.96.1 --port 8000
     container_name: monitor-agent
     env_file:
-      - monitor_agent/monitor_agent.env
+      - monitor_agent_assemble_files/monitor_agent.env
     volumes:
       - ./monitor_agent/:/home/monitor-agent-app/api
       - ./monitor_agent_logs/:/home/monitor-agent-app/api/logs

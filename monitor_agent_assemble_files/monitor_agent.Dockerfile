@@ -25,7 +25,7 @@ RUN mkdir $APP_HOME; mkdir $APP_HOME/logs; rm -rf /wheels
 
 WORKDIR $APP_HOME
 
-COPY ../monitor_agent $APP_HOME
+COPY . $APP_HOME
 
 #RUN chown -R monitor:monitor $APP_HOME
 #USER monitor
