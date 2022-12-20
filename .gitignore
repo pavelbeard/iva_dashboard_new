@@ -1,11 +1,5 @@
-/.idea
-/postgres_assemble_files
-/monitor_serv/.idea
-/get_processes_status.http
-/postgres_assemble_files/docker-entrypoint-initdb.d/init-user-db.sh
-/docker-compose.yml
-/monitor_agent_logs
-/monitor_nginx/monitor_nginx.Dockerfile
-/monitor_agent_assemble_files/prod.monitor_agent.env
-/monitor_serv/prod.monitor_serv.env
-/prod.docker-compose.yml
+*.idea
+*test.*
+*.log
+*.env
+*.http

@@ -31,6 +31,9 @@ function processesData(data, host) {
         return `${el.service}: ${el.status}${st}`;
     });
     let processesTooltip, processesCount;
+
+    // TODO: написать полифил для replaceAll
+
     [processesTooltip, processesCount] = ["".concat(processesArray).replaceAll(',', '\n'),
         processesArray.length];
 

@@ -142,4 +142,4 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 SERVER_CONFIG_FILE = os.getenv('IVA_DASHBOARD_SERVER_CONFIG_FILE',
                                "C:\\Users\\pavel\\.iva_monitoring\\server-config.yml")
 
-CSRF_TRUSTED_ORIGINS = ["http://*localhost:8004"]
+CSRF_TRUSTED_ORIGINS = os.getenv('CSRF_TRUSTED_ORIGINS', default="http://*localhost:8004").split(" ")

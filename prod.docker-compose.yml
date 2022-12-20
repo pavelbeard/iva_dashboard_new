@@ -2,12 +2,10 @@ version: '3.9'
 
 services:
   monitor-nginx:
-    build:
-      context: .
-      dockerfile: monitor_nginx/monitor_nginx.Dockerfile
+    image: pavelbeard/monitor-nginx:v1.0
     container_name: monitor-nginx
     volumes:
-      - static_files:/home/monitor-server-app/web/staticfiles
+      - static-files:/home/monitor-server-app/web/staticfiles
     networks:
       iva_dashboard_net:
         ipv4_address: 2.0.96.4
@@ -19,44 +17,36 @@ services:
 
   monitor-server:
     build:
-      context: .
-      dockerfile: monitor_serv/monitor_serv.Dockerfile
+      context: monitor_serv_assemble_files
+      dockerfile:
     container_name: monitor-server
-    command: uvicorn monitor_server.asgi:application --host 0.0.0.0 --port 8000 --reload
     env_file:
-      - monitor_serv/prod.monitor_serv.env
+      - monitor_serv_assemble_files/prod.monitor_serv.env
     volumes:
       - ./monitor_serv/:/home/monitor-server-app/web
       - ./configs/monitor_serv/:/etc/iva_dashboard
-      - static_files:/home/monitor-server-app/web/staticfiles
+      - static-files:/home/monitor-server-app/web/staticfiles
     networks:
       iva_dashboard_net:
         ipv4_address: 2.0.96.3
-    ports:
-      - "8003:8000"
     depends_on:
       - monitor-db
     restart: always
 
   monitor-db:
-    image: postgres:alpine
-    container_name: monitor-postgres_assemble_files
+    image: pavelbeard/monitor-postgres:v1.0
     env_file:
       - postgres_assemble_files/prod.postgres.env
     volumes:
       - ./postgres_assemble_files/docker-entrypoint-initdb.d/:/docker-entrypoint-initdb.d
-      - postgres_files:/var/lib/postgresql/data
+      - postgres-files:/var/lib/postgresql/data
     networks:
       iva_dashboard_net:
         ipv4_address: 2.0.96.2
-    ports:
-      - "8002:5432"
     restart: always
 
   monitor-agent:
-    build:
-      context: .
-      dockerfile: monitor_agent_assemble_files/monitor_agent.Dockerfile
+    image: pavelbeard/monitor-agent:v1.2
     command: uvicorn main:app --reload --host 2.0.96.1 --port 8000
     container_name: monitor-agent
     env_file:
@@ -66,8 +56,6 @@ services:
     networks:
       iva_dashboard_net:
         ipv4_address: 2.0.96.1
-    ports:
-      - "8001:8000"
     restart: always
 
 
@@ -79,5 +67,5 @@ networks:
           gateway: 2.0.96.14
 
 volumes:
-  postgres_files:
-  static_files:
+  postgres-files:
+  static-files:

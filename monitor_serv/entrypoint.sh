@@ -12,5 +12,7 @@ then
 
 fi
 
-python3.11 manage.py collectstatic
-python3.11 manage.py migrate
+python3.11 manage.py migrate --noinput
+python3.11 manage.py collectstatic --noinput --clear
+
+exec "$@"
