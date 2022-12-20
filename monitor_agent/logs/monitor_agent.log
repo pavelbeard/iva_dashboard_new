@@ -1,0 +1,26 @@
+[2022-12-16 11:28:06,786] loglevel=ERROR  logger=agent.ssh_client run_cmd_on_target_host() L54   OSError
+Traceback (most recent call last):
+  File "/home/monitor-agent-app/api/agent/ssh_client.py", line 37, in run_cmd_on_target_host
+    client.connect(hostname, port, username, password, timeout=5)
+  File "/usr/local/lib/python3.11/site-packages/paramiko/client.py", line 358, in connect
+    retry_on_signal(lambda: sock.connect(addr))
+  File "/usr/local/lib/python3.11/site-packages/paramiko/util.py", line 279, in retry_on_signal
+    return function()
+           ^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/paramiko/client.py", line 358, in <lambda>
+    retry_on_signal(lambda: sock.connect(addr))
+                            ^^^^^^^^^^^^^^^^^^
+OSError: [Errno 99] Address not available
+[2022-12-16 11:28:06,787] loglevel=ERROR  logger=agent.ssh_client run_cmd_on_target_host() L54   OSError
+Traceback (most recent call last):
+  File "/home/monitor-agent-app/api/agent/ssh_client.py", line 37, in run_cmd_on_target_host
+    client.connect(hostname, port, username, password, timeout=5)
+  File "/usr/local/lib/python3.11/site-packages/paramiko/client.py", line 358, in connect
+    retry_on_signal(lambda: sock.connect(addr))
+  File "/usr/local/lib/python3.11/site-packages/paramiko/util.py", line 279, in retry_on_signal
+    return function()
+           ^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/paramiko/client.py", line 358, in <lambda>
+    retry_on_signal(lambda: sock.connect(addr))
+                            ^^^^^^^^^^^^^^^^^^
+OSError: [Errno 99] Address not available
