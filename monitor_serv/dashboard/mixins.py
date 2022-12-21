@@ -10,7 +10,7 @@ from .logic import IvaMetrics, TargetsIsEmpty
 from . import models
 
 
-class ServersInfoMixin(generic.ListView):
+class ServerAnalysisMixin(generic.ListView):
     cmd: str = None
     callback_iva_metrics_handler: Callable = None
     server_config_file = settings.SERVER_CONFIG_FILE

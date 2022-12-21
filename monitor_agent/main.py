@@ -25,10 +25,10 @@ async def request_for_metrics(request: Request):
 
     hosts = body.get('hosts')
 
-    with concurrent.futures.ProcessPoolExecutor(max_workers=5) as process_pool:
+    with concurrent.futures.ThreadPoolExecutor(max_workers=5) as thread_pool:
         loop: AbstractEventLoop = asyncio.get_running_loop()
         calls: List[partial[tuple]] = [partial(run_cmd_on_target_host, host) for host in hosts]
-        call_coros = [loop.run_in_executor(process_pool, call) for call in calls]
+        call_coros = [loop.run_in_executor(thread_pool, call) for call in calls]
 
         task_results = await asyncio.gather(*call_coros, return_exceptions=True)
         results = []

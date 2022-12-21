@@ -2,7 +2,9 @@ version: '3.9'
 
 services:
   monitor-nginx:
-    image: pavelbeard/monitor-nginx:v1.0
+    build:
+      context: monitor_nginx
+      dockerfile: prod.monitor_nginx.Dockerfile
     container_name: monitor-nginx
     volumes:
       - static-files:/home/monitor-server-app/web/staticfiles
@@ -18,7 +20,7 @@ services:
   monitor-server:
     build:
       context: monitor_serv_assemble_files
-      dockerfile:
+      dockerfile: prod.monitor_serv.Dockerfile
     container_name: monitor-server
     env_file:
       - monitor_serv_assemble_files/prod.monitor_serv.env

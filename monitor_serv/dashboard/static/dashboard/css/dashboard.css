@@ -20,6 +20,8 @@ h4 {
 .server {
     display: grid;
     grid-template-columns: auto auto;
+    box-sizing: border-box;
+    border-collapse: collapse;
 
     height: 200px;
     border-radius: 8px;
@@ -31,6 +33,10 @@ h4 {
 .server-left-part {
     display: grid;
     grid-template-rows: auto 40px;
+
+    border-top: .2px solid rgba(0, 0, 0, 0.84);
+    border-left: .2px solid rgba(0, 0, 0, 0.84);
+    border-bottom: .2px solid rgba(0, 0, 0, 0.84);
 }
 
 /*SERVER*/
@@ -46,7 +52,20 @@ h4 {
 
 /*SERVER INFO*/
 .server-info {
-    grid-template-rows: 50px auto;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+
+    border-top: .2px solid rgba(0, 0, 0, 0.84);
+    border-left: .2px solid rgba(0, 0, 0, 0.84);
+    border-right: .2px solid rgba(0, 0, 0, 0.84);
+}
+
+.server-indicator {
+    background: #bcbebf;
+    height: 40px;
+
+    border-bottom: .2px solid rgba(0, 0, 0, 0.84);
 }
 
 .server-info-icon {
@@ -55,7 +74,7 @@ h4 {
     margin-bottom: 3px;
     width: 40px;
 }
-.server-status, .server-cpu, .server-ram, .server-disk, .server-processes, .server-network {
+.server-cpu, .server-ram, .server-disk, .server-processes, .server-network {
     display: flex;
     align-items: center;
 
@@ -68,8 +87,15 @@ h4 {
 }
 
 /*SERVER STATUS*/
-.server-status {
+.server-status, .server-empty {
+    display: flex;
+    align-items: center;
+}
+
+.server-empty {
     background: #bebdbd;
+
+    border-top: .2px solid rgba(0, 0, 0, 0.84);
 }
 /*SERVER STATUS*/
 /*SERVER CARD*/
