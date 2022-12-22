@@ -22,20 +22,21 @@ class AutoAddPolicy(paramiko.MissingHostKeyPolicy):
                            f"{hexlify(key.get_fingerprint())}")
 
 
-def run_cmd_on_target_host(conn_data: dict) -> str | Type[SSHException]:
+def run_cmd_on_target_host(conn_data: dict, timeout: int) -> str | Type[SSHException]:
     """
     Запускает ssh-клиент, который в свою очередь, выполняет команды на целевом хосте.\n
-    :param conn_data: Данные для подключения: хост, порт, имя пользователя, пароль и команда
+    :param conn_data: Данные для подключения: хост, порт, имя пользователя, пароль и команда.
+    :param timeout: Время ожидания соединения с сервером.
     :return: В случае успеха str, в случае, если учетные данные неправильные
-    или нет связи с сервером - SSHException
+    или нет связи с сервером - SSHException.
     """
     with paramiko.SSHClient() as client:
         client.set_missing_host_key_policy(AutoAddPolicy)
         hostname, port, username, password, cmd = list(conn_data.values())
 
         try:
-            client.connect(hostname, port, username, password, timeout=5)
-            stdin, stdout, stderr = client.exec_command(cmd)
+            client.connect(hostname, port, username, password, timeout=timeout)
+            stdin, stdout, stderr = client.exec_command(cmd, timeout*2)
             return bytes.decode(stdout.read(), encoding='utf-8')
 
         except paramiko.ssh_exception.AuthenticationException:

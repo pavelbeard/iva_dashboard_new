@@ -19,7 +19,7 @@ h4 {
 /*SERVER CARD*/
 .server {
     display: grid;
-    grid-template-columns: auto auto;
+    grid-template-columns: 125px 100px;
     box-sizing: border-box;
     border-collapse: collapse;
 

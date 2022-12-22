@@ -16,14 +16,15 @@
                 <div><h4 class="text-dark text-center">Мониторинг серверов</h4></div>
                 <div class="servers flex-shrink-0">
                     {% for address in addresses %}
-                        <div class="server" id="{{ address }}">
+                        <div class="server" id="{{ address.address }}">
                             <div class="server-left-part">
                                 <div class="server-img">
                                     <img class="img" src="{% static "dashboard/images/icons8-server-64.png" %}"
                                              alt="server-image">
                                     <div class="server-hostname text-center">Host undefined</div>
                                     <div class="server-status">no data</div>
-                                    <div class="server-address">{{ address }}</div>
+                                    <div class="server-address">{{ address.address }}</div>
+                                    <div class="server-address">{{ address.role|upper }}</div>
                                 </div>
                                 <div class="server-empty justify-content-center">
 {#                                    <img class="server-info-icon"#}

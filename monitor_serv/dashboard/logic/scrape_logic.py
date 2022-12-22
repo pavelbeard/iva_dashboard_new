@@ -77,7 +77,7 @@ class IvaMetricsHandler:
 
         processes_list = []
         if other_data[0] == "no connection with server." or other_data[0] == "bad credentials.":
-            processes_list.append(other_data[0])
+            return {"hostname": hostname, "task": cls.exec_analysis.__name__, "data": [{"connection_error": True}]}
         else:
             for d in other_data[:-1]:
                 *status, service = d.split()
@@ -104,6 +104,9 @@ class IvaMetricsHandler:
 
         hostname, all_cores, *remaining_cores = data.split("\n")
 
+        if 'no connection with server.' in all_cores:
+            return {"hostname": hostname, "task": cls.cpu_analysis.__name__, "data": [{"connection_error": True}]}
+
         # промежуточный контейнер данных
         tmp_data = []
 
@@ -128,7 +131,7 @@ class IvaMetricsHandler:
                 tmp_data.append({"cpu_cores": len(tmp_data[2:])})
 
         except IndexError:
-            tmp_data = ["no connection with server."]
+            tmp_data = [{"connection_error": True}]
 
         return {"hostname": hostname, "task": cls.cpu_analysis.__name__, "data": tmp_data}
 
@@ -143,6 +146,9 @@ class IvaMetricsHandler:
             return cls.error_result(cls.ram_analysis.__name__)
 
         hostname, *ram_data = data.split("\n")
+
+        if "no connection with server." in ram_data:
+            return {"hostname": hostname, "task": cls.ram_analysis.__name__, "data": [{"connection_error": True}]}
 
         # total used free shared buff/cache available
         ram_calc_data = list(map(lambda x: int(x), ram_data[1].split()[1:]))
@@ -173,22 +179,92 @@ class IvaMetricsHandler:
         hostname, *fs_data = data.split("\n")
 
         tmp_data = []
-        total = []
-        total_used = []
-        total_available = []
+
+        if "no connection with server." in fs_data:
+            return {"hostname": hostname, "task": cls.file_sys_analysis.__name__, "data": [{"connection_error": True}]}
 
         # filesystem size used available use% mounted on
-        for fs in fs_data[1:-1]:
+        for fs in fs_data[1:-2]:
             tmp_tuple = tuple(map(lambda x: x.strip(), fs.split()))
             filesystem, size, used, available, use_percent, mounted_on = tmp_tuple
             tmp_data.append({"filesystem": filesystem, "size": size,
-                             "used": total_used, "available": available, "use_percent": use_percent,
+                             "used": used, "available": available, "use_percent": use_percent,
                              "mounted_on": mounted_on})
+        else:
+            used_percent = (float(fs_data[-2].split()[0][:-1]) / float(fs_data[-3].split()[3][:-1])) * 100
 
-            total.append(float(size[:-1]) if len(size) > 1 else size)
-            total_used.append(float(used[:-1]) if len(used) > 1 else used)
-            total_available.append(float(available[:-1]) if len(available) > 1 else available)
-            total_available.append(int(use_percent[:-1]))
-
+            tmp_data += [
+                {"total_size": fs_data[-3].split()[3]},
+                {"total_used": fs_data[-2].split("\t")[0]},
+                {"used_percent": f"{used_percent:10.2f}".strip()},
+            ]
 
         return {"hostname": hostname, "task": cls.ram_analysis.__name__, "data": tmp_data}
+
+    @classmethod
+    def net_analysis(cls, data: str) -> {}:
+        """
+        Анализ данных файловой системы с сервера.\n
+        :param data: Disk data
+        :return: {}
+        """
+        if type(data) == dict:
+            return cls.error_result(cls.file_sys_analysis.__name__)
+
+        hostname, *net_data = data.split("\n")
+
+        text = "\n".join(net_data)
+
+        INTERFACE = re.search(r"on\s(.*)", text)
+        PATTERN = "\s+(\db|\d+b|\d+.\d+b|\dKb|\d+Kb|\d+.\d+Kb|\dMb|\d+Mb|\d+.\d+Mb|\dGb|\d+Gb|\d+.\d+Gb|" + \
+                  "\dB|\d+B|\d+.\d+B|\dKB|\d+KB|\d+.\d+KB|\dMB|\d+MB|\d+.\d+MB|\dGB|\d+GB|\d+.\d+GB)"
+        TOTAL_SEND_RATE = re.search(fr"Total\ssend\srate:{PATTERN}{PATTERN}{PATTERN}", text)
+        TOTAL_RECEIVE_RATE = re.search(fr"Total\sreceive\srate:{PATTERN}{PATTERN}{PATTERN}", text)
+        TOTAL_SEND_AND_RECEIVE_RATE = re.search(fr"Total\ssend\sand\sreceive\srate:{PATTERN}{PATTERN}{PATTERN}", text)
+        PEAK_RATE = re.search(fr"Peak\srate\s\(.*\):\s+{PATTERN}{PATTERN}{PATTERN}", text)
+        CUMULATIVE = re.search(fr"Cumulative\s\(.*\):\s+{PATTERN}{PATTERN}{PATTERN}", text)
+        FROM_TO = re.findall(fr"(.*):\d+\s+(<=|=>){PATTERN}{PATTERN}{PATTERN}{PATTERN}", text)
+
+        tmp_data = [
+            {"interface": INTERFACE[1]}
+        ]
+
+        try:
+            for match in FROM_TO:
+                direction = "from" if "=>" in match[1] else "to"
+                tmp_data.append({
+                    direction: match[0].strip() + match[1],
+                    "last2s": match[2],
+                    "last10s": match[3],
+                    "last40s": match[4],
+                    "cumulative": match[5]
+                })
+        except TypeError:
+            pass
+
+        tmp_data += [
+            {
+                "total_send_rate": {
+                    "last2s": TOTAL_SEND_RATE[1], "last10s": TOTAL_SEND_RATE[2], "last40s": TOTAL_SEND_RATE[3]
+                }
+            },
+            {
+                "total_receive_rate": {
+                    "last2s": TOTAL_RECEIVE_RATE[1], "last10s": TOTAL_RECEIVE_RATE[2], "last40s": TOTAL_RECEIVE_RATE[3]
+                }
+            },
+            {
+                "total_send_and_receive_rate": {
+                    "last2s": TOTAL_SEND_AND_RECEIVE_RATE[1],
+                    "last10s": TOTAL_SEND_AND_RECEIVE_RATE[2],
+                    "last40s": TOTAL_SEND_AND_RECEIVE_RATE[3]
+                }
+            },
+            {"peak_rate": {"last2s": PEAK_RATE[1], "last10s": PEAK_RATE[2], "last40s": PEAK_RATE[3]}},
+            {"cumulative": {"last2s": CUMULATIVE[1], "last10s": CUMULATIVE[2], "last40s": CUMULATIVE[3]}},
+        ]
+
+        if "no connection with server." in net_data:
+            return {"hostname": hostname, "task": cls.net_analysis.__name__, "data": [{"connection_error": True}]}
+
+        return {"hostname": hostname, "task": cls.net_analysis.__name__, "data": tmp_data}
