@@ -3,7 +3,7 @@ version: '3.9'
 services:
   monitor-nginx:
     build:
-      context: monitor_nginx
+      context: monitor_nginx_assemble_files
       dockerfile: prod.monitor_nginx.Dockerfile
     container_name: monitor-nginx
     volumes:
@@ -19,11 +19,11 @@ services:
 
   monitor-server:
     build:
-      context: monitor_serv_assemble_files
+      context: monitor_serv
       dockerfile: prod.monitor_serv.Dockerfile
     container_name: monitor-server
     env_file:
-      - monitor_serv_assemble_files/prod.monitor_serv.env
+      - monitor_serv/monitor_serv_assemble_files/prod.monitor-serv.env
     volumes:
       - ./monitor_serv/:/home/monitor-server-app/web
       - ./configs/monitor_serv/:/etc/iva_dashboard
@@ -32,16 +32,17 @@ services:
       iva_dashboard_net:
         ipv4_address: 2.0.96.3
     depends_on:
-      - monitor-db
+      - monitor-postgres
     restart: always
 
-  monitor-db:
+  monitor-postgres:
     image: pavelbeard/monitor-postgres:v1.0
+    container_name: monitor-postgres
     env_file:
-      - postgres_assemble_files/prod.postgres.env
+      - monitor_postgres_assemble_files/prod.monitor-postgres.env
     volumes:
-      - ./postgres_assemble_files/docker-entrypoint-initdb.d/:/docker-entrypoint-initdb.d
-      - postgres-files:/var/lib/postgresql/data
+      # заменить на /postgres-files
+      - ./postgres-files:/var/lib/postgresql/data
     networks:
       iva_dashboard_net:
         ipv4_address: 2.0.96.2
@@ -52,9 +53,10 @@ services:
     command: uvicorn main:app --reload --host 2.0.96.1 --port 8000
     container_name: monitor-agent
     env_file:
-      - monitor_agent_assemble_files/prod.monitor_agent.env
+      - monitor_agent/monitor_agent_assemble_files/prod.monitor-agent.env
     volumes:
-      - ./monitor_agent/:/app
+      - ./monitor_agent/:/home/monitor-agent-app/api
+      - ./monitor_agent_logs/:/home/monitor-agent-app/api/logs
     networks:
       iva_dashboard_net:
         ipv4_address: 2.0.96.1

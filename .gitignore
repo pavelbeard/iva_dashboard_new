@@ -1,5 +1,7 @@
 *.idea
 *test.*
 *.log
+*.log.*
 *.env
 *.http
+/postgres-files

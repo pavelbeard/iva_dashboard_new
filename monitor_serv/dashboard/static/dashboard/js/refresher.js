@@ -154,12 +154,12 @@ function updateServerNode(hostname, data, id, callback) {
 
 }
 
-function monitorUnavailable(servers) {
+function monitorUnavailable(servers, reason) {
     let bg_unavailable = "#bebdbd"
     for (let server of servers) {
         // title
         server.childNodes[1].childNodes[1].childNodes[3].setAttribute('style', 'white-space: pre;')
-        server.childNodes[1].childNodes[1].childNodes[3].textContent = "Агент мониторинга\r\nнедоступен"
+        server.childNodes[1].childNodes[1].childNodes[3].textContent = reason
         server.childNodes[1].childNodes[1].childNodes[5].textContent = "no data"
         // server status
         server.childNodes[1].childNodes[1].style.backgroundColor = bg_unavailable
@@ -182,7 +182,11 @@ function redrawTableElements(data, callback) {
 
     ///если мониторинг пал
     if (parsedData['ClientConnectionError'] !== undefined)
-        monitorUnavailable(document.getElementsByClassName('server'))
+        monitorUnavailable(document
+            .getElementsByClassName('server'), 'Агент мониторинга\r\nнедоступен')
+    else if (parsedData['FileNotFoundError'] !== undefined)
+        monitorUnavailable(document
+            .getElementsByClassName('server'), 'Файл конфигурации\r\nинфопанели не найден')
     else
         parsedData.forEach(el => updateServerNode(el.hostname, el.data, el.id, callback));
 

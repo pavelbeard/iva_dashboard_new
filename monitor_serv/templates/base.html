@@ -9,7 +9,7 @@
     <script src="{% static "bootstrap/js/bootstrap.js" %}"></script>
     {% block css %}{% endblock %}
     {% block js %}{% endblock %}
-    <title>{% block title %}Title{% endblock %}</title>
+    <title>{% block title %}Dashboard{% endblock %}</title>
 </head>
 <body class="d-flex flex-column h-100">
     <header class="flex-shrink-0">
@@ -17,7 +17,7 @@
             <div class="container-fluid">
                 <div class="navbar-header">
                     <a href="{% url "dashboard:index" %}"
-                       class="navbar-brand header-text">ЦУ МСК IVA MCU Dashboard
+                       class="navbar-brand header-text">ЦУ МСК IVA MCU Инфопанель
                     </a>
                 </div>
                 <div>
