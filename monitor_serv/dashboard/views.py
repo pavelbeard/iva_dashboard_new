@@ -48,4 +48,5 @@ class Net(mixins.ServerAnalysisMixin):
 
 
 class Uptime(mixins.ServerAnalysisMixin):
-    cmd = "uname -n && "
+    cmd = "uname -n && uptime"
+    callback_iva_metrics_handler = IvaMetricsHandler.uptime

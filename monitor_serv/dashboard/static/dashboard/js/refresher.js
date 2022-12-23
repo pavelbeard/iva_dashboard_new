@@ -1,3 +1,10 @@
+function uptime(data, host) {
+    let connErr = data[0].uptime === undefined ? "" : 0;
+    let result = connErr !== "";
+
+    host.childNodes[1].title = result ? data[0].uptime : "";
+}
+
 function netAnalysis(data, host) {
     let connErr = (data[0].interface === undefined) ? "" : 0;
     let result = (connErr !== "");
@@ -8,12 +15,12 @@ function netAnalysis(data, host) {
 
     if (result) {
         //int
-        let interface = result ? data[0].interface : "";
+        let iface = result ? data[0].interface : "";
 
         //-5 elems
         let lastFiveElems = data.slice(-5,);
         let allRate = "".concat(lastFiveElems
-            .map(el => `last2s: ${Object.values(el)[0].last2s} | last10s: ${Object.values(el)[0].last10s} | last40s: ${Object.values(el)[0].last40s}`))
+            .map(el => `${Object.keys(el)[0]}: last2s: ${Object.values(el)[0].last2s} | last10s: ${Object.values(el)[0].last10s} | last40s: ${Object.values(el)[0].last40s}`))
             .replace(/,/g, '\n');
 
         let remainingItems = data.slice(1, -5);
@@ -26,9 +33,7 @@ function netAnalysis(data, host) {
             }
         })).replace(/,/g, "\n");
 
-
-
-        host.childNodes[3].childNodes[9].title = `${interface}\n${remainingResult}\n${allRate}`
+        host.childNodes[3].childNodes[9].title = `${iface}\n${remainingResult}\n${allRate}`
     }
 
 }
@@ -201,6 +206,7 @@ async function inspectServers() {
     setTimeout(getMetrics, 0,"cpu-info/", "GET", cpuAnalysis);
     setTimeout(getMetrics, 0,"ram-info/", "GET", ramAnalysis);
     setTimeout(getMetrics, 0,"net-info/", "GET", netAnalysis);
+    setTimeout(getMetrics, 0,"uptime/", "GET", uptime);
 
     // // TODO: создать очередь задач. Самая первая задача должна быть трудной
     // await getMetrics("processes/", "GET", execAnalysis);

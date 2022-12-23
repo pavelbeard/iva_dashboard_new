@@ -204,14 +204,17 @@ class IvaMetricsHandler:
     @classmethod
     def net_analysis(cls, data: str) -> {}:
         """
-        Анализ данных файловой системы с сервера.\n
-        :param data: Disk data
+        Анализ данных сетевых интерфейсов с сервера.\n
+        :param data: Net data
         :return: {}
         """
         if type(data) == dict:
-            return cls.error_result(cls.file_sys_analysis.__name__)
+            return cls.error_result(cls.net_analysis.__name__)
 
         hostname, *net_data = data.split("\n")
+
+        if "no connection with server." in net_data:
+            return {"hostname": hostname, "task": cls.net_analysis.__name__, "data": [{"connection_error": True}]}
 
         text = "\n".join(net_data)
 
@@ -268,3 +271,22 @@ class IvaMetricsHandler:
             return {"hostname": hostname, "task": cls.net_analysis.__name__, "data": [{"connection_error": True}]}
 
         return {"hostname": hostname, "task": cls.net_analysis.__name__, "data": tmp_data}
+
+    @classmethod
+    def uptime(cls, data: str) -> {}:
+        """
+        Показывает, сколько времени сервер находится в работе
+        :param data: uptime
+        :return: {}
+        """
+        if type(data) == dict:
+            return cls.error_result(cls.uptime.__name__)
+
+        hostname, *uptime_data = data.split("\n")
+
+        if "no connection with server." in uptime_data:
+            return {"hostname": hostname, "task": cls.uptime.__name__, "data": [{"connection_error": True}]}
+
+        tmp_data = [{"uptime": uptime_data[0].split(',')[0]}]
+
+        return {"hostname": hostname, "task": cls.uptime.__name__, "data": tmp_data}

@@ -14,6 +14,7 @@ from agent import run_cmd_on_target_host, app, get_logger
 logger = get_logger(__name__)
 
 
+# TODO: нужна валидация модели
 @app.post("/api/monitor/metrics")
 async def request_for_metrics(request: Request):
     """

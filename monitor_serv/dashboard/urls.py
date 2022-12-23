@@ -12,4 +12,5 @@ urlpatterns = [
     urls.path('ram-info/', views.RAM.as_view(), name="ram_info"),
     urls.path('disk-info/', views.DiskSpace.as_view(), name="disk_info"),
     urls.path('net-info/', views.Net.as_view(), name="net_info"),
+    urls.path('uptime/', views.Uptime.as_view(), name="uptime"),
 ]
