@@ -35,7 +35,8 @@ class DiskSpace(mixins.ServerAnalysisMixin):
     # или перемещать эти утилиты в другие группы
     #
     # UPD: дано разрешение выполнять команду du без прав админа: sudo chmod +s $(which du)
-    cmd = 'uname -n && df -h && lsblk | grep -E "^sda" && du -sh --exclude=mnt --exclude=proc /'
+    # UPD: "du -sh --exclude=mnt --exclude=proc /" - не используется из-за огромной нагрузки на процессор
+    cmd = 'uname -n && df -h && lsblk | grep -E "^sda"'
     callback_iva_metrics_handler = IvaMetricsHandler.file_sys_analysis
 
 

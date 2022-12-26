@@ -190,14 +190,17 @@ class IvaMetricsHandler:
             tmp_data.append({"filesystem": filesystem, "size": size,
                              "used": used, "available": available, "use_percent": use_percent,
                              "mounted_on": mounted_on})
-        else:
-            used_percent = (float(fs_data[-2].split()[0][:-1]) / float(fs_data[-3].split()[3][:-1])) * 100
 
-            tmp_data += [
-                {"total_size": fs_data[-3].split()[3]},
-                {"total_used": fs_data[-2].split("\t")[0]},
-                {"used_percent": f"{used_percent:10.2f}".strip()},
-            ]
+        most_valuable_partition = max(tmp_data, key=lambda x: float(x.get('size')[:-1]))
+
+        tmp_data += [
+            {"total_disk_size": fs_data[-2].split()[3]},
+            {"most_valuable_part_fs": most_valuable_partition.get('filesystem')},
+            {"most_valuable_part_size": most_valuable_partition.get('size')},
+            {"most_valuable_part_used": most_valuable_partition.get('used')},
+            {"most_valuable_part_available": most_valuable_partition.get('available')},
+            {"most_valuable_part_use_percent": most_valuable_partition.get('use_percent')},
+        ]
 
         return {"hostname": hostname, "task": cls.ram_analysis.__name__, "data": tmp_data}
 
@@ -215,6 +218,8 @@ class IvaMetricsHandler:
 
         if "no connection with server." in net_data:
             return {"hostname": hostname, "task": cls.net_analysis.__name__, "data": [{"connection_error": True}]}
+        if net_data == ['']:
+            return {"hostname": hostname, "task": cls.net_analysis.__name__, "data": [{"command_not_found": True}]}
 
         text = "\n".join(net_data)
 

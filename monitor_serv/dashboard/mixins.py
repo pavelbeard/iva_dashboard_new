@@ -35,6 +35,8 @@ class ServerAnalysisMixin(generic.ListView):
             scraper = IvaMetrics(targets={"hosts": targets}, server_config_path=self.server_config_file)
             data = await scraper.scrape_metrics_from_agent()
 
+            # TODO: добавить экспорт метрик в базу данных
+
             response_data = [self.callback_iva_metrics_handler(d) for d in data]
 
             for rd, target in zip(response_data, targets):

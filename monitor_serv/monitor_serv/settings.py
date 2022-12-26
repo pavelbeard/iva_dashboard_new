@@ -78,6 +78,7 @@ WSGI_APPLICATION = 'monitor_serv.wsgi.application'
 # https://docs.djangoproject.com/en/4.1/ref/settings/#databases
 
 DATABASES = {
+    # TODO: Здесь будет еще одна база данных: ivcs ivcs
     'default': {
         'ENGINE': os.getenv("ENGINE", "django.db.backends.postgresql_psycopg2"),
         'NAME': os.getenv('POSTGRES_DB_NAME', "test_db"),

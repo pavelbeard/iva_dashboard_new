@@ -10,8 +10,13 @@ function netAnalysis(data, host) {
     let result = (connErr !== "");
 
     // status
-    host.childNodes[3].childNodes[9].style.backgroundColor = result ? "#69ff4e" : "#ff0000";
-    host.childNodes[3].childNodes[9].childNodes[2].textContent = result ? "UP" : "DOWN";
+    if (data[0].command_not_found === undefined) {
+        host.childNodes[3].childNodes[9].style.backgroundColor = result ? "#69ff4e" : "#ff0000";
+        host.childNodes[3].childNodes[9].childNodes[2].textContent = result ? "UP" : "DOWN";
+    } else {
+        host.childNodes[3].childNodes[9].style.backgroundColor = "#bebdbd";
+        host.childNodes[3].childNodes[9].childNodes[2].textContent = "iftop n/f";
+    }
 
     if (result) {
         //int
@@ -46,25 +51,36 @@ function fileSysAnalysisParts(data, host) {
     //style
     host.childNodes[3].childNodes[5].style.backgroundColor = result ? "#69ff4e" : "#bebdbd";
 
-    // percentage
-    let used_percent = result ? data[data.length - 1].used_percent : "";
-    host.childNodes[3].childNodes[5].childNodes[2].textContent = result ? `${used_percent}%` : "N/A";
+    let totalDiskSize = result ? data[data.length - 6]["total_disk_size"] : "";
+    let mostValuablePartFs = result ? data[data.length - 5]["most_valuable_part_fs"] : "";
+    let mostValuablePartSize = result ? data[data.length - 4]["most_valuable_part_size"] : "";
+    let mostValuablePartUsed = result ? data[data.length - 3]["most_valuable_part_used"] : "";
+    let mostValuablePartAvailable = result ? data[data.length - 2]["most_valuable_part_available"] : "";
 
-    let total_size = result ? data[data.length - 3].total_size : "";
-    let total_used = result ? data[data.length - 2].total_used : "";
+    // percentage
+    let mostValuablePartUsePercent = result ? data[data.length - 1]["most_valuable_part_use_percent"] : "";
+
+    host.childNodes[3].childNodes[5].childNodes[2].textContent = result ? `${mostValuablePartUsePercent}` : "N/A";
 
     //title
     //filesystem size used available use% mounted on
 
     if (result) {
-        let slicedData = data.slice(0, -3);
+        let slicedData = data.slice(0, -6);
         let cols = "".concat(Object.keys(slicedData[0])).replace(/,/g, " | ") + "\n"
         let slicedArray = slicedData
             .map(el => `${el.filesystem} | ${el.size} | ${el.used} | ${el.available} | ${el.use_percent} | ${el.mounted_on}`);
 
         let title = "".concat(slicedArray).replace(/,/g, "\n");
 
-        host.childNodes[3].childNodes[5].title = `Total size: ${total_size}\nTotal used: ${total_used}\n` + cols + title;
+        host.childNodes[3].childNodes[5].title =
+            `Total disk size: ${totalDiskSize}\n` +
+            `MVP fs: ${mostValuablePartFs}\n` +
+            `${mostValuablePartFs} size: ${mostValuablePartSize}\n` +
+            `${mostValuablePartFs} size used: ${mostValuablePartUsed}\n` +
+            `${mostValuablePartFs} size available: ${mostValuablePartAvailable}\n` +
+            `${mostValuablePartFs} size use in %: ${mostValuablePartUsePercent}\n\n` +
+            cols + title;
     } else {
         host.childNodes[3].childNodes[5].title = "";
     }
@@ -107,8 +123,6 @@ function cpuAnalysis(data, host) {
 function execAnalysis(data, host) {
     let connErr = (data[0].status === undefined) ? "" : 0;
     let result = (connErr !== "");
-
-    // TODO: Здесь будут выводиться результаты из crm status
 
     let processesArray = data.map(el => {
         let st = ''
@@ -212,11 +226,7 @@ async function inspectServers() {
     setTimeout(getMetrics, 0,"net-info/", "GET", netAnalysis);
     setTimeout(getMetrics, 0,"uptime/", "GET", uptime);
 
-    // // TODO: создать очередь задач. Самая первая задача должна быть трудной
-    // await getMetrics("processes/", "GET", execAnalysis);
-    // await getMetrics("cpu-info/", "GET", cpuAnalysis);
-    // await getMetrics("ram-info/", "GET", ramAnalysis);
-    // await getMetrics("disk-info/", "GET", fileSysAnalysisParts);
+    // TODO: создать новый js файл для чисто iva-утилит
 }
 
 // main //
