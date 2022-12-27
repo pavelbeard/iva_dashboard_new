@@ -1,26 +1,22 @@
 function uptime(data, host) {
-    let connErr = data[0].uptime === undefined ? "" : 0;
-    let result = connErr !== "";
+    let err = data[0].uptime !== undefined;
 
-    host.childNodes[1].title = result ? data[0].uptime : "";
+    host.childNodes[1].title = err ? data[0].uptime : "";
 }
 
-function netAnalysis(data, host) {
-    let connErr = (data[0].interface === undefined) ? "" : 0;
-    let result = (connErr !== "");
+// TODO: Переедет в файл уровня детализации
+function netAnalysisDetail(data, host) {
+    let err = data[0]["interface"] !== undefined;
+    let cmdNotFound = data[0]["command_not_found"] !== undefined
 
     // status
-    if (data[0].command_not_found === undefined) {
-        host.childNodes[3].childNodes[9].style.backgroundColor = result ? "#69ff4e" : "#ff0000";
-        host.childNodes[3].childNodes[9].childNodes[2].textContent = result ? "UP" : "DOWN";
-    } else {
-        host.childNodes[3].childNodes[9].style.backgroundColor = "#bebdbd";
-        host.childNodes[3].childNodes[9].childNodes[2].textContent = "iftop n/f";
-    }
 
-    if (result) {
+    host.childNodes[3].childNodes[9].style.backgroundColor = err ? "#69ff4e" : cmdNotFound ? "#ff0000" : "#bebdbd";
+    host.childNodes[3].childNodes[9].childNodes[2].textContent = err ? "UP" : cmdNotFound ? "DOWN" : "iftop n/a";
+
+    if (err) {
         //int
-        let iface = result ? data[0].interface : "";
+        let iface = err ? data[0].interface : "";
 
         //-5 elems
         let lastFiveElems = data.slice(-5,);
@@ -43,29 +39,62 @@ function netAnalysis(data, host) {
 
 }
 
+function netAnalysis(data, host) {
+    let err = data[0]["iface"] !== undefined
+    let cmdNotFound = data[0]["command_not_found"] !== undefined
+
+
+    host.childNodes[3].childNodes[9].childNodes[1].src = err ?
+        "/static/dashboard/images/svgrepo-com-ethernet-on.svg" :
+        cmdNotFound ? "/static/dashboard/images/svgrepo-com-ethernet-off.svg" :
+             "/static/dashboard/images/svgrepo-com-ethernet.svg";
+    // host.childNodes[3].childNodes[9].style.backgroundColor = err ? "#69ff4e" : cmdNotFound ?  "#ff0000" : "#bebdbd";
+    host.childNodes[3].childNodes[9].childNodes[2].textContent = err ? "UP" : cmdNotFound ? "DOWN" : "N/A" ;
+
+    if (err) {
+        let ifaces = data.map(i => `interface: ${i["iface"]} - status: ${i["status"]}\n`)
+    }
+}
+
 
 function fileSysAnalysisParts(data, host) {
-    let connErr = (data[0].filesystem === undefined) ? "" : 0;
-    let result = (connErr !== "");
-
-    //style
-    host.childNodes[3].childNodes[5].style.backgroundColor = result ? "#69ff4e" : "#bebdbd";
-
-    let totalDiskSize = result ? data[data.length - 6]["total_disk_size"] : "";
-    let mostValuablePartFs = result ? data[data.length - 5]["most_valuable_part_fs"] : "";
-    let mostValuablePartSize = result ? data[data.length - 4]["most_valuable_part_size"] : "";
-    let mostValuablePartUsed = result ? data[data.length - 3]["most_valuable_part_used"] : "";
-    let mostValuablePartAvailable = result ? data[data.length - 2]["most_valuable_part_available"] : "";
+    let err = data[0].filesystem !== undefined
 
     // percentage
-    let mostValuablePartUsePercent = result ? data[data.length - 1]["most_valuable_part_use_percent"] : "";
+    let mostValuablePartUsePercent = err ? data[data.length - 1]["most_valuable_part_use_percent"] : "";
 
-    host.childNodes[3].childNodes[5].childNodes[2].textContent = result ? `${mostValuablePartUsePercent}` : "N/A";
+    //style
+    let na = "/static/dashboard/images/svgrepo-com-ssd.svg"
+    try {
+        let percent = parseFloat(mostValuablePartUsePercent.slice(0,-1))
+        if (percent > 0.0 && percent < 50.0) {
+            host.childNodes[3].childNodes[5].childNodes[1].src =
+                "/static/dashboard/images/svgrepo-com-ssd-normal.svg";
+        } else if (percent > 50.0 && percent < 75.0) {
+            host.childNodes[3].childNodes[5].childNodes[1].src =
+                "/static/dashboard/images/svgrepo-com-ssd-warning.svg";
+        } else {
+            host.childNodes[3].childNodes[5].childNodes[1].src =
+                "/static/dashboard/images/svgrepo-com-ssd-danger.svg";
+        }
+    } catch (e) {
+        host.childNodes[3].childNodes[5].childNodes[1].src = na;
+        console.log(e);
+    }
+
+    let totalDiskSize = err ? data[data.length - 6]["total_disk_size"] : "";
+    let mostValuablePartFs = err ? data[data.length - 5]["most_valuable_part_fs"] : "";
+    let mostValuablePartSize = err ? data[data.length - 4]["most_valuable_part_size"] : "";
+    let mostValuablePartUsed = err ? data[data.length - 3]["most_valuable_part_used"] : "";
+    let mostValuablePartAvailable = err ? data[data.length - 2]["most_valuable_part_available"] : "";
+
+
+    host.childNodes[3].childNodes[5].childNodes[2].textContent = err ? `${mostValuablePartUsePercent}` : "N/A";
 
     //title
     //filesystem size used available use% mounted on
 
-    if (result) {
+    if (err) {
         let slicedData = data.slice(0, -6);
         let cols = "".concat(Object.keys(slicedData[0])).replace(/,/g, " | ") + "\n"
         let slicedArray = slicedData
@@ -88,41 +117,73 @@ function fileSysAnalysisParts(data, host) {
 }
 
 function ramAnalysis(data, host) {
-    let connErr = (data[0].ram_util === undefined) ? "" : 0;
-    let result = (connErr !== "");
+    let err = data[0]["ram_util"] !== undefined;
 
-    host.childNodes[3].childNodes[3].style.backgroundColor = result ? "#69ff4e" : "#bebdbd";
-    host.childNodes[3].childNodes[3].childNodes[2].textContent = result ? `${data[0].ram_util}%` : "N/A";
+    let na = "/static/dashboard/images/svgrepo-com-memory.svg"
+    try {
+        let percent = parseFloat(data[0]["ram_util"])
+        if (percent > 0.0 && percent < 50.0) {
+            host.childNodes[3].childNodes[3].childNodes[1].src =
+                "/static/dashboard/images/svgrepo-com-memory-normal.svg";
+        } else if (percent > 50.0 && percent < 75.0) {
+            host.childNodes[3].childNodes[3].childNodes[1].src =
+                "/static/dashboard/images/svgrepo-com-memory-warning.svg";
+        } else {
+            host.childNodes[3].childNodes[3].childNodes[1].src =
+                "/static/dashboard/images/svgrepo-com-memory-danger.svg";
+        }
+    } catch (e) {
+        host.childNodes[3].childNodes[3].childNodes[1].src = na;
+        console.log(e)
+    }
 
-    let total = result ? data[1].ram_total.trim() : "";
-    let free = result ? data[2].ram_free.trim() : "";
-    let used = result ? data[3].ram_used.trim() : "";
+
+    host.childNodes[3].childNodes[3].childNodes[2].textContent = err ? `${data[0].ram_util}%` : "N/A";
+
+    let total = err ? data[1].ram_total.trim() : "";
+    let free = err ? data[2].ram_free.trim() : "";
+    let used = err ? data[3].ram_used.trim() : "";
 
     host.childNodes[3].childNodes[3]
-        .title = result ? `Total RAM: ${total}GB\nFree RAM: ${free}GB\nUsed RAM: ${used}GB` : ""
+        .title = err ? `Total RAM: ${total}GB\nFree RAM: ${free}GB\nUsed RAM: ${used}GB` : ""
 }
 
 function cpuAnalysis(data, host) {
-    let connErr = (data[0].cpu_load === undefined) ? "" : 0;
-    let result = (connErr !== "");
+    let err = data[0]["cpu_load"] !== undefined;
 
-    host.childNodes[3].childNodes[1].style.backgroundColor = result ? "#69ff4e" : "#bebdbd";
-    host.childNodes[3].childNodes[1].childNodes[2].textContent = result ? `${data[0].cpu_load}%` : "N/A";
+    let na = "/static/dashboard/images/svgrepo-com-cpu.svg"
+    try {
+        let percent = parseFloat(data[0]["cpu_load"]);
+        if (percent > 0.0 && percent < 50.0) {
+            host.childNodes[3].childNodes[1].childNodes[1].src =
+                "/static/dashboard/images/svgrepo-com-cpu-normal.svg";
+        } else if (percent > 50.0 && percent < 75.0) {
+            host.childNodes[3].childNodes[1].childNodes[1].src =
+                "/static/dashboard/images/svgrepo-com-cpu-warning.svg";
+        } else {
+            host.childNodes[3].childNodes[1].childNodes[1].src =
+                "/static/dashboard/images/svgrepo-com-cpu-danger.svg";
+        }
+    } catch (e) {
+        host.childNodes[3].childNodes[1].childNodes[1].src = na;
+        console.log(e)
+    }
+
+    host.childNodes[3].childNodes[1].childNodes[2].textContent = err ? `${data[0].cpu_load}%` : "N/A";
 
     //вывод всех ядер и количества ядер
     let core = 0
-    let cores  = result ? "".concat(data.slice(2, -1).map(el => `Core ${core++}: ${Object.values(el)[0]}%`))
+    let cores  = err ? "".concat(data.slice(2, -1).map(el => `Core ${core++}: ${Object.values(el)[0]}%`))
         .replace( /,/g, '\n') : "";
 
     host.childNodes[3].childNodes[1]
-        .title = result ? `CPU idle: ${data[1].cpu_idle}%\nCPU cores: ${data[data.length - 1].cpu_cores}\n`
+        .title = err ? `CPU idle: ${data[1].cpu_idle}%\nCPU cores: ${data[data.length - 1].cpu_cores}\n`
         + cores  : "";
 
 }
 
 function execAnalysis(data, host) {
-    let connErr = (data[0].status === undefined) ? "" : 0;
-    let result = (connErr !== "");
+    let err = data[0].status !== undefined;
 
     let processesArray = data.map(el => {
         let st = ''
@@ -145,9 +206,11 @@ function execAnalysis(data, host) {
         processesArray.length];
 
     //processes
-    host.childNodes[3].childNodes[7].title = result ? processesTooltip : "";
-    host.childNodes[3].childNodes[7].childNodes[2].textContent = result ? processesCount : 0;
-    host.childNodes[3].childNodes[7].style.backgroundColor = result ? "#69ff4e" : "#bebdbd";
+    host.childNodes[3].childNodes[7].title = err ? processesTooltip : "";
+    host.childNodes[3].childNodes[7].childNodes[1].src =
+        err ? "/static/dashboard/images/svgrepo-com-setting-normal.svg" :
+            "/static/dashboard/images/svgrepo-com-setting.svg";
+    host.childNodes[3].childNodes[7].childNodes[2].textContent = err ? processesCount : 0;
 
 
 }
@@ -155,14 +218,16 @@ function execAnalysis(data, host) {
 function updateServerNode(hostname, data, id, callback) {
     let host = document.getElementById(id);
 
-    let result = data[0].connection_error === undefined;
+    let err = data[0].connection_error === undefined;
 
     // set hostname
-    host.childNodes[1].childNodes[1].childNodes[3].textContent = result  ? hostname : "Хост недоступен\n";
+    host.childNodes[1].childNodes[1].childNodes[3].textContent = err  ? hostname : "Хост недоступен\n";
 
     // server status
-    host.childNodes[1].childNodes[1].style.backgroundColor = result ? "#69ff4e" : "#ff0000"
-    host.childNodes[1].childNodes[1].childNodes[5].textContent = result ? "UP\n" : "DOWN\n";
+    host.childNodes[1].childNodes[1].childNodes[1].src = err ?
+        "/static/dashboard/images/svgrepo-com-server-up.svg" :
+        "/static/dashboard/images/svgrepo-com-server-down.svg"
+    host.childNodes[1].childNodes[1].childNodes[5].textContent = err ? "UP\n" : "DOWN\n";
 
     callback(data, host)
 
@@ -177,9 +242,7 @@ function monitorUnavailable(servers, reason) {
         server.childNodes[1].childNodes[1].childNodes[5].textContent = "no data"
         // server status
         server.childNodes[1].childNodes[1].style.backgroundColor = bg_unavailable
-        //
-        // server.childNodes[1].childNodes[3].childNodes[1].src = "/static/dashboard/images/icons8-unlike-64.png"
-        // server.childNodes[1].childNodes[3].childNodes[2].textContent = "?  "
+
         // server info
         let server_info_pane = server.childNodes[3].childNodes
         for (let i = 1; i < server_info_pane.length; i += 2) {
@@ -191,8 +254,8 @@ function monitorUnavailable(servers, reason) {
     }
 }
 
-function redrawTableElements(data, callback) {
-    let parsedData = JSON.parse(data);
+function redrawTableElements(parsedData, callback) {
+
 
     ///если мониторинг пал
     if (parsedData['ClientConnectionError'] !== undefined)
@@ -206,30 +269,49 @@ function redrawTableElements(data, callback) {
 
 }
 
-async function getMetrics (url, method, callback) {
+let headers = {
+    'X-Requested-With': 'XMLHttpRequest',
+    'Content-Type': 'application/json',
+}
+
+async function getMetrics (url, method, headers, callback) {
     let response = await fetch(url, {
-        method: method, headers: {
-            'X-Requested-With': 'XMLHttpRequest',
-            'Content-Type': 'application/json',
-        }
+        method: method, headers: headers
     });
 
     let data = await response.json()
-    redrawTableElements(data, callback);
+    let parsedData = JSON.parse(data);
+    redrawTableElements(parsedData, callback);
+}
+
+async function getInterval(url, method, headers) {
+    let response = await fetch(url, {
+        method: method, headers: headers
+    });
+
+    let int = JSON.parse(await response.json());
+
+    if (int['file_not_found'] === undefined)
+        return  parseInt(int.interval) * 1000;
+    else
+        return 5000;
 }
 
 async function inspectServers() {
-    setTimeout(getMetrics, 0,"disk-info/", "GET", fileSysAnalysisParts);
-    setTimeout(getMetrics, 0,"processes/", "GET", execAnalysis);
-    setTimeout(getMetrics, 0,"cpu-info/", "GET", cpuAnalysis);
-    setTimeout(getMetrics, 0,"ram-info/", "GET", ramAnalysis);
-    setTimeout(getMetrics, 0,"net-info/", "GET", netAnalysis);
-    setTimeout(getMetrics, 0,"uptime/", "GET", uptime);
+    setTimeout(getMetrics, 0,"disk-info/", "GET", headers,   fileSysAnalysisParts);
+    setTimeout(getMetrics, 0,"processes/", "GET", headers, execAnalysis);
+    setTimeout(getMetrics, 0,"cpu-info/", "GET", headers, cpuAnalysis);
+    setTimeout(getMetrics, 0,"ram-info/", "GET", headers, ramAnalysis);
+    setTimeout(getMetrics, 0,"net-info/", "GET", headers, netAnalysis);
+    setTimeout(getMetrics, 0,"uptime/", "GET", headers, uptime);
 
     // TODO: создать новый js файл для чисто iva-утилит
 }
 
 // main //
-document.onload = async () => await inspectServers();
-setInterval(inspectServers, 5000);
+setTimeout(async function () {
+    await inspectServers();
+    let interval = await getInterval("interval/", "GET", headers);
+    setInterval(inspectServers, interval);
+}, 0);
 // main //

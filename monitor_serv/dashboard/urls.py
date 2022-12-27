@@ -1,5 +1,4 @@
 from django import urls
-from django.views import generic
 from . import views
 
 
@@ -13,4 +12,5 @@ urlpatterns = [
     urls.path('disk-info/', views.DiskSpace.as_view(), name="disk_info"),
     urls.path('net-info/', views.Net.as_view(), name="net_info"),
     urls.path('uptime/', views.Uptime.as_view(), name="uptime"),
+    urls.path('interval/', views.get_interval, name="interval"),
 ]

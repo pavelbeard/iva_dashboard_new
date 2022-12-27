@@ -3,10 +3,9 @@ import json
 from typing import Callable
 from django import http
 from django.conf import settings
-from django.shortcuts import render
 from django.views import generic
 from django.db import utils
-from .logic import IvaMetrics, TargetsIsEmpty
+from logic import IvaMetrics, TargetsIsEmpty
 from . import models
 
 

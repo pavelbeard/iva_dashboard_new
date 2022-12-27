@@ -37,6 +37,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     # custom apps
     'dashboard.apps.DashboardConfig',
+    'dashboard_detail.apps.DashboardDetailConfig',
 
 ]
 
@@ -58,6 +59,7 @@ TEMPLATES = [
         'DIRS': [
             BASE_DIR / 'templates',
             BASE_DIR / 'dashboard/templates/dashboard',
+            BASE_DIR / 'dashboard_detail/templates/dashboard_detail',
         ]
         ,
         'APP_DIRS': True,
@@ -132,6 +134,7 @@ STATICFILES_FINDERS = (
 STATICFILES_DIRS = (
     os.path.join(BASE_DIR, "static"),
     os.path.join(BASE_DIR, "dashboard", "static"),
+    os.path.join(BASE_DIR, "dashboard_detail", "static"),
 )
 
 # Default primary key field type
@@ -145,3 +148,4 @@ SERVER_CONFIG_FILE = os.getenv('IVA_DASHBOARD_SERVER_CONFIG_FILE',
 
 CSRF_TRUSTED_ORIGINS = os.getenv('CSRF_TRUSTED_ORIGINS', default="http://*localhost:8004").split(" ")
 CONN_HEALTH_CHECKS = True
+APPLICATION_VERSION = "v0.5.4"

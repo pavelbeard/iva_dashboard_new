@@ -19,47 +19,66 @@
                         <div class="server" id="{{ address.address }}">
                             <div class="server-left-part">
                                 <div class="server-img">
-                                    <img class="img" src="{% static "dashboard/images/icons8-server-64.png" %}"
-                                             alt="server-image">
+                                    <img class="img"
+                                         width="64"
+                                         height="64"
+                                         src="{% static "dashboard/images/svgrepo-com-server.svg" %}"
+                                         alt="server-image">
                                     <div class="server-hostname text-center">Host undefined</div>
                                     <div class="server-status">no data</div>
                                     <div class="server-address">{{ address.address }}</div>
                                     <div class="server-address">{{ address.role|upper }}</div>
                                 </div>
                                 <div class="server-empty justify-content-center">
-{#                                    <img class="server-info-icon"#}
-{#                                         src="{% static "dashboard/images/icons8-unlike-64.png" %}"#}
-{#                                         alt="server-status"><p>?</p>#}
+                                    {# Свободное место #}
                                 </div>
                             </div>
                             <div class="server-info">
                                 <div class="server-indicator server-cpu">
                                         <img class="server-info-icon"
-                                             src="{% static "dashboard/images/icons8-cpu-64.png" %}"
-                                             alt="server-cpu"><p>0%</p></div>
+                                             width="64"
+                                             height="64"
+                                             src="{% static "dashboard/images/svgrepo-com-cpu.svg" %}"
+                                             alt="server-cpu"><p>0%</p>
+                                </div>
                                 <div class="server-indicator server-ram">
                                     <img class="server-info-icon"
-                                         src="{% static "dashboard/images/icons8-ram-64.png" %}"
-                                                                  alt="server-ram"><p>0%</p></div>
+                                         width="64"
+                                         height="64"
+                                         src="{% static "dashboard/images/svgrepo-com-memory.svg" %}"
+                                                                  alt="server-ram"><p>0%</p>
+                                </div>
                                 <div class="server-indicator server-disk">
                                     <img class="server-info-icon"
-                                         src="{% static "dashboard/images/icons8-disk-64.png" %}"
-                                                                  alt="server-disk"><p>0%</p></div>
+                                         width="64"
+                                         height="64"
+                                         src="{% static "dashboard/images/svgrepo-com-ssd.svg" %}"
+                                                                  alt="server-disk"><p>0%</p>
+                                </div>
                                 <div class="server-indicator server-processes">
                                     <img class="server-info-icon"
-                                         src="{% static "dashboard/images/icons8-code-64.png" %}"
-                                                                  alt="server-processes"><p>0</p></div>
+                                         width="64"
+                                         height="64"
+                                         src="{% static "dashboard/images/svgrepo-com-setting.svg" %}"
+                                                                  alt="server-processes"><p>0</p>
+                                </div>
                                 <div class="server-indicator server-network">
                                     <img class="server-info-icon"
-                                         src="{% static "dashboard/images/icons8-ethernet-64.png" %}"
-                                                                  alt="server-network"><p>?</p></div>
+                                         width="64"
+                                         height="64"
+                                         src="{% static "dashboard/images/svgrepo-com-ethernet-off.svg" %}"
+                                                                  alt="server-network"><p>?</p>
+                                </div>
                             </div>
                         </div>
                     {% endfor %}
                 </div>
             </div>
-            {# TODO: Добавить отображение пользователей IVA           #}
+            {# TODO: Добавить отображение пользователей IVA #}
             {# еще один div col-md-6 #}
         </div>
     </section>
+{% endblock %}
+{% block version %}
+    {{ app_version }}
 {% endblock %}

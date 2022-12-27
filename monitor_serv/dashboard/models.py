@@ -7,16 +7,14 @@ import uuid
 # Create your models here.
 SERVER_ROLE = (
     ('media', "MEDIA"),
-    ('slave', "SLAVE"),
-    ('master', "MASTER"),
+    ('head', "HEAD"),
 )
 
 
 class Target(models.Model):
     class ServerRole(models.TextChoices):
         MEDIA = 'media', _('MEDIA')
-        SLAVE = 'slave', _('SLAVE')
-        MASTER = 'master', _('MASTER')
+        HEAD = 'head', _('HEAD')
 
     uuid = fields.UUIDField(default=uuid.uuid4, primary_key=True)
     address = fields.GenericIPAddressField(null=False, verbose_name="IP-адрес целевого сервера:")

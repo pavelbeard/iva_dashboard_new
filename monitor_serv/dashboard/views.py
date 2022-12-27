@@ -1,5 +1,10 @@
+import json
+
+import yaml
+from django import http
 from django.shortcuts import render
-from .logic import IvaMetricsHandler
+from django.conf import settings
+from logic import IvaMetricsHandler
 from . import mixins
 from . import models
 
@@ -8,9 +13,12 @@ from . import models
 
 
 def index_view(request):
+    app_version = settings.APPLICATION_VERSION
     targets = models.Target.objects.all()
     addresses = [{"address": f"{target.address}:{target.port}", "role": target.server_role} for target in targets]
-    return render(request=request, template_name="index.html", context={"addresses": addresses})
+    return render(request=request, template_name="index.html", context={
+        "addresses": addresses, "app_version": app_version
+    })
 
 
 class Processes(mixins.ServerAnalysisMixin):
@@ -41,13 +49,21 @@ class DiskSpace(mixins.ServerAnalysisMixin):
 
 
 class Net(mixins.ServerAnalysisMixin):
-    # команды iftop может не быть на целевой машине, проверить перед
-    # развертыванием дашборда, установить в случае отсутствия
-    # UPD: дано разрешение выполнять команду iftop без прав админа: sudo chmod +s $(which /usr/sbin/iftop)
-    cmd = "uname -n && /usr/sbin/iftop -t -s 1 -P"
+    cmd = "uname -n && /usr/sbin/ifconfig"
     callback_iva_metrics_handler = IvaMetricsHandler.net_analysis
 
 
 class Uptime(mixins.ServerAnalysisMixin):
     cmd = "uname -n && uptime"
     callback_iva_metrics_handler = IvaMetricsHandler.uptime
+
+
+def get_interval(request):
+    try:
+        server_config_file = settings.SERVER_CONFIG_FILE
+        with open(server_config_file, 'r') as file:
+            config = yaml.safe_load(file)
+            interval = config.get('settings').get('interval')
+            return http.JsonResponse(json.dumps({"interval": interval}), safe=False)
+    except FileNotFoundError:
+        http.JsonResponse(json.dumps({"file_not_found": "no data."}), safe=False)

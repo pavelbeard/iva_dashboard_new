@@ -5,13 +5,59 @@ import yaml
 from aiohttp import web
 
 
+class DigitalDataConverters:
+    @staticmethod
+    def convert_metric_to_bytes(amount: str) -> float:
+        """
+        Конвертирует единицы измерения информации в метрической системе в байты.\n
+        :param amount: Количество тера-, гига-, мега-, кило- и просто байтов
+        :return: float
+        """
+        if amount.__contains__("T"):
+            return float(amount[:-1]) * 1000 ** 4
+        if amount.__contains__("G"):
+            return float(amount[:-1]) * 1000 ** 3
+        elif amount.__contains__("M"):
+            return float(amount[:-1]) * 1000 ** 2
+        elif amount.__contains__("K"):
+            return float(amount[:-1]) * 1000
+        else:
+            return float(amount[:-1])
+
+    @staticmethod
+    def convert_bytes_to_metric(amount: str) -> str:
+        """
+        Конвертирует байты в международные единицы измерения информации в метрической системе.\n
+        :param amount: Количество байтов
+        :return: str
+        """
+        try:
+            amount_of_bytes = float(amount)
+            if 1000.0 <= amount_of_bytes <= 1_000_000.0:
+                return f"{amount_of_bytes / 1000:10.2f}KB".strip()
+            elif 1_000_000.0 <= amount_of_bytes <= 1_000_000_000.0:
+                return f"{amount_of_bytes / 1000 ** 2:10.2f}MB".strip()
+            else:
+                return f"{amount_of_bytes / 1000 ** 3:10.2f}GB".strip()
+        except ValueError:
+            return ''
+
+    @staticmethod
+    def from_cidr_to_prefixlen(ipaddr: str, netmask: str) -> str:
+        splitted_nm = [
+            int(i) for i in "".join(["{0:b}".format(int(octet)) for octet in netmask.split(".")]).replace("0", "")
+        ]
+        prefixlen = sum(splitted_nm)
+        return f"{ipaddr}/{prefixlen}"
+
+
 class IvaMetrics:
     def __init__(self, targets: dict, server_config_path):
         self.targets = targets
         self.server_config_path = server_config_path
 
         try:
-            with open(self.server_config_path) as file:
+            with open(self.server_config_path, 'r') as file:
                 self.__config = yaml.safe_load(file)
                 self.monitor_url = self.__config.get('settings').get('scraper_url')
         except FileNotFoundError:
@@ -191,7 +237,7 @@ class IvaMetricsHandler:
                              "used": used, "available": available, "use_percent": use_percent,
                              "mounted_on": mounted_on})
 
-        most_valuable_partition = max(tmp_data, key=lambda x: float(x.get('size')[:-1]))
+        most_valuable_partition = max(tmp_data, key=lambda x: DigitalDataConverters.convert_metric_to_bytes(x.get('size')))
 
         tmp_data += [
             {"total_disk_size": fs_data[-2].split()[3]},
@@ -207,8 +253,8 @@ class IvaMetricsHandler:
     @classmethod
     def net_analysis(cls, data: str) -> {}:
         """
-        Анализ данных сетевых интерфейсов с сервера.\n
-        :param data: Net data
+        Анализ утилизации сетевых интерфейсов командой ifconfig.\n
+        :param data: Данные команды ifconfig
         :return: {}
         """
         if type(data) == dict:
@@ -219,7 +265,73 @@ class IvaMetricsHandler:
         if "no connection with server." in net_data:
             return {"hostname": hostname, "task": cls.net_analysis.__name__, "data": [{"connection_error": True}]}
         if net_data == ['']:
-            return {"hostname": hostname, "task": cls.net_analysis.__name__, "data": [{"command_not_found": True}]}
+            return {"hostname": hostname, "task": cls.net_analysis_detail.__name__, "data": [
+                {"command_not_found": True}
+            ]}
+
+        text = "\n".join(net_data)
+
+        PATTERN = "(.*|.*:.*):\s.*<(\w{2,4}).*\n\s+inet\s(\d+.\d+.\d+.\d+)\s+netmask\s(\d+.\d+.\d+.\d+).*\n|" + \
+                  ".*\n\s+RX\spackets\s(\d+)\s+bytes\s(\d+).*\n" + \
+                  ".*RX\serrors\s(\d+)\s+dropped\s(\d+)\s+overruns\s(\d+)\s+frame\s(\d+)\n" + \
+                  "\s+TX\spackets\s(\d+)\s+bytes\s(\d+)\s.*\n" + \
+                  "\s+TX\serrors\s(\d+)\s+dropped\s(\d+)\s+overruns\s(\d+)\s+carrier\s(\d+)\s+collisions\s(\d+)"
+
+        IFACES_INFO = re.findall(PATTERN, text, flags=re.MULTILINE)
+
+        FORMAT_IFACES_INFO = []
+
+        for i, interface in enumerate(IFACES_INFO):
+            if all([x == "" for x in interface[0:3]]):
+                new_array = tuple([x for x in IFACES_INFO[i - 1] + IFACES_INFO[1] if x != ""])
+                FORMAT_IFACES_INFO.pop()
+                FORMAT_IFACES_INFO.append(new_array)
+            else:
+                FORMAT_IFACES_INFO.append(interface)
+
+        tmp_data = []
+
+        for interface in FORMAT_IFACES_INFO:
+            iface, status, ip_addr, netmask, \
+                rx_bytes, rx_packets, rx_errors1, rx_errors2, rx_errors3, rx_errors4, \
+                tx_bytes, tx_packets, tx_errors1, tx_errors2, tx_errors3, tx_errors4, tx_errors5 = interface
+            tmp_data.append({
+                "iface": iface, "status": status, "ipaddress": DigitalDataConverters.from_cidr_to_prefixlen(
+                    ip_addr, netmask
+                ),
+                "rx_bytes": DigitalDataConverters.convert_bytes_to_metric(rx_bytes), "rx_packets": rx_packets,
+                "rx_errors": {
+                    "errors": rx_errors1, "dropped": rx_errors2, "overruns": rx_errors3, "frame": rx_errors4,
+                },
+                "tx_bytes": DigitalDataConverters.convert_bytes_to_metric(tx_bytes), "tx_packets": tx_packets,
+                "tx_errors": {
+                    "errors": tx_errors1, "dropped": tx_errors2, "overruns": tx_errors3,
+                    "carrier": tx_errors4, "collisions": tx_errors5,
+                },
+            })
+
+        return {"hostname": hostname, "task": cls.net_analysis.__name__, "data": tmp_data}
+
+    @classmethod
+    def net_analysis_detail(cls, data: str) -> {}:
+        """
+        Анализ данных сетевых интерфейсов с сервера.\n
+        :param data: Net data
+        :return: {}
+        """
+        if type(data) == dict:
+            return cls.error_result(cls.net_analysis_detail.__name__)
+
+        hostname, *net_data = data.split("\n")
+
+        if "no connection with server." in net_data:
+            return {"hostname": hostname, "task": cls.net_analysis_detail.__name__, "data": [
+                {"connection_error": True}
+            ]}
+        if net_data == ['']:
+            return {"hostname": hostname, "task": cls.net_analysis_detail.__name__, "data": [
+                {"command_not_found": True}
+            ]}
 
         text = "\n".join(net_data)
 
@@ -273,9 +385,11 @@ class IvaMetricsHandler:
         ]
 
         if "no connection with server." in net_data:
-            return {"hostname": hostname, "task": cls.net_analysis.__name__, "data": [{"connection_error": True}]}
+            return {"hostname": hostname, "task": cls.net_analysis_detail.__name__, "data": [
+                {"connection_error": True}
+            ]}
 
-        return {"hostname": hostname, "task": cls.net_analysis.__name__, "data": tmp_data}
+        return {"hostname": hostname, "task": cls.net_analysis_detail.__name__, "data": tmp_data}
 
     @classmethod
     def uptime(cls, data: str) -> {}:
@@ -295,3 +409,4 @@ class IvaMetricsHandler:
         tmp_data = [{"uptime": uptime_data[0].split(',')[0]}]
 
         return {"hostname": hostname, "task": cls.uptime.__name__, "data": tmp_data}
+

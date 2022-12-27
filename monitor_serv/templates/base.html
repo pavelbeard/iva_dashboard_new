@@ -22,12 +22,10 @@
                 </div>
                 <div>
                     <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-                        <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-                            <li class="nav-item"><a href="{% url "dashboard:index" %}"
-                                                    class="nav-link header-text">Главная</a></li>
-                            <li class="nav-item"><a href="{% url "admin:index" %}"
-                                                    class="nav-link header-text">Панель админа</a></li>
-                        </ul>
+                        <li class="nav-item"><a href="{% url "dashboard:index" %}"
+                                                class="nav-link header-text">Главная</a></li>
+                        <li class="nav-item"><a href="{% url "admin:index" %}"
+                                                class="nav-link header-text">Панель админа</a></li>
                     </ul>
                 </div>
             </div>
@@ -37,6 +35,7 @@
     {% endblock %}
     <footer class="footer mt-auto py-3 bg-light container-fluid">
         <div class="container text-center">created by pavel borodin</div>
+        <div class="container text-center">{% block version %}{% endblock %}</div>
     </footer>
 </body>
 </html>

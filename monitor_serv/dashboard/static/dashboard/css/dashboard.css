@@ -41,7 +41,7 @@ h4 {
 
 /*SERVER*/
 .server-img {
-    background: rgba(102, 16, 242, 0.71);
+    background: rgba(190, 189, 189, 0.29);
 
     display: flex;
     align-items: center;
@@ -62,7 +62,7 @@ h4 {
 }
 
 .server-indicator {
-    background: #bcbebf;
+    background: rgba(190, 189, 189, 0.29);
     height: 40px;
 
     border-bottom: .2px solid rgba(0, 0, 0, 0.84);
@@ -78,7 +78,7 @@ h4 {
     display: flex;
     align-items: center;
 
-    background: #bebdbd;
+    background: rgba(190, 189, 189, 0.29);
 }
 /*SERVER INFO*/
 .server-status > p, .server-cpu > p, .server-ram > p, .server-disk > p, .server-processes > p, .server-network > p{
@@ -93,7 +93,7 @@ h4 {
 }
 
 .server-empty {
-    background: #bebdbd;
+    background: rgba(190, 189, 189, 0.29);
 
     border-top: .2px solid rgba(0, 0, 0, 0.84);
 }
