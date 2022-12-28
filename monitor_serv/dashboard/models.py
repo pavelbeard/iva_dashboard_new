@@ -45,13 +45,19 @@ class CPU(models.Model):
     cpu_cores = fields.IntegerField(null=False, verbose_name="Количество ядер:")
     cpu_load = fields.FloatField(null=False, verbose_name="Загрузка процессора %:")
     cpu_idle = fields.FloatField(null=False, verbose_name="Простой процессора %:")
-    record_date = fields.DateTimeField(auto_now=True, null=False, verbose_name="Информация взята:")
+    record_date = fields.DateTimeField(auto_now=True, null=False, verbose_name="Время сканирования:")
 
     server_uuid = models.ForeignKey(Server, on_delete=models.CASCADE, verbose_name="Сервер:")
 
 
 class RAM(models.Model):
     uuid_record = fields.UUIDField(default=uuid.uuid4, primary_key=True)
+    total_ram = fields.FloatField(null=False, verbose_name="Всего RAM:")
+    ram_free = fields.FloatField(null=False, verbose_name="Свободной памяти:")
+    ram_used = fields.FloatField(null=False, verbose_name="Занятой памяти:")
+    record_date = fields.DateTimeField(auto_now=True, null=False, verbose_name="Время сканирования:")
+
+    server_uuid = models.ForeignKey(Server, on_delete=models.CASCADE, verbose_name="Сервер:")
 
 
 class DiskSpace(models.Model):

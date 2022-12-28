@@ -23,7 +23,11 @@
                                     <img class="img"
                                          width="64"
                                          height="64"
-                                         src="{% static "dashboard/images/svgrepo-com-server.svg" %}"
+                                         {% if address.role == 'media' %}
+                                            src="{% static "dashboard/images/svg-server-media.svg" %}"
+                                         {% else %}
+                                            src="{% static "dashboard/images/svg-server-head.svg" %}"
+                                         {% endif %}
                                          alt="server-image">
                                     <div class="server-hostname text-center">Host undefined</div>
                                     <div class="server-status">no data</div>
@@ -39,35 +43,35 @@
                                         <img class="server-info-icon"
                                              width="64"
                                              height="64"
-                                             src="{% static "dashboard/images/svgrepo-com-cpu.svg" %}"
+                                             src="{% static "dashboard/images/svg-cpu.svg" %}"
                                              alt="server-cpu"><p>0%</p>
                                 </div>
                                 <div class="server-indicator server-ram">
                                     <img class="server-info-icon"
                                          width="64"
                                          height="64"
-                                         src="{% static "dashboard/images/svgrepo-com-memory.svg" %}"
+                                         src="{% static "dashboard/images/svg-ram.svg" %}"
                                                                   alt="server-ram"><p>0%</p>
                                 </div>
                                 <div class="server-indicator server-disk">
                                     <img class="server-info-icon"
                                          width="64"
                                          height="64"
-                                         src="{% static "dashboard/images/svgrepo-com-ssd.svg" %}"
+                                         src="{% static "dashboard/images/svg-disk.svg" %}"
                                                                   alt="server-disk"><p>0%</p>
                                 </div>
                                 <div class="server-indicator server-processes">
                                     <img class="server-info-icon"
                                          width="64"
                                          height="64"
-                                         src="{% static "dashboard/images/svgrepo-com-setting.svg" %}"
+                                         src="{% static "dashboard/images/svg-apps.svg" %}"
                                                                   alt="server-processes"><p>0</p>
                                 </div>
                                 <div class="server-indicator server-network">
                                     <img class="server-info-icon"
                                          width="64"
                                          height="64"
-                                         src="{% static "dashboard/images/svgrepo-com-ethernet.svg" %}"
+                                         src="{% static "dashboard/images/svg-ethernet.svg" %}"
                                                                   alt="server-network"><p>?</p>
                                 </div>
                             </div>

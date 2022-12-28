@@ -24,7 +24,8 @@ class ServerAnalysisMixin(generic.ListView):
                     "port": q.port,
                     "username": q.username,
                     "password": q.password,
-                    "cmd": self.cmd
+                    "cmd": self.cmd,
+                    "role": q.server_role,
                 } async for q in query
             ]
 
@@ -41,6 +42,7 @@ class ServerAnalysisMixin(generic.ListView):
             for rd, target in zip(response_data, targets):
                 if rd is not None:
                     rd['id'] = f"{target.get('host')}:{target.get('port')}"
+                    rd['role'] = f"{target.get('role')}"
 
             return http.JsonResponse(json.dumps(response_data), safe=False)
         except aiohttp.ClientConnectionError:

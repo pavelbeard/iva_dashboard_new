@@ -47,9 +47,9 @@ function netAnalysis(data, host) {
 
 
     host.childNodes[3].childNodes[9].childNodes[1].src = status ?
-        "/static/dashboard/images/svgrepo-com-ethernet-on.svg" :
-        cmdNotFound ? "/static/dashboard/images/svgrepo-com-ethernet.svg" :
-             "/static/dashboard/images/svgrepo-com-ethernet.svg";
+        "/static/dashboard/images/svg-ethernet-up.svg" :
+        cmdNotFound ? "/static/dashboard/images/svg-ethernet-down.svg" :
+             "/static/dashboard/images/svg-ethernet.svg";
     host.childNodes[3].childNodes[9].childNodes[2].textContent = status ? "UP" : cmdNotFound ? "DOWN" : "N/A" ;
 
     if (status) {
@@ -78,18 +78,18 @@ function fileSysAnalysisParts(data, host) {
     let mostValuablePartUsePercent = err ? data[data.length - 1]["most_valuable_part_use_percent"] : "";
 
     //style
-    let na = "/static/dashboard/images/svgrepo-com-ssd.svg"
+    let na = "/static/dashboard/images/svg-disk.svg"
     try {
-        let percent = parseFloat(mostValuablePartUsePercent.slice(0,-1))
-        if (percent > 0.0 && percent < 50.0) {
+        let threshold = parseFloat(mostValuablePartUsePercent.slice(0,-1))
+        if (threshold > 0.0 && threshold < 50.0) {
             host.childNodes[3].childNodes[5].childNodes[1].src =
-                "/static/dashboard/images/svgrepo-com-ssd-normal.svg";
-        } else if (percent > 50.0 && percent < 75.0) {
+                "/static/dashboard/images/svg-disk-normal.svg";
+        } else if (threshold > 50.0 && threshold < 75.0) {
             host.childNodes[3].childNodes[5].childNodes[1].src =
-                "/static/dashboard/images/svgrepo-com-ssd-warning.svg";
-        } else if (percent > 75.0 && percent <= 100.0) {
+                "/static/dashboard/images/svg-disk-warning.svg";
+        } else if (threshold > 75.0 && threshold <= 100.0) {
             host.childNodes[3].childNodes[5].childNodes[1].src =
-                "/static/dashboard/images/svgrepo-com-ssd-danger.svg";
+                "/static/dashboard/images/svg-disk-danger.svg";
         } else if (!err) {
             throw new Error("N/A");
         }
@@ -135,18 +135,18 @@ function fileSysAnalysisParts(data, host) {
 function ramAnalysis(data, host) {
     let err = data[0]["ram_util"] !== undefined;
 
-    let na = "/static/dashboard/images/svgrepo-com-memory.svg"
+    let na = "/static/dashboard/images/svg-ram.svg"
     try {
-        let percent = parseFloat(data[0]["ram_util"])
-        if (percent > 0.0 && percent < 50.0) {
+        let threshold = parseFloat(data[0]["ram_util"])
+        if (threshold > 0.0 && threshold < 50.0) {
             host.childNodes[3].childNodes[3].childNodes[1].src =
-                "/static/dashboard/images/svgrepo-com-memory-normal.svg";
-        } else if (percent > 50.0 && percent < 75.0) {
+                "/static/dashboard/images/svg-ram-normal.svg";
+        } else if (threshold > 50.0 && threshold < 75.0) {
             host.childNodes[3].childNodes[3].childNodes[1].src =
-                "/static/dashboard/images/svgrepo-com-memory-warning.svg";
-        } else if (percent > 75.0 && percent <= 100.0) {
+                "/static/dashboard/images/svg-ram-warning.svg";
+        } else if (threshold > 75.0 && threshold <= 100.0) {
             host.childNodes[3].childNodes[3].childNodes[1].src =
-                "/static/dashboard/images/svgrepo-com-memory-danger.svg";
+                "/static/dashboard/images/svg-ram-danger.svg";
         } else if (!err) {
             throw new Error("N/A");
         }
@@ -156,11 +156,11 @@ function ramAnalysis(data, host) {
     }
 
 
-    host.childNodes[3].childNodes[3].childNodes[2].textContent = err ? `${data[0].ram_util}%` : "N/A";
+    host.childNodes[3].childNodes[3].childNodes[2].textContent = err ? `${data[0]["ram_util"]}%` : "N/A";
 
-    let total = err ? data[1].ram_total.trim() : "";
-    let free = err ? data[2].ram_free.trim() : "";
-    let used = err ? data[3].ram_used.trim() : "";
+    let total = err ? data[1]["ram_total"].trim() : "";
+    let free = err ? data[2]["ram_free"].trim() : "";
+    let used = err ? data[3]["ram_used"].trim() : "";
 
     host.childNodes[3].childNodes[3]
         .title = err ? `Total RAM: ${total}GB\nFree RAM: ${free}GB\nUsed RAM: ${used}GB` : ""
@@ -169,18 +169,18 @@ function ramAnalysis(data, host) {
 function cpuAnalysis(data, host) {
     let err = data[0]["cpu_load"] !== undefined;
 
-    let na = "/static/dashboard/images/svgrepo-com-cpu.svg"
+    let na = "/static/dashboard/images/svg-cpu.svg"
     try {
-        let percent = parseFloat(data[0]["cpu_load"]);
-        if (percent > 0.0 && percent < 50.0) {
+        let threshold = parseFloat(data[0]["cpu_load"]);
+        if (threshold > 0.0 && threshold < 50.0) {
             host.childNodes[3].childNodes[1].childNodes[1].src =
-                "/static/dashboard/images/svgrepo-com-cpu-normal.svg";
-        } else if (percent > 50.0 && percent < 75.0) {
+                "/static/dashboard/images/svg-cpu-normal.svg";
+        } else if (threshold > 50.0 && threshold < 75.0) {
             host.childNodes[3].childNodes[1].childNodes[1].src =
-                "/static/dashboard/images/svgrepo-com-cpu-warning.svg";
-        } else if (percent > 75.0 && percent <= 100.0) {
+                "/static/dashboard/images/svg-cpu-warning.svg";
+        } else if (threshold > 75.0 && threshold <= 100.0) {
             host.childNodes[3].childNodes[1].childNodes[1].src =
-                "/static/dashboard/images/svgrepo-com-cpu-danger.svg";
+                "/static/dashboard/images/svg-cpu-danger.svg";
         } else if (!err) {
             throw new Error("N/A");
         }
@@ -228,14 +228,14 @@ function execAnalysis(data, host) {
     //processes
     host.childNodes[3].childNodes[7].title = err ? processesTooltip : "";
     host.childNodes[3].childNodes[7].childNodes[1].src =
-        err ? "/static/dashboard/images/svgrepo-com-setting-normal.svg" :
-            "/static/dashboard/images/svgrepo-com-setting.svg";
+        err ? "/static/dashboard/images/svg-apps-normal.svg" :
+            "/static/dashboard/images/svg-apps.svg";
     host.childNodes[3].childNodes[7].childNodes[2].textContent = err ? processesCount : 0;
 
 
 }
 
-function updateServerNode(hostname, data, id, callback) {
+function updateServerNode(hostname, data, id, server_role, callback) {
     let host = document.getElementById(id);
 
     let err = data[0]["connection_error"] === undefined;
@@ -244,9 +244,18 @@ function updateServerNode(hostname, data, id, callback) {
     host.childNodes[1].childNodes[1].childNodes[3].textContent = err  ? hostname : "Хост недоступен\n";
 
     // server status
-    host.childNodes[1].childNodes[1].childNodes[1].src = err ?
-        "/static/dashboard/images/svgrepo-com-server-up.svg" :
-        "/static/dashboard/images/svgrepo-com-server-down.svg"
+
+    //if server media else server head
+
+    if (server_role === 'media') {
+        host.childNodes[1].childNodes[1].childNodes[1].src = err ?
+            "/static/dashboard/images/svg-server-media-up.svg" :
+            "/static/dashboard/images/svg-server-media-down.svg"
+    } else {
+        host.childNodes[1].childNodes[1].childNodes[1].src = err ?
+            "/static/dashboard/images/svg-server-head-up.svg" :
+            "/static/dashboard/images/svg-server-head-down.svg"
+    }
     host.childNodes[1].childNodes[1].childNodes[5].textContent = err ? "UP\n" : "DOWN\n";
 
     callback(data, host)
@@ -292,7 +301,7 @@ function redrawTableElements(parsedData, callback) {
         monitorUnavailable(document
             .getElementsByClassName('server'), 'Целевые хосты\r\nне найдены!')
     else
-        parsedData.forEach(el => updateServerNode(el.hostname, el.data, el.id, callback));
+        parsedData.forEach(el => updateServerNode(el.hostname, el.data, el.id, el.role, callback));
 
 }
 
