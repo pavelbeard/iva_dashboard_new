@@ -9,11 +9,12 @@ class HashableModel(BaseModel):
 
 
 class Target(BaseModel):
-    address: str
+    host: str
     port: int
     username: str
     password: str
+    cmd: str
 
 
-class PackageIn(BaseModel):
+class Targets(BaseModel):
     hosts: List[Target]

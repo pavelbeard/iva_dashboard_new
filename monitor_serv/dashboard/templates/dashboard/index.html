@@ -7,7 +7,8 @@
     <link rel="stylesheet" href="{% static "dashboard/css/dashboard.css" %}">
 {% endblock %}
 {% block js %}
-    <script src="{% static "dashboard/js/refresher.js" %}"></script>
+    <script type="module" src="{% static "dashboard/js/refresher.js" %}"></script>
+    <script type="module" src="{% static "dashboard/js/extensions.js" %}"></script>
 {% endblock %}
 {% block dashboard %}
     <section class="flex-shrink-0" id="servers">
@@ -66,7 +67,7 @@
                                     <img class="server-info-icon"
                                          width="64"
                                          height="64"
-                                         src="{% static "dashboard/images/svgrepo-com-ethernet-off.svg" %}"
+                                         src="{% static "dashboard/images/svgrepo-com-ethernet.svg" %}"
                                                                   alt="server-network"><p>?</p>
                                 </div>
                             </div>

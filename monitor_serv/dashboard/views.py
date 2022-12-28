@@ -28,7 +28,7 @@ class Processes(mixins.ServerAnalysisMixin):
 
 class CPU(mixins.ServerAnalysisMixin):
     # cmd = "echo $[100-$(vmstat 1 2|tail -1|awk '{print $15}')] && lscpu | egrep 'CPU\(s\):'"
-    cmd = "uname -n && cat /proc/stat "
+    cmd = 'uname -n && top -bn 1 | grep -P "^(%)" && top 1 -w 70 -bn 1 | grep -P "^(%)"'
     callback_iva_metrics_handler = IvaMetricsHandler.cpu_analysis
 
 

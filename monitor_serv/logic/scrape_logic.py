@@ -5,6 +5,11 @@ import yaml
 from aiohttp import web
 
 
+class ValidationException(Exception):
+    def __init__(self, message):
+        self.message = message
+
+
 class DigitalDataConverters:
     @staticmethod
     def convert_metric_to_bytes(amount: str) -> float:
@@ -33,9 +38,11 @@ class DigitalDataConverters:
         """
         try:
             amount_of_bytes = float(amount)
-            if 1000.0 <= amount_of_bytes <= 1_000_000.0:
+            if 0.0 <= amount_of_bytes < 1000.0:
+                return f"{amount_of_bytes:10.2f}B".strip()
+            elif 1000.0 <= amount_of_bytes < 1_000_000.0:
                 return f"{amount_of_bytes / 1000:10.2f}KB".strip()
-            elif 1_000_000.0 <= amount_of_bytes <= 1_000_000_000.0:
+            elif 1_000_000.0 <= amount_of_bytes < 1_000_000_000.0:
                 return f"{amount_of_bytes / 1000 ** 2:10.2f}MB".strip()
             else:
                 return f"{amount_of_bytes / 1000 ** 3:10.2f}GB".strip()
@@ -70,6 +77,9 @@ class IvaMetrics:
         async with aiohttp.ClientSession() as session:
             async with session.post(url=self.monitor_url, headers=headers, data=body) as response:
                 try:
+                    if response.status == 422:
+                        raise ValidationException("bad validation.")
+
                     json_content = await response.json()
                     return json_content
                 except aiohttp.ClientConnectionError:
@@ -80,6 +90,8 @@ class IvaMetrics:
                     raise aiohttp.ContentTypeError
                 except aiohttp.ClientResponseError:
                     raise aiohttp.ClientResponseError
+                except ValidationException:
+                    raise ValidationException
 
 
 class IvaMetricsHandler:
@@ -159,8 +171,13 @@ class IvaMetricsHandler:
         try:
             # cpu load - all cores
             # user + nice + system + idle + iowait + irq + sortirq
-            idle, total = all_cores.split()[1:][3], sum(map(lambda x: int(x), all_cores.split()[1:]))
-            cpu_load = (1.0 - float(idle) / total) * 100.0
+            split_pattern = ":\s+|,\s+|,"
+            idle, total = re.split(split_pattern, all_cores)[1:][3].split()[0], \
+                sum(map(lambda x: float(x.split()[0]), re.split(split_pattern, all_cores)[1:]))
+            if total != 0:
+                cpu_load = (1.0 - float(idle) / total) * 100.0
+            else:
+                cpu_load = (1.0 - float(idle)) * 100.0
 
             tmp_data += [
                 {"cpu_load": f"{cpu_load:10.2f}".strip()},
@@ -168,9 +185,13 @@ class IvaMetricsHandler:
             ]
 
             # cpu load even core
-            for num, core in enumerate(list(filter(lambda x: re.search('^cpu', x), remaining_cores))):
-                idle, total = core.split()[1:][3], sum(map(lambda x: int(x), core.split()[1:]))
-                core_load = (1.0 - float(idle) / total) * 100.0
+            for num, core in enumerate(remaining_cores[:-1]):
+                idle, total = re.split(split_pattern, core)[1:][3].split()[0], \
+                    sum(map(lambda x: float(x.split()[0]), re.split(split_pattern, core)[1:]))
+                if total != 0:
+                    core_load = (1.0 - float(idle) / total) * 100.0
+                else:
+                    core_load = (1.0 - float(idle)) * 100.0
 
                 tmp_data.append({f"cpu_core{num}": f"{core_load:10.2f}".strip()})
             else:
@@ -202,6 +223,8 @@ class IvaMetricsHandler:
         ram_total = f"{float(ram_calc_data[0] / (1000 ** 2)):10.2f}"
         ram_free = f"{float(ram_calc_data[2] / (1000 ** 2)):10.2f}"
         ram_used = f"{float((ram_calc_data[1] + ram_calc_data[3] + ram_calc_data[4]) / (1000 ** 2)):10.2f}"
+
+        zip
 
         tmp_data = [
             {"ram_util": ram_utilization},
@@ -237,7 +260,8 @@ class IvaMetricsHandler:
                              "used": used, "available": available, "use_percent": use_percent,
                              "mounted_on": mounted_on})
 
-        most_valuable_partition = max(tmp_data, key=lambda x: DigitalDataConverters.convert_metric_to_bytes(x.get('size')))
+        most_valuable_partition = max(tmp_data,
+                                      key=lambda x: DigitalDataConverters.convert_metric_to_bytes(x.get('size')))
 
         tmp_data += [
             {"total_disk_size": fs_data[-2].split()[3]},
@@ -283,7 +307,7 @@ class IvaMetricsHandler:
 
         for i, interface in enumerate(IFACES_INFO):
             if all([x == "" for x in interface[0:3]]):
-                new_array = tuple([x for x in IFACES_INFO[i - 1] + IFACES_INFO[1] if x != ""])
+                new_array = tuple([x for x in IFACES_INFO[i - 1] + IFACES_INFO[i] if x != ""])
                 FORMAT_IFACES_INFO.pop()
                 FORMAT_IFACES_INFO.append(new_array)
             else:
@@ -409,4 +433,3 @@ class IvaMetricsHandler:
         tmp_data = [{"uptime": uptime_data[0].split(',')[0]}]
 
         return {"hostname": hostname, "task": cls.uptime.__name__, "data": tmp_data}
-

@@ -5,7 +5,7 @@ from django import http
 from django.conf import settings
 from django.views import generic
 from django.db import utils
-from logic import IvaMetrics, TargetsIsEmpty
+from logic import IvaMetrics, TargetsIsEmpty, ValidationException
 from . import models
 
 
@@ -20,7 +20,7 @@ class ServerAnalysisMixin(generic.ListView):
             query = models.Target.objects.all()
             targets = [
                 {
-                    "address": q.address,
+                    "host": q.address,
                     "port": q.port,
                     "username": q.username,
                     "password": q.password,
@@ -40,7 +40,7 @@ class ServerAnalysisMixin(generic.ListView):
 
             for rd, target in zip(response_data, targets):
                 if rd is not None:
-                    rd['id'] = f"{target.get('address')}:{target.get('port')}"
+                    rd['id'] = f"{target.get('host')}:{target.get('port')}"
 
             return http.JsonResponse(json.dumps(response_data), safe=False)
         except aiohttp.ClientConnectionError:
@@ -54,3 +54,6 @@ class ServerAnalysisMixin(generic.ListView):
                                      safe=False)
         except TargetsIsEmpty as tie:
             return http.JsonResponse(json.dumps({"TargetsIsEmpty": tie.message}), safe=False)
+        except ValidationException as err:
+            return http.JsonResponse(json.dumps({"ValidationException": err.message}), safe=False)
+

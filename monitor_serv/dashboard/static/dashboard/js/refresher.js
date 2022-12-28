@@ -1,22 +1,24 @@
-function uptime(data, host) {
-    let err = data[0].uptime !== undefined;
+import {zip} from "./extensions.js";
 
-    host.childNodes[1].title = err ? data[0].uptime : "";
+function uptime(data, host) {
+    let status = data[0]["uptime"] !== undefined;
+
+    host.childNodes[1].title = status ? data[0]["uptime"] : "";
 }
 
 // TODO: Переедет в файл уровня детализации
 function netAnalysisDetail(data, host) {
-    let err = data[0]["interface"] !== undefined;
+    let status = data[0]["interface"] !== undefined;
     let cmdNotFound = data[0]["command_not_found"] !== undefined
 
     // status
 
-    host.childNodes[3].childNodes[9].style.backgroundColor = err ? "#69ff4e" : cmdNotFound ? "#ff0000" : "#bebdbd";
-    host.childNodes[3].childNodes[9].childNodes[2].textContent = err ? "UP" : cmdNotFound ? "DOWN" : "iftop n/a";
+    host.childNodes[3].childNodes[9].style.backgroundColor = status ? "#69ff4e" : cmdNotFound ? "#ff0000" : "#bebdbd";
+    host.childNodes[3].childNodes[9].childNodes[2].textContent = status ? "UP" : cmdNotFound ? "DOWN" : "iftop n/a";
 
-    if (err) {
+    if (status) {
         //int
-        let iface = err ? data[0].interface : "";
+        let iface = status ? data[0]["interface"] : "";
 
         //-5 elems
         let lastFiveElems = data.slice(-5,);
@@ -40,19 +42,31 @@ function netAnalysisDetail(data, host) {
 }
 
 function netAnalysis(data, host) {
-    let err = data[0]["iface"] !== undefined
+    let status = data[0]["iface"] !== undefined
     let cmdNotFound = data[0]["command_not_found"] !== undefined
 
 
-    host.childNodes[3].childNodes[9].childNodes[1].src = err ?
+    host.childNodes[3].childNodes[9].childNodes[1].src = status ?
         "/static/dashboard/images/svgrepo-com-ethernet-on.svg" :
-        cmdNotFound ? "/static/dashboard/images/svgrepo-com-ethernet-off.svg" :
+        cmdNotFound ? "/static/dashboard/images/svgrepo-com-ethernet.svg" :
              "/static/dashboard/images/svgrepo-com-ethernet.svg";
-    // host.childNodes[3].childNodes[9].style.backgroundColor = err ? "#69ff4e" : cmdNotFound ?  "#ff0000" : "#bebdbd";
-    host.childNodes[3].childNodes[9].childNodes[2].textContent = err ? "UP" : cmdNotFound ? "DOWN" : "N/A" ;
+    host.childNodes[3].childNodes[9].childNodes[2].textContent = status ? "UP" : cmdNotFound ? "DOWN" : "N/A" ;
 
-    if (err) {
-        let ifaces = data.map(i => `interface: ${i["iface"]} - status: ${i["status"]}\n`)
+    if (status) {
+        let ifaces = data.map(i => `interface: ${i["iface"]} - status: ${i["status"]}\n`);
+        let ipAddresses = data.map(i => `ip address: ${i["ipaddress"]}\n`);
+        let rxBytes = data.map(i => `RX bytes: ${i["rx_bytes"]}\n`);
+        let rxPackets = data.map(i => `RX packets: ${i["rx_packets"]}\n`);
+        let rxErrors = data.map(i => `RX errors: ${Object.entries(i["rx_errors"])}\n`)
+            .map(i => i.replace(/,(?!\d+)/g, ' | ').replace(/,(?=\d+)/g, '='))
+        let txBytes = data.map(i => `TX bytes: ${i["tx_bytes"]}\n`);
+        let txPackets = data.map(i => `TX packets: ${i["tx_packets"]}\n`);
+        let txErrors = data.map(i => `TX errors: ${Object.entries(i["tx_errors"])}\n\n`)
+            .map(i => i.replace(/,(?!\d+)/g, ' | ').replace(/,(?=\d+)/g, '='))
+
+        let titleInfo = [...zip(ifaces, ipAddresses, rxBytes, rxPackets, rxErrors, txBytes, txPackets, txErrors)];
+
+        host.childNodes[3].childNodes[9].title = "".concat(titleInfo).replace(/,/g, "");
     }
 }
 
@@ -73,9 +87,11 @@ function fileSysAnalysisParts(data, host) {
         } else if (percent > 50.0 && percent < 75.0) {
             host.childNodes[3].childNodes[5].childNodes[1].src =
                 "/static/dashboard/images/svgrepo-com-ssd-warning.svg";
-        } else {
+        } else if (percent > 75.0 && percent <= 100.0) {
             host.childNodes[3].childNodes[5].childNodes[1].src =
                 "/static/dashboard/images/svgrepo-com-ssd-danger.svg";
+        } else if (!err) {
+            throw new Error("N/A");
         }
     } catch (e) {
         host.childNodes[3].childNodes[5].childNodes[1].src = na;
@@ -128,9 +144,11 @@ function ramAnalysis(data, host) {
         } else if (percent > 50.0 && percent < 75.0) {
             host.childNodes[3].childNodes[3].childNodes[1].src =
                 "/static/dashboard/images/svgrepo-com-memory-warning.svg";
-        } else {
+        } else if (percent > 75.0 && percent <= 100.0) {
             host.childNodes[3].childNodes[3].childNodes[1].src =
                 "/static/dashboard/images/svgrepo-com-memory-danger.svg";
+        } else if (!err) {
+            throw new Error("N/A");
         }
     } catch (e) {
         host.childNodes[3].childNodes[3].childNodes[1].src = na;
@@ -160,16 +178,18 @@ function cpuAnalysis(data, host) {
         } else if (percent > 50.0 && percent < 75.0) {
             host.childNodes[3].childNodes[1].childNodes[1].src =
                 "/static/dashboard/images/svgrepo-com-cpu-warning.svg";
-        } else {
+        } else if (percent > 75.0 && percent <= 100.0) {
             host.childNodes[3].childNodes[1].childNodes[1].src =
                 "/static/dashboard/images/svgrepo-com-cpu-danger.svg";
+        } else if (!err) {
+            throw new Error("N/A");
         }
     } catch (e) {
         host.childNodes[3].childNodes[1].childNodes[1].src = na;
         console.log(e)
     }
 
-    host.childNodes[3].childNodes[1].childNodes[2].textContent = err ? `${data[0].cpu_load}%` : "N/A";
+    host.childNodes[3].childNodes[1].childNodes[2].textContent = err ? `${data[0]["cpu_load"]}%` : "N/A";
 
     //вывод всех ядер и количества ядер
     let core = 0
@@ -177,17 +197,17 @@ function cpuAnalysis(data, host) {
         .replace( /,/g, '\n') : "";
 
     host.childNodes[3].childNodes[1]
-        .title = err ? `CPU idle: ${data[1].cpu_idle}%\nCPU cores: ${data[data.length - 1].cpu_cores}\n`
+        .title = err ? `CPU idle: ${data[1]["cpu_idle"]}%\nCPU cores: ${data[data.length - 1]["cpu_cores"]}\n`
         + cores  : "";
 
 }
 
 function execAnalysis(data, host) {
-    let err = data[0].status !== undefined;
+    let err = data[0]["status"] !== undefined;
 
     let processesArray = data.map(el => {
         let st = ''
-        switch (el.status) {
+        switch (el["status"]) {
             case 'running':
                 st += ' [+]'
                 break
@@ -198,7 +218,7 @@ function execAnalysis(data, host) {
                 st += ' [?]'
                 break
         }
-        return `${el.service}: ${el.status}${st}`;
+        return `${el["service"]}: ${el["status"]}${st}`;
     });
     let processesTooltip, processesCount;
 
@@ -218,7 +238,7 @@ function execAnalysis(data, host) {
 function updateServerNode(hostname, data, id, callback) {
     let host = document.getElementById(id);
 
-    let err = data[0].connection_error === undefined;
+    let err = data[0]["connection_error"] === undefined;
 
     // set hostname
     host.childNodes[1].childNodes[1].childNodes[3].textContent = err  ? hostname : "Хост недоступен\n";
@@ -255,15 +275,22 @@ function monitorUnavailable(servers, reason) {
 }
 
 function redrawTableElements(parsedData, callback) {
-
-
     ///если мониторинг пал
     if (parsedData['ClientConnectionError'] !== undefined)
         monitorUnavailable(document
-            .getElementsByClassName('server'), 'Агент мониторинга\r\nнедоступен')
+            .getElementsByClassName('server'), 'Агент мониторинга\r\nнедоступен!')
+    //если конфигурация сервера мониторинга не найдена
     else if (parsedData['FileNotFoundError'] !== undefined)
         monitorUnavailable(document
-            .getElementsByClassName('server'), 'Файл конфигурации\r\nинфопанели не найден')
+            .getElementsByClassName('server'), 'Файл конфигурации\r\nинфопанели не найден!')
+    //агент не может валидировать данные
+    else if (parsedData['ValidationException'] !== undefined)
+        monitorUnavailable(document
+            .getElementsByClassName('server'), 'Агент не распознал\r\nданные!')
+    //таблица с целевыми хостами отсутствует
+    else if (parsedData["ProgrammingError"] !== undefined || parsedData['TargetsIsEmpty'] !== undefined)
+        monitorUnavailable(document
+            .getElementsByClassName('server'), 'Целевые хосты\r\nне найдены!')
     else
         parsedData.forEach(el => updateServerNode(el.hostname, el.data, el.id, callback));
 
