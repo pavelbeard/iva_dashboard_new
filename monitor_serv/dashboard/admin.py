@@ -16,3 +16,8 @@ class TargetForm(forms.ModelForm):
 @admin.register(models.Target)
 class TargetAdmin(admin.ModelAdmin):
     form = TargetForm
+
+
+@admin.register(models.Server)
+class ServerAdmin(admin.ModelAdmin):
+    pass

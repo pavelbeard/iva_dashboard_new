@@ -21,12 +21,12 @@
                             <div class="server-left-part">
                                 <div class="server-img">
                                     <img class="img"
-                                         width="64"
-                                         height="64"
+                                         width="48"
+                                         height="48"
                                          {% if address.role == 'media' %}
-                                            src="{% static "dashboard/images/svg-server-media.svg" %}"
+                                            src="{% static "dashboard/images/dashboard-server-media.svg" %}"
                                          {% else %}
-                                            src="{% static "dashboard/images/svg-server-head.svg" %}"
+                                            src="{% static "dashboard/images/dashboard-server-head.svg" %}"
                                          {% endif %}
                                          alt="server-image">
                                     <div class="server-hostname text-center">Host undefined</div>
@@ -43,35 +43,35 @@
                                         <img class="server-info-icon"
                                              width="64"
                                              height="64"
-                                             src="{% static "dashboard/images/svg-cpu.svg" %}"
+                                             src="{% static "dashboard/images/dashboard-cpu.svg" %}"
                                              alt="server-cpu"><p>0%</p>
                                 </div>
                                 <div class="server-indicator server-ram">
                                     <img class="server-info-icon"
                                          width="64"
                                          height="64"
-                                         src="{% static "dashboard/images/svg-ram.svg" %}"
+                                         src="{% static "dashboard/images/dashboard-ram.svg" %}"
                                                                   alt="server-ram"><p>0%</p>
                                 </div>
                                 <div class="server-indicator server-disk">
                                     <img class="server-info-icon"
                                          width="64"
                                          height="64"
-                                         src="{% static "dashboard/images/svg-disk.svg" %}"
+                                         src="{% static "dashboard/images/dashboard-ssd-card.svg" %}"
                                                                   alt="server-disk"><p>0%</p>
                                 </div>
                                 <div class="server-indicator server-processes">
                                     <img class="server-info-icon"
-                                         width="64"
-                                         height="64"
-                                         src="{% static "dashboard/images/svg-apps.svg" %}"
+                                         width="48"
+                                         height="20"
+                                         src="{% static "dashboard/images/dashboard-apps.svg" %}"
                                                                   alt="server-processes"><p>0</p>
                                 </div>
                                 <div class="server-indicator server-network">
                                     <img class="server-info-icon"
-                                         width="64"
-                                         height="64"
-                                         src="{% static "dashboard/images/svg-ethernet.svg" %}"
+                                         width="48"
+                                         height="20"
+                                         src="{% static "dashboard/images/dashboard-ethernet.svg" %}"
                                                                   alt="server-network"><p>?</p>
                                 </div>
                             </div>

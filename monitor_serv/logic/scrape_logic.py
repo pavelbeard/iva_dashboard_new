@@ -3,6 +3,9 @@ import re
 import aiohttp
 import yaml
 from aiohttp import web
+from asgiref.sync import sync_to_async
+
+from dashboard import models
 
 
 class ValidationException(Exception):
@@ -433,3 +436,51 @@ class IvaMetricsHandler:
         tmp_data = [{"uptime": uptime_data[0].split(',')[0]}]
 
         return {"hostname": hostname, "task": cls.uptime.__name__, "data": tmp_data}
+
+    @classmethod
+    def hostnamectl(cls, data: str) -> {}:
+        """
+        Основные данные сервера: hostname, os_version, os_kernel
+        :return: {}
+        """
+
+        if type(data) == dict:
+            return cls.error_result(cls.uptime.__name__)
+
+        splitted_data = data.split("\n")
+
+        hostname = splitted_data[0]
+        os_version = re.search("PRETTY_NAME=\"(.*)\"", data)[1]
+        os_kernel = splitted_data[1]
+
+        return {"hostname": hostname, "os": os_version, "kernel": os_kernel}
+
+
+class DataAccessLayerServer:
+    @classmethod
+    async def check_server_data(cls, data: dict):
+        query = models.Server(**data)
+
+        exist_server: models.Server = await models.Server.objects.aget(target_uuid=query.target_uuid)
+
+
+
+        #
+        # if len(exist_server) > 0:
+        #     pass
+
+        # exist_server = await sync_to_async(models.Server.objects.get)(target_uuid=query.target_uuid)
+
+        print(query)
+        await sync_to_async(query.save)()
+
+        return {"status": "ok"}
+
+    # SERVER CRUD
+    # Create
+    @classmethod
+    def __insert_into_server(cls, query: models.Server):
+        print(query)
+        query.save()
+    pass
+

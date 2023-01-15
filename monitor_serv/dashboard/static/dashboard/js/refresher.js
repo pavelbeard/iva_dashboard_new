@@ -47,9 +47,9 @@ function netAnalysis(data, host) {
 
 
     host.childNodes[3].childNodes[9].childNodes[1].src = status ?
-        "/static/dashboard/images/svg-ethernet-up.svg" :
-        cmdNotFound ? "/static/dashboard/images/svg-ethernet-down.svg" :
-             "/static/dashboard/images/svg-ethernet.svg";
+        "/static/dashboard/images/dashboard-ethernet-up.svg" :
+        cmdNotFound ? "/static/dashboard/images/dashboard-ethernet-down.svg" :
+             "/static/dashboard/images/dashboard-ethernet.svg";
     host.childNodes[3].childNodes[9].childNodes[2].textContent = status ? "UP" : cmdNotFound ? "DOWN" : "N/A" ;
 
     if (status) {
@@ -67,7 +67,10 @@ function netAnalysis(data, host) {
         let titleInfo = [...zip(ifaces, ipAddresses, rxBytes, rxPackets, rxErrors, txBytes, txPackets, txErrors)];
 
         host.childNodes[3].childNodes[9].title = "".concat(titleInfo).replace(/,/g, "");
+    } else {
+        host.childNodes[3].childNodes[9].title = ""
     }
+
 }
 
 
@@ -78,18 +81,18 @@ function fileSysAnalysisParts(data, host) {
     let mostValuablePartUsePercent = err ? data[data.length - 1]["most_valuable_part_use_percent"] : "";
 
     //style
-    let na = "/static/dashboard/images/svg-disk.svg"
+    let na = "/static/dashboard/images/dashboard-ssd-card.svg"
     try {
         let threshold = parseFloat(mostValuablePartUsePercent.slice(0,-1))
         if (threshold > 0.0 && threshold < 50.0) {
             host.childNodes[3].childNodes[5].childNodes[1].src =
-                "/static/dashboard/images/svg-disk-normal.svg";
+                "/static/dashboard/images/dashboard-ssd-card-normal.svg";
         } else if (threshold > 50.0 && threshold < 75.0) {
             host.childNodes[3].childNodes[5].childNodes[1].src =
-                "/static/dashboard/images/svg-disk-warning.svg";
+                "/static/dashboard/images/dashboard-ssd-card-warning.svg";
         } else if (threshold > 75.0 && threshold <= 100.0) {
             host.childNodes[3].childNodes[5].childNodes[1].src =
-                "/static/dashboard/images/svg-disk-danger.svg";
+                "/static/dashboard/images/dashboard-ssd-card-danger.svg";
         } else if (!err) {
             throw new Error("N/A");
         }
@@ -135,18 +138,18 @@ function fileSysAnalysisParts(data, host) {
 function ramAnalysis(data, host) {
     let err = data[0]["ram_util"] !== undefined;
 
-    let na = "/static/dashboard/images/svg-ram.svg"
+    let na = "/static/dashboard/images/dashboard-ram.svg"
     try {
         let threshold = parseFloat(data[0]["ram_util"])
         if (threshold > 0.0 && threshold < 50.0) {
             host.childNodes[3].childNodes[3].childNodes[1].src =
-                "/static/dashboard/images/svg-ram-normal.svg";
+                "/static/dashboard/images/dashboard-ram-normal.svg";
         } else if (threshold > 50.0 && threshold < 75.0) {
             host.childNodes[3].childNodes[3].childNodes[1].src =
-                "/static/dashboard/images/svg-ram-warning.svg";
+                "/static/dashboard/images/dashboard-ram-warning.svg";
         } else if (threshold > 75.0 && threshold <= 100.0) {
             host.childNodes[3].childNodes[3].childNodes[1].src =
-                "/static/dashboard/images/svg-ram-danger.svg";
+                "/static/dashboard/images/dashboard-ram-danger.svg";
         } else if (!err) {
             throw new Error("N/A");
         }
@@ -169,18 +172,18 @@ function ramAnalysis(data, host) {
 function cpuAnalysis(data, host) {
     let err = data[0]["cpu_load"] !== undefined;
 
-    let na = "/static/dashboard/images/svg-cpu.svg"
+    let na = "/static/dashboard/images/dashboard-cpu.svg"
     try {
         let threshold = parseFloat(data[0]["cpu_load"]);
         if (threshold > 0.0 && threshold < 50.0) {
             host.childNodes[3].childNodes[1].childNodes[1].src =
-                "/static/dashboard/images/svg-cpu-normal.svg";
+                "/static/dashboard/images/dashboard-cpu-normal.svg";
         } else if (threshold > 50.0 && threshold < 75.0) {
             host.childNodes[3].childNodes[1].childNodes[1].src =
-                "/static/dashboard/images/svg-cpu-warning.svg";
+                "/static/dashboard/images/dashboard-cpu-warning.svg";
         } else if (threshold > 75.0 && threshold <= 100.0) {
             host.childNodes[3].childNodes[1].childNodes[1].src =
-                "/static/dashboard/images/svg-cpu-danger.svg";
+                "/static/dashboard/images/dashboard-cpu-danger.svg";
         } else if (!err) {
             throw new Error("N/A");
         }
@@ -228,8 +231,8 @@ function execAnalysis(data, host) {
     //processes
     host.childNodes[3].childNodes[7].title = err ? processesTooltip : "";
     host.childNodes[3].childNodes[7].childNodes[1].src =
-        err ? "/static/dashboard/images/svg-apps-normal.svg" :
-            "/static/dashboard/images/svg-apps.svg";
+        err ? "/static/dashboard/images/dashboard-apps-normal.svg" :
+            "/static/dashboard/images/dashboard-apps.svg";
     host.childNodes[3].childNodes[7].childNodes[2].textContent = err ? processesCount : 0;
 
 
@@ -249,12 +252,12 @@ function updateServerNode(hostname, data, id, server_role, callback) {
 
     if (server_role === 'media') {
         host.childNodes[1].childNodes[1].childNodes[1].src = err ?
-            "/static/dashboard/images/svg-server-media-up.svg" :
-            "/static/dashboard/images/svg-server-media-down.svg"
+            "/static/dashboard/images/dashboard-server-media-up.svg" :
+            "/static/dashboard/images/dashboard-server-media-down.svg"
     } else {
         host.childNodes[1].childNodes[1].childNodes[1].src = err ?
-            "/static/dashboard/images/svg-server-head-up.svg" :
-            "/static/dashboard/images/svg-server-head-down.svg"
+            "/static/dashboard/images/dashboard-server-head-up.svg" :
+            "/static/dashboard/images/dashboard-server-head-down.svg"
     }
     host.childNodes[1].childNodes[1].childNodes[5].textContent = err ? "UP\n" : "DOWN\n";
 
@@ -317,7 +320,9 @@ async function getMetrics (url, method, headers, callback) {
 
     let data = await response.json()
     let parsedData = JSON.parse(data);
-    redrawTableElements(parsedData, callback);
+
+    if (callback !== undefined)
+        redrawTableElements(parsedData, callback);
 }
 
 async function getInterval(url, method, headers) {
@@ -334,19 +339,21 @@ async function getInterval(url, method, headers) {
 }
 
 async function inspectServers() {
-    setTimeout(getMetrics, 0,"disk-info/", "GET", headers,   fileSysAnalysisParts);
-    setTimeout(getMetrics, 0,"processes/", "GET", headers, execAnalysis);
     setTimeout(getMetrics, 0,"cpu-info/", "GET", headers, cpuAnalysis);
     setTimeout(getMetrics, 0,"ram-info/", "GET", headers, ramAnalysis);
+    setTimeout(getMetrics, 0,"disk-info/", "GET", headers, fileSysAnalysisParts);
+    setTimeout(getMetrics, 0,"processes/", "GET", headers, execAnalysis);
     setTimeout(getMetrics, 0,"net-info/", "GET", headers, netAnalysis);
     setTimeout(getMetrics, 0,"uptime/", "GET", headers, uptime);
 
     // TODO: создать новый js файл для чисто iva-утилит
+    // TODO: переписать в функциях часть кода, отвечающий за обработку ошибок в промисы
 }
 
 // main //
 setTimeout(async function () {
     await inspectServers();
+    setTimeout(getMetrics, 0, 'dal/hostnamectl/', "GET")
     let interval = await getInterval("interval/", "GET", headers);
     setInterval(inspectServers, interval);
 }, 0);

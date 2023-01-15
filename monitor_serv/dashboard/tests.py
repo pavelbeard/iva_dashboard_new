@@ -19,7 +19,7 @@ def add_targets():
             address="2.0.96.6", port=22, username="test", password="test", server_role=models.Target.ServerRole.MEDIA
         ),
         models.Target(
-            address="192.168.248.5", port=2250, username="info-admin", password="Rt3$YiOO",
+            address="192.168.248.4", port=2249, username="info-admin", password="Rt3$YiOO",
             server_role=models.Target.ServerRole.HEAD
         ),
     ]
@@ -65,3 +65,10 @@ class DashboardTests(TestCase):
         add_targets()
         objects = get_targets()
         print(objects)
+
+    def test_db_filling(self):
+        add_targets()
+        get_targets()
+        response: http.JsonResponse = self.client.get(urls.reverse("dashboard:dal_hostnamectl"))
+        print(json.loads(response.content))
+        self.assertEqual(response.status_code, 200)

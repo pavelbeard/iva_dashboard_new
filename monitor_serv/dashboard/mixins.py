@@ -1,3 +1,5 @@
+import asyncio
+
 import aiohttp
 import json
 from typing import Callable
@@ -12,6 +14,8 @@ from . import models
 class ServerAnalysisMixin(generic.ListView):
     cmd: str = None
     callback_iva_metrics_handler: Callable = None
+    callback_insert_into_table: Callable = None
+    callback_data_access_layer: Callable = None
     server_config_file = settings.SERVER_CONFIG_FILE
 
     async def get(self, request, *args, **kwargs):
@@ -35,9 +39,16 @@ class ServerAnalysisMixin(generic.ListView):
             scraper = IvaMetrics(targets={"hosts": targets}, server_config_path=self.server_config_file)
             data = await scraper.scrape_metrics_from_agent()
 
-            # TODO: добавить экспорт метрик в базу данных
-
             response_data = [self.callback_iva_metrics_handler(d) for d in data]
+
+            # TODO: добавить экспорт метрик в базу данных
+            tasks_export_to_db = None
+
+            if self.callback_data_access_layer is not None:
+                db_data = [q async for q in query]
+                tasks_export_to_db = [asyncio.create_task(self.callback_data_access_layer(rd|{"target_uuid": db}))
+                                      for rd, db in zip(response_data, db_data)]
+                res = await asyncio.gather(*tasks_export_to_db, return_exceptions=True)
 
             for rd, target in zip(response_data, targets):
                 if rd is not None:
@@ -58,4 +69,3 @@ class ServerAnalysisMixin(generic.ListView):
             return http.JsonResponse(json.dumps({"TargetsIsEmpty": tie.message}), safe=False)
         except ValidationException as err:
             return http.JsonResponse(json.dumps({"ValidationException": err.message}), safe=False)
-

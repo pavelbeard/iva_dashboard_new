@@ -4,7 +4,7 @@ import yaml
 from django import http
 from django.shortcuts import render
 from django.conf import settings
-from logic import IvaMetricsHandler
+from logic import IvaMetricsHandler, DataAccessLayerServer
 from . import mixins
 from . import models
 
@@ -59,6 +59,7 @@ class Uptime(mixins.ServerAnalysisMixin):
 
 
 def get_interval(request):
+    """Возвращает интервал снятия метрик в секундах"""
     try:
         server_config_file = settings.SERVER_CONFIG_FILE
         with open(server_config_file, 'r') as file:
@@ -67,3 +68,9 @@ def get_interval(request):
             return http.JsonResponse(json.dumps({"interval": interval}), safe=False)
     except FileNotFoundError:
         http.JsonResponse(json.dumps({"file_not_found": "no data."}), safe=False)
+
+
+class ServerData(mixins.ServerAnalysisMixin):
+    cmd = "uname -n && uname -r && cat /etc/os-release"
+    callback_iva_metrics_handler = IvaMetricsHandler.hostnamectl
+    callback_data_access_layer = DataAccessLayerServer.check_server_data
