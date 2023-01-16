@@ -1,0 +1,23 @@
+{% for message in messages %}
+    {% if message.tags == 'info' %}
+        <div class="container-fluid">
+            <div class="cst-info-wrapper">
+                <div class="mt-3 h-100">
+                    <div class="bg-info card h-100 cst-info">
+                        <h5 class="text-center">{{ message }}</h5>
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% elif message.tags == 'error' %}
+        <div class="container-fluid">
+            <div class="cst-info-wrapper">
+                <div class="mt-3 h-100">
+                    <div class="bg-danger card h-100 cst-info">
+                        <h5 class="text-center">{{ message }}</h5>
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+{% endfor %}

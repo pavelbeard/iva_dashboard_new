@@ -34,7 +34,7 @@ def get_targets():
 
 class DashboardTests(TestCase):
     def test_index(self):
-        response = self.client.get(urls.reverse("dashboard:index"))
+        response = self.client.get(urls.reverse("dashboard"))
         self.assertEqual(response.status_code, 200)
 
     def test_cpu_info(self):

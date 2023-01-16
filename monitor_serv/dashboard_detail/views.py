@@ -1,6 +1,6 @@
 from django.shortcuts import render
 
-# Create your views here.
+# Create your views.py here.
 
 from logic import IvaMetricsHandler
 from . import mixins

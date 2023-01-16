@@ -1,0 +1,72 @@
+{% load static %}
+
+<div class="row container-fluid servers-container">
+    <div class="col-md-6 left">
+        <div><h4 class="text-dark text-center">Мониторинг серверов</h4></div>
+        <div class="servers flex-shrink-0">
+            {% for address in addresses %}
+                <div class="server" id="{{ address.address }}">
+                    <div class="server-left-part">
+                        <div class="server-img">
+                            <img class="img"
+                                 width="48"
+                                 height="48"
+                                 {% if address.role == 'media' %}
+                                    src="{% static "dashboard/images/dashboard-server-media.svg" %}"
+                                 {% else %}
+                                    src="{% static "dashboard/images/dashboard-server-head.svg" %}"
+                                 {% endif %}
+                                 alt="server-image">
+                            <div class="server-hostname text-center">Host undefined</div>
+                            <div class="server-status">no data</div>
+                            <div class="server-address">{{ address.address }}</div>
+                            <div class="server-address">{{ address.role|upper }}</div>
+                        </div>
+                        <div class="server-empty justify-content-center">
+                            {# Свободное место #}
+                        </div>
+                    </div>
+                    <div class="server-info">
+                        <div class="server-indicator server-cpu">
+                                <img class="server-info-icon"
+                                     width="64"
+                                     height="64"
+                                     src="{% static "dashboard/images/dashboard-cpu.svg" %}"
+                                     alt="server-cpu"><p>0%</p>
+                        </div>
+                        <div class="server-indicator server-ram">
+                            <img class="server-info-icon"
+                                 width="64"
+                                 height="64"
+                                 src="{% static "dashboard/images/dashboard-ram.svg" %}"
+                                                          alt="server-ram"><p>N/A</p>
+                        </div>
+                        <div class="server-indicator server-disk">
+                            <img class="server-info-icon"
+                                 width="64"
+                                 height="64"
+                                 src="{% static "dashboard/images/dashboard-ssd-card.svg" %}"
+                                                          alt="server-disk"><p>N/A</p>
+                        </div>
+                        <div class="server-indicator server-processes">
+                            <img class="server-info-icon"
+                                 width="48"
+                                 height="20"
+                                 src="{% static "dashboard/images/dashboard-apps.svg" %}"
+                                                          alt="server-processes"><p>N/A</p>
+                        </div>
+                        <div class="server-indicator server-network">
+                            <img class="server-info-icon"
+                                 width="48"
+                                 height="20"
+                                 src="{% static "dashboard/images/dashboard-ethernet.svg" %}"
+                                                          alt="server-network"><p>N/A</p>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+{# TODO: Добавить отображение пользователей IVA #}
+{# еще один div col-md-6 #}
+</div>

@@ -1,0 +1,42 @@
+{% load static %}
+
+<!-- Modal -->
+<div class="modal fade" id="loginModal" tabindex="-1" role="dialog" aria-labelledby="loginModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="loginModalLabel">
+            Войти в Инфопанель
+        </h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">
+        </button>
+      </div>
+        <h5 class="text-center mt-3">
+            Ограниченный доступ!
+        </h5>
+        <form action="{% url "login_user" %}" method="post" autocomplete="off">
+            <div class="modal-body">
+                {% csrf_token %}
+                {{ form }}
+                <div class="input-group mb-3 mt-3">
+                    <span class="btn input-group-text border-secondary bg-light side-label">
+                        <img width="20" height="48" src="{% static "images/user-svgrepo-com.svg" %}">
+                    </span>
+                    <input type="text" class="form-control" name="username" placeholder="Username">
+                </div>
+                <div class="input-group mb-3 mt-3">
+                    <span class="btn input-group-text border-secondary bg-light side-label">
+                        <img width="20" height="48" src="{% static "images/key-svgrepo-com.svg" %}">
+                    </span>
+                    <input type="password" class="form-control" name="password" placeholder="Password">
+                </div>
+
+                <div class="container d-grid gap-2 mt-4 mb-4">
+                    <button type="submit" class="btn btn-primary">Войти</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>
+                </div>
+            </div>
+        </form>
+    </div>
+  </div>
+</div>

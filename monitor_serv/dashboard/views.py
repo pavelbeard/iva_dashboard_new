@@ -2,18 +2,42 @@ import json
 
 import yaml
 from django import http
-from django.shortcuts import render
 from django.conf import settings
+from django.contrib import messages
+from django.contrib.auth.decorators import login_required
+from django.contrib.messages import get_messages
+from django.contrib.messages.storage.base import Message
+from django.http import HttpResponseRedirect
+from django.shortcuts import render
+from django.urls import reverse_lazy
+from django.views.decorators.cache import cache_control
+
 from logic import IvaMetricsHandler, DataAccessLayerServer
 from . import mixins
 from . import models
 
 
-# Create your views here.
+# Create your views.py here.
+
+app_version = settings.APPLICATION_VERSION
 
 
 def index_view(request):
-    app_version = settings.APPLICATION_VERSION
+    if request.user.is_authenticated:
+        return HttpResponseRedirect(redirect_to=reverse_lazy("dashboard:dashboard"))
+    else:
+
+        storage = get_messages(request)
+
+        if len(storage) == 0:
+            messages.info(request, "Войдите в систему чтобы увидеть Инфопанель")
+
+        return render(request=request, template_name="base.html", context={"app_version": app_version})
+
+
+@login_required(login_url=reverse_lazy("login"))
+@cache_control(no_cache=True, must_revalidate=True, no_store=True)
+def dashboard_view(request):
     targets = models.Target.objects.all()
     addresses = [{"address": f"{target.address}:{target.port}", "role": target.server_role} for target in targets]
     return render(request=request, template_name="index.html", context={
@@ -74,3 +98,5 @@ class ServerData(mixins.ServerAnalysisMixin):
     cmd = "uname -n && uname -r && cat /etc/os-release"
     callback_iva_metrics_handler = IvaMetricsHandler.hostnamectl
     callback_data_access_layer = DataAccessLayerServer.check_server_data
+
+

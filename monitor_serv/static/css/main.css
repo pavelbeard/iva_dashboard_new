@@ -1,0 +1,23 @@
+
+.header {
+    background: rgb(253, 65, 86);
+}
+
+.header-text {
+    font-weight: 400;
+    color: white;
+}
+
+.side-label {
+    width: 45px;
+}
+
+.cst-info-wrapper {
+    height: 500px;
+    padding: 25px;
+}
+
+.cst-info {
+    display: flex;
+    justify-content: center;
+}
