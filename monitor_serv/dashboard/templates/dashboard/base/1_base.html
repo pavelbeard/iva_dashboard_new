@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en" class="h-100">
+<head>
+    {% load static %}
+    <meta charset="UTF-8">
+
+    {% block static_files %}
+        <link rel="stylesheet" href="{% static "bootstrap/css/bootstrap.css" %}">
+        <link rel="stylesheet" href="{% static "css/main.css" %}">
+        <script src="{% static "jquery/jquery-3.6.3.js" %}"></script>
+        <script src="{% static "bootstrap/js/bootstrap.js" %}"></script>
+        <script src="{% static "sweetalert/dist/sweetalert2.all.js" %}"></script>
+
+        <script src="{% static 'js/jquery.bootstrap.modal.forms.js' %}"></script>
+
+        <link rel="stylesheet" href="{% static "dashboard/css/dashboard.css" %}">
+    {% endblock %}
+
+    {% if user.is_authenticated %}
+        <script type="module" src="{% static "dashboard/js/refresher.js" %}"></script>
+        <script type="module" src="{% static "dashboard/js/extensions.js" %}"></script>
+    {% endif %}
+    <title>{% block title %}Dashboard{% endblock %}</title>
+</head>
+<body class="d-flex flex-column h-100">
+    {% block content %}
+    {% endblock %}
+</body>
+</html>

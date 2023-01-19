@@ -12,6 +12,8 @@ https://docs.djangoproject.com/en/4.1/ref/settings/
 import os
 from pathlib import Path
 
+from django.urls import reverse_lazy
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -38,6 +40,9 @@ INSTALLED_APPS = [
     # custom apps
     'dashboard.apps.DashboardConfig',
     'dashboard_detail.apps.DashboardDetailConfig',
+    # pip apps
+    'bootstrap_modal_forms',
+    'widget_tweaks',
 ]
 
 MIDDLEWARE = [
@@ -147,5 +152,8 @@ SERVER_CONFIG_FILE = os.getenv('IVA_DASHBOARD_SERVER_CONFIG_FILE',
 
 CSRF_TRUSTED_ORIGINS = os.getenv('CSRF_TRUSTED_ORIGINS', default="http://*localhost:8004").split(" ")
 CONN_HEALTH_CHECKS = True
-APPLICATION_VERSION = "v0.6.2"
+LOGIN_REDIRECT_URL = reverse_lazy("dashboard:dashboard")
+LOGOUT_REDIRECT_URL = reverse_lazy("dashboard:index")
+
+APPLICATION_VERSION = "v0.6.4"
 

@@ -13,8 +13,7 @@
                                             class="nav-link header-text">Выйти</a></li>
                     {% else %}
                         <li class="nav-item"><a href="#login-form"
-                                                data-bs-toggle="modal"
-                                                data-bs-target="#loginModal"
+                                                id="loginForm"
                                                 class="nav-link header-text">Войти</a></li>
                     {% endif %}
                         <li class="nav-item"><a href="{% url "dashboard:dashboard" %}"

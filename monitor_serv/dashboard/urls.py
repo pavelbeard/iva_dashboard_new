@@ -1,8 +1,6 @@
 from django import urls
 from django.urls import include
-
 from . import views
-
 
 app_name = "dashboard"
 
@@ -18,6 +16,11 @@ urlpatterns = [
         urls.path('uptime/', views.Uptime.as_view(), name="uptime"),
         urls.path('interval/', views.get_interval, name="interval"),
     ])),
+    urls.path('auth/', include([
+        urls.path('signup/', views.SignupView.as_view(), name='signup'),
+        urls.path('login/', views.LoginView.as_view(), name='login'),
+        urls.path('logout/', views.LogoutView.as_view(), name='logout'),
+    ]))
 
     # data access urls
     # urls.path('dal/', include([

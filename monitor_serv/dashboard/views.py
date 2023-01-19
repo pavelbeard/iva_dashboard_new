@@ -4,18 +4,17 @@ import yaml
 from django import http
 from django.conf import settings
 from django.contrib import messages
+from django.contrib.auth import views, logout as django_logout
 from django.contrib.auth.decorators import login_required
 from django.contrib.messages import get_messages
-from django.contrib.messages.storage.base import Message
 from django.http import HttpResponseRedirect
 from django.shortcuts import render
 from django.urls import reverse_lazy
 from django.views.decorators.cache import cache_control
-
+from bootstrap_modal_forms.generic import BSModalCreateView, BSModalLoginView
 from logic import IvaMetricsHandler, DataAccessLayerServer
-from . import mixins
+from . import mixins, forms
 from . import models
-
 
 # Create your views.py here.
 
@@ -27,22 +26,48 @@ def index_view(request):
         return HttpResponseRedirect(redirect_to=reverse_lazy("dashboard:dashboard"))
     else:
 
-        storage = get_messages(request)
+        # storage = get_messages(request)
+        #
+        # if len(storage) == 0:
+        messages.info(request, "Войдите в систему чтобы увидеть Инфопанель")
 
-        if len(storage) == 0:
-            messages.info(request, "Войдите в систему чтобы увидеть Инфопанель")
+        return render(
+            request=request,
+            template_name="base/2_index.html",
+            context={"app_version": app_version}
+        )
 
-        return render(request=request, template_name="base.html", context={"app_version": app_version})
+
+class SignupView(mixins.SignupLogicMixin):
+    form_class = forms.SignupForm
+    template_name = "auth/_signup.html"
+    success_url = reverse_lazy("dashboard:dashboard")
 
 
-@login_required(login_url=reverse_lazy("login"))
+class LoginView(BSModalLoginView):
+    form_class = forms.LoginForm
+    template_name = "auth/_login.html"
+    success_message = "Добро пожаловать!"
+    success_url = reverse_lazy("dashboard:dashboard")
+
+
+class LogoutView(views.LogoutView):
+    def get(self, request, *args, **kwargs):
+        django_logout(request)
+        request.user = None
+        return HttpResponseRedirect(redirect_to=reverse_lazy("dashboard:index"))
+
+
+@login_required(login_url=reverse_lazy("dashboard:index"))
 @cache_control(no_cache=True, must_revalidate=True, no_store=True)
 def dashboard_view(request):
     targets = models.Target.objects.all()
     addresses = [{"address": f"{target.address}:{target.port}", "role": target.server_role} for target in targets]
-    return render(request=request, template_name="index.html", context={
-        "addresses": addresses, "app_version": app_version
-    })
+    return render(
+        request=request,
+        template_name="base/4_dashboard.html",
+        context={"addresses": addresses, "app_version": app_version}
+    )
 
 
 class Processes(mixins.ServerAnalysisMixin):
@@ -98,5 +123,3 @@ class ServerData(mixins.ServerAnalysisMixin):
     cmd = "uname -n && uname -r && cat /etc/os-release"
     callback_iva_metrics_handler = IvaMetricsHandler.hostnamectl
     callback_data_access_layer = DataAccessLayerServer.check_server_data
-
-

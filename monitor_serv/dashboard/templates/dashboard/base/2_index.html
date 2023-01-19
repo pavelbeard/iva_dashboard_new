@@ -1,0 +1,37 @@
+{% extends "base/1_base.html" %}
+
+{% load static %}
+
+{% block content %}
+    <!-- BODY -->
+    <!-- header -->
+    {% include "base/3_header.html" %}
+    <!-- /header -->
+    <!-- dashboard -->
+    {% if user.is_authenticated %}
+        {% block dashboard %}
+        {% endblock %}
+    {% else %}
+
+        {% include "base/_modal.html" %}
+
+        <script type="text/javascript">
+            $(function () {
+                $("#signupForm").modalForm({
+                    formURL: "{% url 'dashboard:signup' %}"
+                });
+
+                $("#loginForm").modalForm({
+                    formURL: "{% url 'dashboard:login' %}"
+                });
+            });
+        </script>
+
+        {% include "auth/_no_auth.html" %}
+    {% endif %}
+    <!-- /dashboard -->
+    <!-- footer -->
+    {% include "base/5_footer.html" %}
+    <!-- /footer -->
+    <!-- /BODY -->
+{% endblock %}

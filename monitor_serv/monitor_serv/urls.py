@@ -16,15 +16,12 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 from django.views import generic
-
-from monitor_serv import views
+from dashboard import views
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('dashboard/', include('dashboard.urls')),
-    path('login/', views.LoginView.as_view(), name='login'),
-    path('login-user/', views.LoginUserView.as_view(), name='login_user'),
-    path('logout/', views.LogoutView.as_view(), name='logout'),
+    path('accounts/', include('django.contrib.auth.urls')),
 
     path('', generic.RedirectView.as_view(pattern_name="dashboard:index"), name='base'),
 ]

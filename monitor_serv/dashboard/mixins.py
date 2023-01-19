@@ -1,5 +1,4 @@
 import asyncio
-
 import aiohttp
 import json
 from typing import Callable
@@ -8,6 +7,7 @@ from django.conf import settings
 from django.views import generic
 from django.db import utils
 from logic import IvaMetrics, TargetsIsEmpty, ValidationException
+from bootstrap_modal_forms.generic import BSModalCreateView
 from . import models
 
 
@@ -46,7 +46,7 @@ class ServerAnalysisMixin(generic.ListView):
 
             if self.callback_data_access_layer is not None:
                 db_data = [q async for q in query]
-                tasks_export_to_db = [asyncio.create_task(self.callback_data_access_layer(rd|{"target_uuid": db}))
+                tasks_export_to_db = [asyncio.create_task(self.callback_data_access_layer(rd | {"target_uuid": db}))
                                       for rd, db in zip(response_data, db_data)]
                 res = await asyncio.gather(*tasks_export_to_db, return_exceptions=True)
 
@@ -69,3 +69,7 @@ class ServerAnalysisMixin(generic.ListView):
             return http.JsonResponse(json.dumps({"TargetsIsEmpty": tie.message}), safe=False)
         except ValidationException as err:
             return http.JsonResponse(json.dumps({"ValidationException": err.message}), safe=False)
+
+
+class SignupLogicMixin(BSModalCreateView):
+    pass
