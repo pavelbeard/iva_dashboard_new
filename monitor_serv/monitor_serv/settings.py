@@ -104,12 +104,24 @@ AUTH_PASSWORD_VALIDATORS = [
     },
     {
         'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
+        'OPTIONS': {
+            'min_length': 8
+        }
     },
     {
         'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
     },
     {
         'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
+    },
+    {
+        'NAME': 'monitor_serv.password_validation.SymbolsPasswordValidator'
+    },
+    {
+        'NAME': 'monitor_serv.password_validation.UppercasePasswordValidator'
+    },
+    {
+        'NAME': 'monitor_serv.password_validation.NumberPasswordValidator'
     },
 ]
 
@@ -154,6 +166,7 @@ CSRF_TRUSTED_ORIGINS = os.getenv('CSRF_TRUSTED_ORIGINS', default="http://*localh
 CONN_HEALTH_CHECKS = True
 LOGIN_REDIRECT_URL = reverse_lazy("dashboard:dashboard")
 LOGOUT_REDIRECT_URL = reverse_lazy("dashboard:index")
+AUTH_USER_MODEL = "dashboard.CustomUser"
 
-APPLICATION_VERSION = "v0.6.4"
+APPLICATION_VERSION = "v0.6.5"
 

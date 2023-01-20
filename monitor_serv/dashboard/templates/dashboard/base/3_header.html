@@ -12,14 +12,20 @@
                         <li class="nav-item"><a href="{% url "logout" %}"
                                             class="nav-link header-text">Выйти</a></li>
                     {% else %}
+                        <li class="nav-item"><a href="#signup-form"
+                                                id="signupForm"
+                                                class="nav-link header-text">Зарегистрироваться</a></li>
                         <li class="nav-item"><a href="#login-form"
                                                 id="loginForm"
                                                 class="nav-link header-text">Войти</a></li>
                     {% endif %}
+
+                    {% if user.is_superuser %}
                         <li class="nav-item"><a href="{% url "dashboard:dashboard" %}"
                                             class="nav-link header-text">Главная</a></li>
                         <li class="nav-item"><a href="{% url "admin:index" %}"
                                             class="nav-link header-text">Панель админа</a></li>
+                    {% endif %}
                 </ul>
             </div>
         </div>

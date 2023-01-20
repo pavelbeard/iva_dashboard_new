@@ -1,7 +1,12 @@
 from django.db import models
 from django.db.models import fields
+from django.contrib.auth.models import AbstractUser
 from django.utils.translation import gettext_lazy as _
 import uuid
+
+
+class CustomUser(AbstractUser):
+    email = fields.EmailField(unique=True)
 
 
 # Create your models here.
@@ -30,15 +35,11 @@ class Target(models.Model):
 
 
 class Server(models.Model):
-    uuid = fields.IntegerField(default=1, primary_key=True)
     hostname = fields.CharField(max_length=64, null=False, default="none", verbose_name="Имя сервера:")
     os = fields.CharField(max_length=32, null=False, default="none", verbose_name="Операционная система:")
     kernel = fields.CharField(max_length=64, null=False, default="none", verbose_name="Ядро ОС:")
 
-    server_id = models.ForeignKey(Target, on_delete=models.CASCADE, verbose_name="Целевой хост:")
-    #
-    # def get_fields(self):
-    #     return [self.]
+    server = models.OneToOneField(Target, on_delete=models.CASCADE, verbose_name="Целевой хост:", primary_key=True)
 
     def __str__(self):
         return f"Server(hostname={self.hostname}, os={self.os}, kernel={self.kernel})"
