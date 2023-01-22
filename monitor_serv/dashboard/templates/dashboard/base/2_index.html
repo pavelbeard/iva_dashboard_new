@@ -5,7 +5,7 @@
 {% block content %}
     <!-- BODY -->
     <!-- header -->
-    {% include "base/3_header.html" %}
+    {% include "dashboard/base/3_header.html" %}
     <!-- /header -->
     <!-- dashboard -->
     {% if user.is_authenticated %}
@@ -13,25 +13,25 @@
         {% endblock %}
     {% else %}
 
-        {% include "base/_modal.html" %}
+        {% include "dashboard/base/_modal.html" %}
 
         <script type="text/javascript">
             $(function () {
                 $("#signupForm").modalForm({
-                    formURL: "{% url 'dashboard:signup' %}"
+                    formURL: "{% url 'dashboard_users:signup' %}"
                 });
 
                 $("#loginForm").modalForm({
-                    formURL: "{% url 'dashboard:login' %}"
+                    formURL: "{% url 'dashboard_users:login' %}"
                 });
             });
         </script>
 
-        {% include "auth/_no_auth.html" %}
+        {% include "dashboard_users/auth/_no_auth.html" %}
     {% endif %}
     <!-- /dashboard -->
     <!-- footer -->
-    {% include "base/5_footer.html" %}
+    {% include "dashboard/base/5_footer.html" %}
     <!-- /footer -->
     <!-- /BODY -->
 {% endblock %}

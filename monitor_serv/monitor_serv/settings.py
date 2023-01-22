@@ -173,5 +173,5 @@ LOGIN_REDIRECT_URL = reverse_lazy("dashboard:dashboard")
 LOGOUT_REDIRECT_URL = reverse_lazy("dashboard:index")
 AUTH_USER_MODEL = "dashboard_users.CustomUser"
 
-APPLICATION_VERSION = "v0.6.5"
+APPLICATION_VERSION = "v0.6.7"
 
