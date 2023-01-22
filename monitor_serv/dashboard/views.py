@@ -38,27 +38,6 @@ def index_view(request):
         )
 
 
-class SignupView(mixins.SignupLogicMixin):
-    form_class = forms.SignupForm
-    template_name = "auth/_signup.html"
-    success_message = "Вы успешно зарегистрированы. Ожидайте подтверждения администратором!"
-    success_url = reverse_lazy("dashboard:dashboard")
-
-
-class LoginView(BSModalLoginView):
-    form_class = forms.LoginForm
-    template_name = "auth/_login.html"
-    success_message = "Добро пожаловать!"
-    success_url = reverse_lazy("dashboard:dashboard")
-
-
-class LogoutView(views.LogoutView):
-    def get(self, request, *args, **kwargs):
-        django_logout(request)
-        request.user = None
-        return HttpResponseRedirect(redirect_to=reverse_lazy("dashboard:index"))
-
-
 @login_required(login_url=reverse_lazy("dashboard:index"))
 @cache_control(no_cache=True, must_revalidate=True, no_store=True)
 def dashboard_view(request):

@@ -16,7 +16,7 @@
         <link rel="stylesheet" href="{% static "dashboard/css/dashboard.css" %}">
     {% endblock %}
 
-    {% if user.is_authenticated %}
+    {% if user.is_authenticated and addresses %}
         <script type="module" src="{% static "dashboard/js/refresher.js" %}"></script>
         <script type="module" src="{% static "dashboard/js/extensions.js" %}"></script>
     {% endif %}

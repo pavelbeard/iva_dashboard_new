@@ -21,6 +21,7 @@ from dashboard import views
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('dashboard/', include('dashboard.urls')),
+    path('dashboard_users/', include('dashboard_users.urls')),
     path('accounts/', include('django.contrib.auth.urls')),
 
     path('', generic.RedirectView.as_view(pattern_name="dashboard:index"), name='base'),

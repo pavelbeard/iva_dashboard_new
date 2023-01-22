@@ -1,21 +1,16 @@
 from django.contrib import admin
-from django import forms
-from . import models
+from dashboard_users import models as dashboard_users_models
+from . import models as dashboard_models
 from . import forms
 
 
 # Register your models here.
 
-@admin.register(models.CustomUser)
-class CustomUserAdmin(admin.ModelAdmin):
-    pass
-
-
-@admin.register(models.Server)
+@admin.register(dashboard_models.Server)
 class ServerAdmin(admin.ModelAdmin):
     pass
 
 
-@admin.register(models.Target)
+@admin.register(dashboard_models.Target)
 class TargetAdmin(admin.ModelAdmin):
     form = forms.TargetForm

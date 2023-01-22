@@ -1,12 +1,9 @@
+from django.conf import settings
 from django.db import models
 from django.db.models import fields
 from django.contrib.auth.models import AbstractUser
 from django.utils.translation import gettext_lazy as _
 import uuid
-
-
-class CustomUser(AbstractUser):
-    email = fields.EmailField(unique=True)
 
 
 # Create your models here.
@@ -48,7 +45,7 @@ class Server(models.Model):
 class CPU(models.Model):
     uuid_record = fields.UUIDField(default=uuid.uuid4, primary_key=True)
     cpu_cores = fields.IntegerField(null=False, default=0, verbose_name="Количество ядер:")
-    cpu_load = fields.FloatField(null=False, default=0,  verbose_name="Загрузка процессора %:")
+    cpu_load = fields.FloatField(null=False, default=0, verbose_name="Загрузка процессора %:")
     cpu_idle = fields.FloatField(null=False, default=0, verbose_name="Простой процессора %:")
     record_date = fields.DateTimeField(auto_now=True, null=False, verbose_name="Время сканирования:")
 
@@ -106,7 +103,8 @@ class NetInterface(models.Model):
     tx_packets = fields.FloatField(null=False, default=0, verbose_name="Отправлено пакетов:")
     tx_errors_errors = fields.FloatField(null=False, default=0, verbose_name="Отправлено с ошибками:")
     tx_errors_dropped = fields.FloatField(null=False, default=0, verbose_name="Отброшено при отправке пакетов:")
-    tx_errors_overruns = fields.FloatField(null=False, default=0, verbose_name="Перерасходованных при отправке пакетов:")
+    tx_errors_overruns = fields.FloatField(null=False, default=0,
+                                           verbose_name="Перерасходованных при отправке пакетов:")
     tx_errors_carrier = fields.FloatField(null=False, default=0, verbose_name='Пакетов с потерянными носителями :')
     tx_errors_collisions = fields.FloatField(null=False, default=0, verbose_name="Отправлено пакетов с коллизиями:")
     record_date = fields.DateTimeField(auto_now=True, null=False, verbose_name="Время сканирования:")

@@ -38,8 +38,9 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     # custom apps
-    'dashboard.apps.DashboardConfig',
-    'dashboard_detail.apps.DashboardDetailConfig',
+    'dashboard',
+    'dashboard_detail',
+    'dashboard_users',
     # pip apps
     'bootstrap_modal_forms',
     'widget_tweaks',
@@ -63,6 +64,7 @@ TEMPLATES = [
         'DIRS': [
             BASE_DIR / 'templates',
             BASE_DIR / 'dashboard/templates/dashboard',
+            BASE_DIR / 'dashboard_users/templates/dashboard_users',
             BASE_DIR / 'dashboard_detail/templates/dashboard_detail',
         ]
         ,
@@ -115,14 +117,17 @@ AUTH_PASSWORD_VALIDATORS = [
         'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
     },
     {
-        'NAME': 'monitor_serv.password_validation.SymbolsPasswordValidator'
+        'NAME': 'dashboard_users.password_validation.SymbolsPasswordValidator'
     },
     {
-        'NAME': 'monitor_serv.password_validation.UppercasePasswordValidator'
+        'NAME': 'dashboard_users.password_validation.UppercasePasswordValidator'
     },
     {
-        'NAME': 'monitor_serv.password_validation.NumberPasswordValidator'
+        'NAME': 'dashboard_users.password_validation.NumberPasswordValidator'
     },
+    # {
+    #     'NAME': 'monitor_serv.password_validation.RepeatedPasswordValidator'
+    # },
 ]
 
 # Internationalization
@@ -166,7 +171,7 @@ CSRF_TRUSTED_ORIGINS = os.getenv('CSRF_TRUSTED_ORIGINS', default="http://*localh
 CONN_HEALTH_CHECKS = True
 LOGIN_REDIRECT_URL = reverse_lazy("dashboard:dashboard")
 LOGOUT_REDIRECT_URL = reverse_lazy("dashboard:index")
-AUTH_USER_MODEL = "dashboard.CustomUser"
+AUTH_USER_MODEL = "dashboard_users.CustomUser"
 
 APPLICATION_VERSION = "v0.6.5"
 
