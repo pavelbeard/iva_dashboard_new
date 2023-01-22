@@ -1,8 +1,16 @@
 from django.contrib import admin
+from django.contrib.admin import AdminSite
+from django.utils.translation import gettext_lazy
 from . import models
 
 
 # Register your models here.
+
+
+# class DashboardAdmin(AdminSite):
+#     site_title = gettext_lazy("")
+#     pass
+
 
 @admin.register(models.CustomUser)
 class CustomUserAdmin(admin.ModelAdmin):
@@ -13,3 +21,8 @@ class CustomUserAdmin(admin.ModelAdmin):
     @admin.action(description="Mark this user(-s) as active", permissions=['change'])
     def make_is_active(self, modeladmin, request, queryset):
         queryset.update(is_active=True)
+
+
+admin.site.site_header = "Панель администратора платформы IVA MCU Dashboard"
+admin.site.index_title = "Администрирование сайта"
+admin.site.site_title = "Панель администратора"
