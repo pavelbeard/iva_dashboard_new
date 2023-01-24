@@ -1,15 +1,20 @@
 from django import forms
-from django.core.exceptions import ValidationError
-from django.db import models
-from dashboard_users import models as dashboard_users_models
+from django.conf import settings
+from logic import pass_handler
 from . import models as dashboard_models
-from django.contrib.auth.forms import AuthenticationForm, UserCreationForm
-from bootstrap_modal_forms.forms import PopRequestMixin, CreateUpdateAjaxMixin
-from django.forms import fields
+
+
+ENCRYPTION_KEY = settings.ENCRYPTION_KEY
 
 
 class TargetForm(forms.ModelForm):
-    password = forms.CharField(widget=forms.PasswordInput())
+    password = forms.CharField(widget=forms.PasswordInput(), label="Пароль сервера:")
+
+    def clean_password(self):
+        password = self.cleaned_data.get('password')
+        encrypted_password = pass_handler.encrypt_pass(password=password, encryption_key=ENCRYPTION_KEY)
+
+        return encrypted_password
 
     class Meta:
         model = dashboard_models.Target

@@ -133,7 +133,7 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/4.1/topics/i18n/
 
-LANGUAGE_CODE = 'en-us'
+LANGUAGE_CODE = 'ru'
 
 TIME_ZONE = 'Europe/Moscow'
 
@@ -172,6 +172,9 @@ CONN_HEALTH_CHECKS = True
 LOGIN_REDIRECT_URL = reverse_lazy("dashboard:dashboard")
 LOGOUT_REDIRECT_URL = reverse_lazy("dashboard:index")
 AUTH_USER_MODEL = "dashboard_users.CustomUser"
+
+SALT = os.getenv("SALT", "3e7413b00ff74da8a80aa990261e1e04")
+ENCRYPTION_KEY = os.getenv('ENCRYPTION_KEY', b'Thm1rA590U9IBSMMIlKWgBSPwbP30nz4keJR6N4RXjI=')
 
 APPLICATION_VERSION = "v0.6.7"
 

@@ -1,14 +1,12 @@
 import asyncio
-import aiohttp
 import json
+import aiohttp
 from typing import Callable
 from django import http
 from django.conf import settings
-from django.contrib import messages
-from django.views import generic
 from django.db import utils
-from logic import IvaMetrics, TargetsIsEmpty, ValidationException
-from bootstrap_modal_forms.generic import BSModalCreateView
+from django.views import generic
+from logic import IvaMetrics, TargetsIsEmpty, ValidationException, pass_handler
 from . import models
 
 
@@ -18,6 +16,7 @@ class ServerAnalysisMixin(generic.ListView):
     callback_insert_into_table: Callable = None
     callback_data_access_layer: Callable = None
     server_config_file = settings.SERVER_CONFIG_FILE
+    encryption_key = settings.ENCRYPTION_KEY
 
     async def get(self, request, *args, **kwargs):
         scraper = None
@@ -28,11 +27,13 @@ class ServerAnalysisMixin(generic.ListView):
                     "host": q.address,
                     "port": q.port,
                     "username": q.username,
-                    "password": q.password,
+                    "password": pass_handler.decrypt_pass(self.encryption_key, q.password),
                     "cmd": self.cmd,
                     "role": q.server_role,
                 } async for q in query
             ]
+
+            # TODO: написать свою функцию шифрования и дешифрования пароля
 
             if len(targets) == 0:
                 raise TargetsIsEmpty(message="The table 'Targets' is empty!")
@@ -70,3 +71,6 @@ class ServerAnalysisMixin(generic.ListView):
             return http.JsonResponse(json.dumps({"TargetsIsEmpty": tie.message}), safe=False)
         except ValidationException as err:
             return http.JsonResponse(json.dumps({"ValidationException": err.message}), safe=False)
+
+
+

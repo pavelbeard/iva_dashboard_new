@@ -1,6 +1,6 @@
-from django.conf import settings
 from django.db import models
 from django.db.models import fields
+from django.contrib.auth.hashers import BCryptSHA256PasswordHasher, make_password
 from django.contrib.auth.models import AbstractUser
 from django.utils.translation import gettext_lazy as _
 import uuid
@@ -22,9 +22,13 @@ class Target(models.Model):
     address = fields.GenericIPAddressField(null=False, verbose_name="IP-адрес целевого сервера:", unique=True)
     port = fields.SmallIntegerField(null=False, verbose_name="Порт сервера:")
     username = fields.CharField(max_length=32, null=False, verbose_name="Логин сервера:")
-    password = fields.CharField(max_length=32, null=False, verbose_name="Пароль сервера:")
+    password = fields.CharField(max_length=255, null=False, verbose_name="Пароль сервера:")
     server_role = fields.CharField(max_length=6, choices=ServerRole.choices, default=ServerRole.MEDIA,
                                    verbose_name="Роль сервера:")
+
+    class Meta:
+        verbose_name = "Целевой хост"
+        verbose_name_plural = "Целевые хосты"
 
     def __str__(self):
         return f"Target(address={self.address}, port={self.port}, username={self.username}, " \
@@ -37,6 +41,10 @@ class Server(models.Model):
     kernel = fields.CharField(max_length=64, null=False, default="none", verbose_name="Ядро ОС:")
 
     server = models.OneToOneField(Target, on_delete=models.CASCADE, verbose_name="Целевой хост:", primary_key=True)
+
+    class Meta:
+        verbose_name = "Данные сервера"
+        verbose_name_plural = "Данные сервера"
 
     def __str__(self):
         return f"Server(hostname={self.hostname}, os={self.os}, kernel={self.kernel})"
