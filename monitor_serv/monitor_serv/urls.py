@@ -24,5 +24,5 @@ urlpatterns = [
     path('dashboard_users/', include('dashboard_users.urls')),
     path('accounts/', include('django.contrib.auth.urls')),
 
-    path('', generic.RedirectView.as_view(pattern_name="dashboard:index"), name='base'),
+    path('', generic.RedirectView.as_view(pattern_name="dashboard_users:login"), name='base'),
 ]

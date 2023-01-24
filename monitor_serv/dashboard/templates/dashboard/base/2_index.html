@@ -6,15 +6,21 @@
     <!-- BODY -->
     <!-- header -->
     {% include "dashboard/base/3_header.html" %}
+    {% include "dashboard/base/_messages.html" %}
     <!-- /header -->
     <!-- dashboard -->
     {% if user.is_authenticated %}
         {% block dashboard %}
         {% endblock %}
-    {% else %}
+    {% elif not index %}
+        {% block register %}
+        {% endblock %}
+        {% block login %}
+        {% endblock %}
 
-        {% include "dashboard_users/auth/_no_auth.html" %}
-        {% include "dashboard/base/_modal.html" %}
+        <!-- MODAL LOGIN/SIGNUP
+        {#        {% include "dashboard_users/auth/_no_auth.html" %}#}
+        {#        {% include "dashboard/base/_modal.html" %}#}
 
         <script type="text/javascript">
             $(function () {
@@ -27,7 +33,9 @@
                 });
             });
         </script>
-
+        -->
+    {% else %}
+        <p>Добро пожаловать в IVA MCU Dashboard</p>
     {% endif %}
     <!-- /dashboard -->
     <!-- footer -->

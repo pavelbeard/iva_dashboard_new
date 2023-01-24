@@ -17,7 +17,7 @@ from . import models
 
 # Create your views.py here.
 
-app_version = settings.APPLICATION_VERSION
+app_version = settings.APP_VERSION
 
 
 def index_view(request):
@@ -35,11 +35,11 @@ def index_view(request):
     return render(
         request=request,
         template_name="base/2_index.html",
-        context={"app_version": app_version}
+        context={"app_version": app_version, "index": True}
     )
 
 
-@login_required(login_url=reverse_lazy("dashboard:index"))
+@login_required(login_url=reverse_lazy("dashboard_users:login"))
 @cache_control(no_cache=True, must_revalidate=True, no_store=True)
 def dashboard_view(request):
     targets = models.Target.objects.all()

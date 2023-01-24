@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/4.1/ref/settings/
 import os
 from pathlib import Path
 
+from django.contrib.messages import constants as messages
 from django.urls import reverse_lazy
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -44,6 +45,8 @@ INSTALLED_APPS = [
     # pip apps
     'bootstrap_modal_forms',
     'widget_tweaks',
+    'crispy_forms',
+    'crispy_bootstrap5'
 ]
 
 MIDDLEWARE = [
@@ -169,12 +172,25 @@ SERVER_CONFIG_FILE = os.getenv('IVA_DASHBOARD_SERVER_CONFIG_FILE',
                                "C:\\Users\\pavel\\.iva_monitoring\\server-config.yml")
 
 CSRF_TRUSTED_ORIGINS = os.getenv('CSRF_TRUSTED_ORIGINS', default="http://*localhost:8004").split(" ")
+
 CONN_HEALTH_CHECKS = True
+
 LOGIN_REDIRECT_URL = reverse_lazy("dashboard:dashboard")
 LOGOUT_REDIRECT_URL = reverse_lazy("dashboard:index")
+
 AUTH_USER_MODEL = "dashboard_users.CustomUser"
 
 ENCRYPTION_KEY = os.getenv('ENCRYPTION_KEY', b'Thm1rA590U9IBSMMIlKWgBSPwbP30nz4keJR6N4RXjI=')
 
-APPLICATION_VERSION = "v0.6.85"
+CRISPY_ALLOWED_TEMPLATE_PACKS = "bootstrap5"
+CRISPY_TEMPLATE_PACK = "bootstrap5"
 
+MESSAGE_TAGS = {
+    messages.DEBUG: 'alert-secondary',
+    messages.INFO: 'alert-info',
+    messages.SUCCESS: 'alert-success',
+    messages.WARNING: 'alert-warning',
+    messages.ERROR: 'alert-danger',
+ }
+
+APP_VERSION = "v0.6.88"

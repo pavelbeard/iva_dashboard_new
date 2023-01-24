@@ -1,0 +1,16 @@
+{% for message in messages %}
+    <div class="container-fluid p-0" id="message">
+        <div class="alert {{ message.tags }} alert-dismissible" role="alert">
+            <button type="button" class="btn-close" data-dismiss="alert" id="closeMessage">
+            </button>
+            {{ message }}
+        </div>
+    </div>
+    <script>
+        $(document).ready(function () {
+            $("#closeMessage").click(function () {
+                $("#message").attr("hidden", "hidden")
+            });
+        });
+    </script>
+{% endfor %}

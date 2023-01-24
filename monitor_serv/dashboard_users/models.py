@@ -22,7 +22,7 @@ class CustomUser(AbstractUser):
             "unique": _("Пользователь с данным именем уже существует."),
         },
         validators=[ascii_validator],
-        verbose_name="Имя пользоветеля"
+        verbose_name="Имя пользователя"
     )
     first_name = models.CharField(
         max_length=64,
