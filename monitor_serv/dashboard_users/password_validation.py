@@ -5,7 +5,7 @@ from django.contrib.auth.hashers import make_password
 from django.contrib.auth.password_validation import ValidationError
 from django.utils.translation import gettext as _
 
-from dashboard import models
+from dashboard_users import models
 
 SALT = os.getenv("SALT", "lKzLscyp8+/Ni?P8Bw@#*DD0")
 

@@ -13,6 +13,7 @@
         {% endblock %}
     {% else %}
 
+        {% include "dashboard_users/auth/_no_auth.html" %}
         {% include "dashboard/base/_modal.html" %}
 
         <script type="text/javascript">
@@ -27,7 +28,6 @@
             });
         </script>
 
-        {% include "dashboard_users/auth/_no_auth.html" %}
     {% endif %}
     <!-- /dashboard -->
     <!-- footer -->

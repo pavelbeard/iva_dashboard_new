@@ -4,16 +4,15 @@ import yaml
 from django import http
 from django.conf import settings
 from django.contrib import messages
-from django.contrib.auth import views, logout as django_logout
 from django.contrib.auth.decorators import login_required
 from django.contrib.messages import get_messages
 from django.http import HttpResponseRedirect
 from django.shortcuts import render
 from django.urls import reverse_lazy
 from django.views.decorators.cache import cache_control
-from bootstrap_modal_forms.generic import BSModalCreateView, BSModalLoginView
+
 from logic import IvaMetricsHandler, DataAccessLayerServer
-from . import mixins, forms
+from . import mixins
 from . import models
 
 # Create your views.py here.
@@ -24,23 +23,28 @@ app_version = settings.APPLICATION_VERSION
 def index_view(request):
     if request.user.is_authenticated:
         return HttpResponseRedirect(redirect_to=reverse_lazy("dashboard:dashboard"))
+    # elif not request.user.is_active:
+    #     messages.info(request, 'Дождитесь активации вашего аккаунта администратором')
     else:
 
-        # storage = get_messages(request)
-        #
-        # if len(storage) == 0:
-        messages.info(request, "Войдите в систему чтобы увидеть Инфопанель")
+        storage = get_messages(request)
 
-        return render(
-            request=request,
-            template_name="base/2_index.html",
-            context={"app_version": app_version}
-        )
+        if len(storage) == 0:
+            messages.info(request, "Войдите в систему чтобы увидеть Инфопанель")
+
+    return render(
+        request=request,
+        template_name="base/2_index.html",
+        context={"app_version": app_version}
+    )
 
 
-@login_required(login_url=reverse_lazy("dashboard:index"))
-@cache_control(no_cache=True, must_revalidate=True, no_store=True)
+# @login_required(login_url=reverse_lazy("dashboard:index"))
+# @cache_control(no_cache=True, must_revalidate=True, no_store=True)
 def dashboard_view(request):
+    if request.user.is_authenticated:
+        pass
+
     targets = models.Target.objects.all()
     addresses = [{"address": f"{target.address}:{target.port}", "role": target.server_role} for target in targets]
     return render(

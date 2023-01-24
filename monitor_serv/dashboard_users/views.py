@@ -12,7 +12,7 @@ class SignupView(mixins.SignupLogicMixin):
     form_class = forms.SignupForm
     template_name = "auth/_signup.html"
     success_message = "Вы успешно зарегистрированы. Ожидайте подтверждения администратором!"
-    success_url = reverse_lazy("dashboard:dashboard")
+    success_url = reverse_lazy("dashboard:index")
 
 
 class LoginView(BSModalLoginView):

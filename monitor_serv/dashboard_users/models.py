@@ -8,15 +8,15 @@ from . import validators
 # Create your models here.
 
 
-ascii_validator = validators.MyASCIIUsernameValidator()
-first_last_name_validator = validators.UnicodeUsernameValidator()
+ascii_validator = validators.ASCIIUsernameValidator()
+first_last_name_validator = validators.FirstLastNameValidator()
 
 
 class CustomUser(AbstractUser):
     username = models.CharField(
         max_length=32, unique=True,
         help_text=_("Обязательное и уникальное. Длина имени пользователя максимум 32 символа."
-                    "Только буквы, цифры и символы: @/./+/-/_"),
+                    "Только буквы, цифры и символы: [@_]"),
         error_messages={
             "unique": _("Пользователь с данным именем уже существует."),
         },

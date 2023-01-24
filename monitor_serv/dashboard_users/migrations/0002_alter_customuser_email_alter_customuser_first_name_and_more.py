@@ -56,6 +56,6 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='customuser',
             name='username',
-            field=models.CharField(error_messages={'unique': 'Пользователь с данным именем уже существует.'}, help_text='Обязательное и уникальное. Длина имени пользователя максимум 32 символа.Только буквы, цифры и символы: @/./+/-/_', max_length=32, unique=True, validators=[dashboard_users.validators.MyASCIIUsernameValidator()], verbose_name='Имя пользоветеля'),
+            field=models.CharField(error_messages={'unique': 'Пользователь с данным именем уже существует.'}, help_text='Обязательное и уникальное. Длина имени пользователя максимум 32 символа.Только буквы, цифры и символы: @/./+/-/_', max_length=32, unique=True, validators=[dashboard_users.validators.ASCIIUsernameValidator()], verbose_name='Имя пользоветеля'),
         ),
     ]
