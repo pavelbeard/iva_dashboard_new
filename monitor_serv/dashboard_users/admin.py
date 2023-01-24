@@ -21,7 +21,7 @@ class CustomUserAdmin(UserAdmin):
             'fields': ('username', 'first_name', 'last_name', 'email', 'password')
         }),
         ('Разрешения и группы', {
-            'fields': ('groups', 'user_permissions')
+            'fields': ('is_superuser', 'is_staff', 'is_active', 'groups', 'user_permissions')
         })
 
     )
@@ -31,7 +31,7 @@ class CustomUserAdmin(UserAdmin):
             'fields': ('username', 'first_name', 'last_name', 'email', 'password1', 'password2')
         }),
         ('Разрешения и группы', {
-            'fields': ('groups', 'user_permissions')
+            'fields': ('is_superuser', 'is_staff', 'is_active', 'groups', 'user_permissions')
         })
     )
 

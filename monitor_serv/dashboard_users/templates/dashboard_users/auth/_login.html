@@ -1,0 +1,21 @@
+{% extends "dashboard/base/2_index.html" %}
+
+{% load crispy_forms_tags %}
+{% load crispy_forms_field %}
+{% load crispy_forms_filters %}
+
+{% block login %}
+    <div class="container py-5">
+        <h5>Войти</h5>
+        <form method="post" action="">
+            {% csrf_token %}
+            {{ login_form|crispy }}
+            <button class="btn btn-primary" type="submit">Войти</button>
+            <p class="text-center">
+                Вы еще не зарегистрированы? <a href="{% url 'dashboard_users:register' %}">
+                <br> Зарегистрируйтесь и ожидайте подтверждения администратором.
+            </a>
+            </p>
+        </form>
+    </div>
+{% endblock %}
