@@ -24,36 +24,36 @@ class SymbolsPasswordValidator(Validator):
     def validate(self, password, user=None):
         if not re.findall("[`!@#\$%\^&\*\(\)_\+~\[\]\{\}\\\';\":,\.;\?/]", password):
             raise ValidationError(
-                _(f"The password must contain at least one symbol from this list: [ {self.list_of_symbols} ]"),
+                _(f"Пароль должен содержать хотя бы один символ из этого списка: [ {self.list_of_symbols} ]"),
                 code="password_no_symbol"
             )
 
     def get_help_text(self) -> _:
-        return _(f"Your password must contain at least one symbol from this list: [ {self.list_of_symbols} ]")
+        return _(f"Ваш пароль должен содержать хотя бы один символ из этого списка: [ {self.list_of_symbols} ]")
 
 
 class UppercasePasswordValidator(Validator):
     def validate(self, password, user=None):
         if not re.findall("[A-Z]", password):
             raise ValidationError(
-                _(f"The password must contain at least one symbol in uppercase, A-Z"),
+                _(f"Пароль должен содержать хотя бы одну букву в верхнем регистре, A-Z"),
                 code="password_no_uppercase"
             )
 
     def get_help_text(self) -> _:
-        return _("Your password must contain at least one symbol in uppercase, A-Z")
+        return _("Ваш пароль должен содержать хотя бы одну букву в верхнем регистре, A-Z")
 
 
 class NumberPasswordValidator(Validator):
     def validate(self, password, user=None):
         if not re.findall("[0-9]", password):
             raise ValidationError(
-                _(f"The password must contain at least one digit, 0-9"),
+                _(f"Пароль должен содержать хотя бы одну цифру, 0-9"),
                 code="password_no_number"
             )
 
     def get_help_text(self) -> _:
-        return _("Your password must contain at least one digit, 0-9")
+        return _("Ваш пароль должен содержать хотя бы одну цифру, 0-9")
 
 
 class RepeatedPasswordValidator(Validator):

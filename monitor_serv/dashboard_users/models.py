@@ -10,6 +10,7 @@ from . import validators
 
 ascii_validator = validators.ASCIIUsernameValidator()
 first_last_name_validator = validators.FirstLastNameValidator()
+email_validator = validators.EmailValidator()
 
 
 class CustomUser(AbstractUser):
@@ -47,6 +48,7 @@ class CustomUser(AbstractUser):
         unique=True,
         help_text=_("Обязательное и уникальное. Длина почты максимум 64 символа."
                     "Формат: username@example.com"),
+        validators=[email_validator],
         verbose_name="Email",
     )
     password = models.CharField(

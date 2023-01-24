@@ -39,12 +39,9 @@ def index_view(request):
     )
 
 
-# @login_required(login_url=reverse_lazy("dashboard:index"))
-# @cache_control(no_cache=True, must_revalidate=True, no_store=True)
+@login_required(login_url=reverse_lazy("dashboard:index"))
+@cache_control(no_cache=True, must_revalidate=True, no_store=True)
 def dashboard_view(request):
-    if request.user.is_authenticated:
-        pass
-
     targets = models.Target.objects.all()
     addresses = [{"address": f"{target.address}:{target.port}", "role": target.server_role} for target in targets]
     return render(

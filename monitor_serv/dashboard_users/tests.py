@@ -1,10 +1,11 @@
+from django.contrib.auth.models import AnonymousUser
 from django.test import TestCase
 from django.urls import reverse
 
 
 # Create your tests here.
 
-class TestLogin(TestCase):
+class TestAuth(TestCase):
     def setUp(self) -> None:
         self.login = "test230923"
         self.password = "Rt3$YiOO"
@@ -21,6 +22,6 @@ class TestLogin(TestCase):
 
         context_data = response.context['user']
 
-        self.assertEqual(response.context['user'].is_active, False)
+        self.assertEqual(response.context['user'], AnonymousUser)
 
 

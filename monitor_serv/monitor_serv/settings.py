@@ -156,6 +156,7 @@ STATICFILES_DIRS = (
     os.path.join(BASE_DIR, "static"),
     os.path.join(BASE_DIR, "dashboard", "static"),
     os.path.join(BASE_DIR, "dashboard_detail", "static"),
+    os.path.join(BASE_DIR, "dashboard_users", "static"),
 )
 
 # Default primary key field type
@@ -175,5 +176,5 @@ AUTH_USER_MODEL = "dashboard_users.CustomUser"
 
 ENCRYPTION_KEY = os.getenv('ENCRYPTION_KEY', b'Thm1rA590U9IBSMMIlKWgBSPwbP30nz4keJR6N4RXjI=')
 
-APPLICATION_VERSION = "v0.6.8"
+APPLICATION_VERSION = "v0.6.85"
 

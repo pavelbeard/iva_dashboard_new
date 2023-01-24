@@ -2,14 +2,14 @@ import json
 import random
 import unittest
 from pprint import pprint
-from django.test import TestCase
-from django import urls
+
 from django import http
-from django.db import connections
+from django import urls
+from django.test import TestCase
 from django.test.runner import DiscoverRunner
 
-from . import models
 from . import forms
+from . import models
 
 
 # Create your tests here.
