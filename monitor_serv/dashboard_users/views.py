@@ -3,9 +3,10 @@ from django import http
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth import views, logout, login, authenticate
+from django.contrib.auth.hashers import check_password
 from django.shortcuts import redirect, render
 from django.urls import reverse_lazy
-from . import mixins, forms
+from . import mixins, forms, models
 
 
 # Create your views here.
@@ -45,12 +46,12 @@ class RegisterView(views.FormView):
             login(request, user)
             messages.success(request, "Регистрация завершена. Ожидайте активации аккаунта администратором.")
 
-            return redirect("dashboard:dashboard")
-
-            # TODO: отобразить ошибки валидации: переписать форму
-
-        messages.error(request, "Регистрация завершилась неудачно. Некорректная информация.")
-        return render(request, self.template_name, context={"register_form": self.form_class()})
+            return http.HttpResponseRedirect(redirect_to=reverse_lazy("dashboard:dashboard"))
+        else:
+            messages.error(request, "Регистрация завершилась неудачно. Некорректная информация.")
+            return render(request, self.template_name, context={
+                "register_form": form,
+            })
 
 
 class LoginView(views.LoginView):
@@ -76,11 +77,22 @@ class LoginView(views.LoginView):
             if user is not None:
                 login(request, user)
                 messages.info(request, f"Вы вошли как {username}.")
-                return redirect("dashboard:dashboard")
+                return http.HttpResponseRedirect(redirect_to=reverse_lazy("dashboard:dashboard"))
             else:
                 messages.error(request, 'Неправильный логин, либо пароль.')
         else:
-            messages.error(request, 'Неправильный логин, либо пароль.')
+            username = form.cleaned_data['username']
+            password = form.cleaned_data['password']
+
+            try:
+                user = models.CustomUser.objects.get(username=username)
+
+                if not user.is_active and check_password(password, user.password):
+                    messages.error(request, 'Ваш аккаунт еще не активирован.')
+                else:
+                    messages.error(request, 'Неправильный логин, либо пароль.')
+            except models.CustomUser.DoesNotExist:
+                messages.error(request, 'Пользователь не найден.')
 
         return render(request, self.template_name, context={
             "login_form": self.form_class(),

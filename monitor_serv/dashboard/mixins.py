@@ -33,8 +33,6 @@ class ServerAnalysisMixin(generic.ListView):
                 } async for q in query
             ]
 
-            # TODO: написать свою функцию шифрования и дешифрования пароля
-
             if len(targets) == 0:
                 raise TargetsIsEmpty(message="The table 'Targets' is empty!")
 

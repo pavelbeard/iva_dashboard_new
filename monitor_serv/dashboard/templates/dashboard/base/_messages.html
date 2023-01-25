@@ -11,6 +11,12 @@
             $("#closeMessage").click(function () {
                 $("#message").attr("hidden", "hidden")
             });
+
+            let fade = function () {
+                $("#message").fadeOut(2000);
+            };
+
+            setTimeout(fade, 3000);
         });
     </script>
 {% endfor %}

@@ -2,3 +2,7 @@
     color: #ff0000;
     font-size: 80%;
 }
+
+.auth-refs a {
+    text-decoration: none;
+}

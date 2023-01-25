@@ -49,14 +49,14 @@ class CustomUser(AbstractUser):
         help_text=_("Обязательное и уникальное. Длина почты максимум 64 символа."
                     "Формат: username@example.com"),
         validators=[email_validator],
-        verbose_name="Email",
+        verbose_name="Email:",
     )
     password = models.CharField(
         max_length=255,
         verbose_name="Пароль:"
     )
     is_active = models.BooleanField(
-        default=False, verbose_name="ACTIVE", help_text=
+        default=True, verbose_name="ACTIVE", help_text=
         _("Является ли пользователь активным?")
     )
     is_superuser = models.BooleanField(

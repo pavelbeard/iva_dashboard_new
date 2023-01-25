@@ -8,10 +8,31 @@
         <h5>Регистрация</h5>
         <form method="post" action="">
             {% csrf_token %}
-            {{ register_form|crispy }}
+            {{ register_form|as_crispy_errors }}
+            <div class="row">
+                <div class="col-12">
+                    {{ register_form.username|as_crispy_field }}
+                </div>
+                <div class="col-6">
+                    {{ register_form.first_name|as_crispy_field }}
+                </div>
+                <div class="col-6">
+                    {{ register_form.last_name|as_crispy_field }}
+                </div>
+                <div class="col-12">
+                    {{ register_form.email|as_crispy_field }}
+                </div>
+                <div class="col-12">
+                    {{ register_form.password1|as_crispy_field }}
+                </div>
+                <div class="col-12">
+                    {{ register_form.password2|as_crispy_field }}
+                </div>
+            </div>
             <button class="btn btn-primary" type="submit">Зарегистрироваться</button>
             <p class="text-center">
-                Если у вас уже есть аккаунт - <a href="{% url 'dashboard_users:login' %}">войдите в него.</a>
+                Если у вас уже есть аккаунт - <a href="{% url 'dashboard_users:login' %}" class="auth-refs">
+                войдите в него.</a>
             </p>
         </form>
     </div>
