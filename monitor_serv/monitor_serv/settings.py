@@ -193,4 +193,4 @@ MESSAGE_TAGS = {
     messages.ERROR: 'alert-danger',
  }
 
-APP_VERSION = "v0.6.88"
+APP_VERSION = "v0.6.9"
