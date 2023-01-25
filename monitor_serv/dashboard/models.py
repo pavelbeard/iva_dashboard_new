@@ -18,7 +18,7 @@ class Target(models.Model):
         MEDIA = 'media', _('MEDIA')
         HEAD = 'head', _('HEAD')
 
-    id = fields.IntegerField(default=1, primary_key=True)
+    id = fields.AutoField(primary_key=True)
     address = fields.GenericIPAddressField(null=False, verbose_name="IP-адрес целевого сервера:", unique=True)
     port = fields.SmallIntegerField(null=False, verbose_name="Порт сервера:")
     username = fields.CharField(max_length=32, null=False, verbose_name="Логин сервера:")
