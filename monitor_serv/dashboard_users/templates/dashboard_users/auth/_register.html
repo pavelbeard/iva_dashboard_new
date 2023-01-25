@@ -3,6 +3,7 @@
 {% load crispy_forms_tags %}
 {% load crispy_forms_filters %}
 
+{% block title %}Регистрация{% endblock %}
 {% block register %}
     <div class="container py-5">
         <h5>Регистрация</h5>
@@ -30,7 +31,7 @@
                 </div>
             </div>
             <button class="btn btn-primary" type="submit">Зарегистрироваться</button>
-            <p class="text-center">
+            <p class="text-center auth-refs">
                 Если у вас уже есть аккаунт - <a href="{% url 'dashboard_users:login' %}" class="auth-refs">
                 войдите в него.</a>
             </p>

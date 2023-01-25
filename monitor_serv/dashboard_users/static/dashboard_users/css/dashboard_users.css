@@ -3,6 +3,14 @@
     font-size: 80%;
 }
 
-.auth-refs a {
+.auth-refs > a {
     text-decoration: none;
+}
+
+.w-35 {
+    width: 35%;
+}
+
+.w-65 {
+    width: 65%;
 }

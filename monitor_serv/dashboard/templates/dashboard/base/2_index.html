@@ -2,6 +2,8 @@
 
 {% load static %}
 
+{% block title %}Главная{% endblock %}
+
 {% block content %}
     <!-- BODY -->
     <!-- header -->
@@ -35,7 +37,34 @@
         </script>
         -->
     {% else %}
-        <p>Добро пожаловать в IVA MCU Dashboard</p>
+        <div class="container py-md-5">
+            <h3 class="text-center mb-5">Добро пожаловать в IVA MCU Dashboard</h3>
+            <div class="mb-5">
+                <div class="pt-3 pb-3 d-flex justify-content-center">
+                    Инфопанель предназначена для мониторинга серверов IVA MCU РЖД.<br>
+                    Связь с разработчиком:
+                </div>
+                <div class="container d-flex justify-content-center">
+                    <div class="pb-3 w-35">
+                        <ul class="d-flex flex-column ">
+                            <li>Рабочая почта: <b class="auth-refs">
+                                <a href="mailto:borodinpa@css.rzd&subject='IVA Dashboard'">
+                                borodinpa@css.rzd
+                                </a></b>
+                            </li>
+                            <li>Телефон: <b>77619</b></li>
+                        </ul>
+                    </div>
+                </div>
+
+            </div>
+            <div class="d-flex justify-content-center">
+                <div class="mb-2 auth-refs">
+                    <a href="{% url 'dashboard_users:login' %}">Войдите</a> или
+                    <a href="{% url 'dashboard_users:login' %}">зарегистрируйтесь</a>
+                </div>
+            </div>
+        </div>
     {% endif %}
     <!-- /dashboard -->
     <!-- footer -->

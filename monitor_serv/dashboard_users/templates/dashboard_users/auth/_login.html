@@ -4,6 +4,7 @@
 {% load crispy_forms_field %}
 {% load crispy_forms_filters %}
 
+{% block title %}Войти{% endblock %}
 {% block login %}
     <div class="container py-5">
         <h5>Войти</h5>
@@ -11,7 +12,7 @@
             {% csrf_token %}
             {{ login_form|crispy }}
             <button class="btn btn-primary" type="submit">Войти</button>
-            <p class="text-center">
+            <p class="text-center auth-refs">
                 Вы еще не зарегистрированы? <a href="{% url 'dashboard_users:register' %}">
                 <br> Зарегистрируйтесь и ожидайте подтверждения администратором.
             </a>
