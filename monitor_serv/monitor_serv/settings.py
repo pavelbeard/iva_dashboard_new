@@ -193,4 +193,7 @@ MESSAGE_TAGS = {
     messages.ERROR: 'alert-danger',
  }
 
+MAIL_TO_DEV = os.getenv("MAIL_TO_DEV", "borodinpa@css.rzd")
+CALL_TO_DEV = os.getenv("CALL_TO_DEV", "77619")
+
 APP_VERSION = "v0.6.94"

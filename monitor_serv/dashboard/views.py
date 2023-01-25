@@ -18,6 +18,8 @@ from . import models
 # Create your views.py here.
 
 app_version = settings.APP_VERSION
+mail_to = settings.MAIL_TO_DEV
+call_to = settings.CALL_TO_DEV
 
 
 def index_view(request):
@@ -35,7 +37,7 @@ def index_view(request):
     return render(
         request=request,
         template_name="base/2_index.html",
-        context={"app_version": app_version, "index": True}
+        context={"app_version": app_version, "index": True, "mail_to": mail_to, "call_to": call_to}
     )
 
 
