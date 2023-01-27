@@ -27,11 +27,11 @@
         <script type="text/javascript">
             $(function () {
                 $("#signupForm").modalForm({
-                    formURL: "{% url 'dashboard_users:signup' %}"
+                    formURL: {# "{% url 'dashboard_users:signup' %}" #}
                 });
 
                 $("#loginForm").modalForm({
-                    formURL: "{% url 'dashboard_users:login' %}"
+                    formURL: {# "{% url 'dashboard_users:login' %}" #}
                 });
             });
         </script>
@@ -61,7 +61,7 @@
             <div class="d-flex justify-content-center">
                 <div class="mb-2 auth-refs">
                     <a href="{% url 'dashboard_users:login' %}">Войдите</a> или
-                    <a href="{% url 'dashboard_users:login' %}">зарегистрируйтесь</a>
+                    <a href="{% url 'dashboard_users:register' %}">зарегистрируйтесь</a>
                 </div>
             </div>
         </div>

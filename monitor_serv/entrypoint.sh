@@ -1,6 +1,6 @@
 #!/bin/bash
 
-if [ "$POSTGRES_DB_NAME" = "iva_dashboard_db" ]
+if [ "$POSTGRES_DB_NAME" = "iva_dashboard" ]
 then
   echo "Waiting for postgres..."
   
@@ -14,5 +14,6 @@ fi
 
 python3.11 manage.py migrate --noinput
 python3.11 manage.py collectstatic --noinput --clear
+python3.11 manage.py createsuperuser --noinput
 
 exec "$@"

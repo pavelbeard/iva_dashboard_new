@@ -13,8 +13,6 @@ services:
         ipv4_address: 2.0.96.4
     ports:
       - "8004:80"
-    depends_on:
-      - monitor-server
     restart: always
 
   monitor-server:
@@ -33,6 +31,7 @@ services:
         ipv4_address: 2.0.96.3
     depends_on:
       - monitor-postgres
+      - monitor-nginx
     restart: always
 
   monitor-postgres:
@@ -40,9 +39,9 @@ services:
     container_name: monitor-postgres
     env_file:
       - monitor_postgres_assemble_files/prod.monitor-postgres.env
-    volumes:
+#    volumes:
       # заменить на ~/postgres-files
-      - ./postgres-files:/var/lib/postgresql/data
+#      - ./postgres-files:/var/lib/postgresql/data
     networks:
       iva_dashboard_net:
         ipv4_address: 2.0.96.2

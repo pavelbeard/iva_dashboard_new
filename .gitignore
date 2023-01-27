@@ -2,7 +2,6 @@
 *test.*
 *.log
 *.log.*
-*.env
 *.http
 *.sql
 /postgres-files
