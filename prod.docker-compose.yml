@@ -39,9 +39,6 @@ services:
     container_name: monitor-postgres
     env_file:
       - monitor_postgres_assemble_files/prod.monitor-postgres.env
-#    volumes:
-      # заменить на ~/postgres-files
-#      - ./postgres-files:/var/lib/postgresql/data
     networks:
       iva_dashboard_net:
         ipv4_address: 2.0.96.2

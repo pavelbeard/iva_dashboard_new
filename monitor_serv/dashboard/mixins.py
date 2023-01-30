@@ -52,7 +52,7 @@ class ServerAnalysisMixin(generic.ListView):
 
             for rd, target in zip(response_data, targets):
                 if rd is not None:
-                    rd['id'] = f"{target.get('host')}:{target.get('port')}"
+                    rd['id'] = f"{target.get('host').replace('.', '')}{target.get('port')}"
                     rd['role'] = f"{target.get('role')}"
 
             return http.JsonResponse(json.dumps(response_data), safe=False)

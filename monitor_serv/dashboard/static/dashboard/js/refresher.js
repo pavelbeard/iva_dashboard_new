@@ -1,50 +1,31 @@
 import {zip} from "./extensions.js";
 
+function dropdownTitle(hostId, html, cardPart) {
+    $(document).ready(function () {
+            $(`div#${hostId}.server`).find(cardPart).hover(function () {
+                $(this).addClass('show');
+                $(this).find('.dropdown-menu').addClass('show');
+                $(this).find('.dropdown-menu').html(html);
+            }, function () {
+                $(this).removeClass('show');
+                $(this).find('.dropdown-menu').removeClass('show');
+                $(this).find('.dropdown-menu').empty()
+            });
+        });
+}
+
 function uptime(data, host) {
     let status = data[0]["uptime"] !== undefined;
 
-    host.childNodes[1].title = status ? data[0]["uptime"] : "";
-}
-
-// TODO: Переедет в файл уровня детализации
-function netAnalysisDetail(data, host) {
-    let status = data[0]["interface"] !== undefined;
-    let cmdNotFound = data[0]["command_not_found"] !== undefined
-
-    // status
-
-    host.childNodes[3].childNodes[9].style.backgroundColor = status ? "#69ff4e" : cmdNotFound ? "#ff0000" : "#bebdbd";
-    host.childNodes[3].childNodes[9].childNodes[2].textContent = status ? "UP" : cmdNotFound ? "DOWN" : "iftop n/a";
-
     if (status) {
-        //int
-        let iface = status ? data[0]["interface"] : "";
-
-        //-5 elems
-        let lastFiveElems = data.slice(-5,);
-        let allRate = "".concat(lastFiveElems
-            .map(el => `${Object.keys(el)[0]}: last2s: ${Object.values(el)[0].last2s} | last10s: ${Object.values(el)[0].last10s} | last40s: ${Object.values(el)[0].last40s}`))
-            .replace(/,/g, '\n');
-
-        let remainingItems = data.slice(1, -5);
-
-        let remainingResult = "".concat(remainingItems.flatMap(el => {
-            if (el.from !== undefined) {
-                return `from: ${el.from} | last2s: ${el.last2s} | last10s: ${el.last10s} | last40s: ${el.last40s} | cumulative: ${el.cumulative}\n`;
-            } else {
-                return `to: ${el.to} | last2s: ${el.last2s} | last10s: ${el.last10s} | last40s: ${el.last40s} | cumulative: ${el.cumulative}\n`;
-            }
-        })).replace(/,/g, "\n");
-
-        host.childNodes[3].childNodes[9].title = `${iface}\n${remainingResult}\n${allRate}`
+        let html = `<li><a class="dropdown-item">${data[0]["uptime"]}</a></li>`;
+        dropdownTitle(host.id, html, '.server-img.dropend');
     }
-
 }
 
 function netAnalysis(data, host) {
     let status = data[0]["iface"] !== undefined
     let cmdNotFound = data[0]["command_not_found"] !== undefined
-
 
     host.childNodes[3].childNodes[9].childNodes[1].src = status ?
         "/static/dashboard/images/dashboard-ethernet-up.svg" :
@@ -53,189 +34,217 @@ function netAnalysis(data, host) {
     host.childNodes[3].childNodes[9].childNodes[2].textContent = status ? "UP" : cmdNotFound ? "DOWN" : "N/A" ;
 
     if (status) {
-        let ifaces = data.map(i => `interface: ${i["iface"]} - status: ${i["status"]}\n`);
-        let ipAddresses = data.map(i => `ip address: ${i["ipaddress"]}\n`);
-        let rxBytes = data.map(i => `RX bytes: ${i["rx_bytes"]}\n`);
-        let rxPackets = data.map(i => `RX packets: ${i["rx_packets"]}\n`);
-        let rxErrors = data.map(i => `RX errors: ${Object.entries(i["rx_errors"])}\n`)
-            .map(i => i.replace(/,(?!\d+)/g, ' | ').replace(/,(?=\d+)/g, '='))
-        let txBytes = data.map(i => `TX bytes: ${i["tx_bytes"]}\n`);
-        let txPackets = data.map(i => `TX packets: ${i["tx_packets"]}\n`);
-        let txErrors = data.map(i => `TX errors: ${Object.entries(i["tx_errors"])}\n\n`)
-            .map(i => i.replace(/,(?!\d+)/g, ' | ').replace(/,(?=\d+)/g, '='))
+        let ifaces =
+            data.map(i => `<li><a class="dropdown-item">interface: ${i["iface"]} - status: ${i["status"]}</a></li>`);
+        let ipAddresses =
+            data.map(i => `<li><a class="dropdown-item">ip address: ${i["ipaddress"]}</a></li>`);
+        let rxBytes =
+            data.map(i => `<li><a class="dropdown-item">RX bytes: ${i["rx_bytes"]}</a></li>`);
+        let rxPackets =
+            data.map(i => `<li><a class="dropdown-item">RX packets: ${i["rx_packets"]}</a></li>`);
+        let rxErrors = data.map(i =>
+            `<li><a class="dropdown-item">RX errors: ${Object.entries(i["rx_errors"])}</a></li>`
+        ).map(
+            i => i.replace(/,(?!\d+)/g, ' | ').replace(/,(?=\d+)/g, '=')
+        );
+        let txBytes = data.map(i =>
+            `<li><a class="dropdown-item">TX bytes: ${i["tx_bytes"]}</a> </li>`
+        );
+        let txPackets = data.map(i =>
+            `<li><a class="dropdown-item">TX packets: ${i["tx_packets"]}</a></li>`
+        );
+        let divider =  `<li><hr class="dropdown-divider"></li>`;
+        let txErrors = data.map(i =>
+            `<li><a class="dropdown-item">TX errors: ${Object.entries(i["tx_errors"])}</a></li>${divider}`
+        ).map(i => i.replace(/,(?!\d+)/g, ' | ').replace(/,(?=\d+)/g, '='));
 
         let titleInfo = [...zip(ifaces, ipAddresses, rxBytes, rxPackets, rxErrors, txBytes, txPackets, txErrors)];
 
-        host.childNodes[3].childNodes[9].title = "".concat(titleInfo).replace(/,/g, "");
-    } else {
-        host.childNodes[3].childNodes[9].title = ""
+        // host.childNodes[3].childNodes[9].title = "".concat(titleInfo).replace(/,/g, "");
+        dropdownTitle(
+            host.id, ``.concat(titleInfo).replace(/,/g, ""),
+            '.server-network.dropend')
     }
-
 }
 
 
 function fileSysAnalysisParts(data, host) {
-    let err = data[0].filesystem !== undefined
-
-    // percentage
-    let mostValuablePartUsePercent = err ? data[data.length - 1]["most_valuable_part_use_percent"] : "";
-
-    //style
+    let status = data[0]["filesystem"] !== undefined;
     let na = "/static/dashboard/images/dashboard-ssd-card.svg"
+
     try {
-        let threshold = parseFloat(mostValuablePartUsePercent.slice(0,-1))
-        if (threshold > 0.0 && threshold < 50.0) {
-            host.childNodes[3].childNodes[5].childNodes[1].src =
-                "/static/dashboard/images/dashboard-ssd-card-normal.svg";
-        } else if (threshold > 50.0 && threshold < 75.0) {
-            host.childNodes[3].childNodes[5].childNodes[1].src =
-                "/static/dashboard/images/dashboard-ssd-card-warning.svg";
-        } else if (threshold > 75.0 && threshold <= 100.0) {
-            host.childNodes[3].childNodes[5].childNodes[1].src =
-                "/static/dashboard/images/dashboard-ssd-card-danger.svg";
-        } else if (!err) {
+        if (status) {
+            // percentage
+            let mostValuablePartUsePercent = data[data.length - 1]["most_valuable_part_use_percent"];
+
+            //style
+            let threshold = parseFloat(mostValuablePartUsePercent.slice(0,-1))
+            if (threshold > 0.0 && threshold < 50.0) {
+                host.childNodes[3].childNodes[5].childNodes[1].src =
+                    "/static/dashboard/images/dashboard-ssd-card-normal.svg";
+            } else if (threshold > 50.0 && threshold < 75.0) {
+                host.childNodes[3].childNodes[5].childNodes[1].src =
+                    "/static/dashboard/images/dashboard-ssd-card-warning.svg";
+            } else if (threshold > 75.0 && threshold <= 100.0) {
+                host.childNodes[3].childNodes[5].childNodes[1].src =
+                    "/static/dashboard/images/dashboard-ssd-card-danger.svg";
+            }
+
+            let totalDiskSize = data[data.length - 6]["total_disk_size"];
+            let mostValuablePartFs = data[data.length - 5]["most_valuable_part_fs"];
+            let mostValuablePartSize = data[data.length - 4]["most_valuable_part_size"];
+            let mostValuablePartUsed = data[data.length - 3]["most_valuable_part_used"];
+            let mostValuablePartAvailable = data[data.length - 2]["most_valuable_part_available"];
+
+            host.childNodes[3].childNodes[5].childNodes[2].textContent = `${mostValuablePartUsePercent}`;
+
+            //title
+            //filesystem size used available use% mounted on
+
+            let slicedData = data.slice(0, -6);
+            let htmlCols = "".concat(Object.keys(slicedData[0])).replace(/,/g, " | ")
+            let cols = `<li><a class="dropdown-item">${htmlCols}</a></li>`;
+            let slicedArray = slicedData.map(el =>
+                `<li><a class="dropdown-item">${el.filesystem} | ${el.size} | ${el.used} | ${el.available} | ${el.use_percent} | ${el.mounted_on}</a></li>`
+            )
+            let htmlTitle = "".concat(slicedArray).replace(/,/g, "");
+            let title = `<li><a class="dropdown-item">${htmlTitle}</a></li>`
+
+            let html = `
+                <li><a class="dropdown-item">Total disk size: ${totalDiskSize}</a></li>
+                <li><a class="dropdown-item">MVP Fs: ${mostValuablePartFs}</a></li>
+                <li><a class="dropdown-item">${mostValuablePartFs} size: ${mostValuablePartSize}</a></li>
+                <li><a class="dropdown-item">${mostValuablePartFs} size used: ${mostValuablePartUsed}</a></li>
+                <li><a class="dropdown-item">${mostValuablePartFs} size available: ${mostValuablePartAvailable}</a></li>
+                <li><a class="dropdown-item">${mostValuablePartFs} size use in %: ${mostValuablePartUsePercent}</a></li>
+            ` + cols + title;
+
+            dropdownTitle(host.id, html, '.server-disk.dropend');
+
+        } else {
             throw new Error("N/A");
         }
     } catch (e) {
         host.childNodes[3].childNodes[5].childNodes[1].src = na;
+        host.childNodes[3].childNodes[5].childNodes[2].textContent = "N/A";
         console.log(e);
     }
-
-    let totalDiskSize = err ? data[data.length - 6]["total_disk_size"] : "";
-    let mostValuablePartFs = err ? data[data.length - 5]["most_valuable_part_fs"] : "";
-    let mostValuablePartSize = err ? data[data.length - 4]["most_valuable_part_size"] : "";
-    let mostValuablePartUsed = err ? data[data.length - 3]["most_valuable_part_used"] : "";
-    let mostValuablePartAvailable = err ? data[data.length - 2]["most_valuable_part_available"] : "";
-
-
-    host.childNodes[3].childNodes[5].childNodes[2].textContent = err ? `${mostValuablePartUsePercent}` : "N/A";
-
-    //title
-    //filesystem size used available use% mounted on
-
-    if (err) {
-        let slicedData = data.slice(0, -6);
-        let cols = "".concat(Object.keys(slicedData[0])).replace(/,/g, " | ") + "\n"
-        let slicedArray = slicedData
-            .map(el => `${el.filesystem} | ${el.size} | ${el.used} | ${el.available} | ${el.use_percent} | ${el.mounted_on}`);
-
-        let title = "".concat(slicedArray).replace(/,/g, "\n");
-
-        host.childNodes[3].childNodes[5].title =
-            `Total disk size: ${totalDiskSize}\n` +
-            `MVP fs: ${mostValuablePartFs}\n` +
-            `${mostValuablePartFs} size: ${mostValuablePartSize}\n` +
-            `${mostValuablePartFs} size used: ${mostValuablePartUsed}\n` +
-            `${mostValuablePartFs} size available: ${mostValuablePartAvailable}\n` +
-            `${mostValuablePartFs} size use in %: ${mostValuablePartUsePercent}\n\n` +
-            cols + title;
-    } else {
-        host.childNodes[3].childNodes[5].title = "";
-    }
-
 }
 
 function ramAnalysis(data, host) {
-    let err = data[0]["ram_util"] !== undefined;
-
+    let status = data[0]["ram_util"] !== undefined;
     let na = "/static/dashboard/images/dashboard-ram.svg"
+
     try {
-        let threshold = parseFloat(data[0]["ram_util"])
-        if (threshold > 0.0 && threshold < 50.0) {
-            host.childNodes[3].childNodes[3].childNodes[1].src =
-                "/static/dashboard/images/dashboard-ram-normal.svg";
-        } else if (threshold > 50.0 && threshold < 75.0) {
-            host.childNodes[3].childNodes[3].childNodes[1].src =
-                "/static/dashboard/images/dashboard-ram-warning.svg";
-        } else if (threshold > 75.0 && threshold <= 100.0) {
-            host.childNodes[3].childNodes[3].childNodes[1].src =
-                "/static/dashboard/images/dashboard-ram-danger.svg";
-        } else if (!err) {
+        if (status) {
+            let threshold = parseFloat(data[0]["ram_util"])
+            if (threshold > 0.0 && threshold < 50.0) {
+                host.childNodes[3].childNodes[3].childNodes[1].src =
+                    "/static/dashboard/images/dashboard-ram-normal.svg";
+            } else if (threshold > 50.0 && threshold < 75.0) {
+                host.childNodes[3].childNodes[3].childNodes[1].src =
+                    "/static/dashboard/images/dashboard-ram-warning.svg";
+            } else if (threshold > 75.0 && threshold <= 100.0) {
+                host.childNodes[3].childNodes[3].childNodes[1].src =
+                    "/static/dashboard/images/dashboard-ram-danger.svg";
+            }
+
+            let total = `<li><a class="dropdown-item">Total RAM: ${data[1]["ram_total"].trim()}GB</a></li>`;
+            let free = `<li><a class="dropdown-item">Free RAM: ${data[2]["ram_free"].trim()}GB</a></li>`;
+            let used = `<li><a class="dropdown-item">Used RAM: ${data[3]["ram_used"].trim()}GB</a></li>`;
+
+            host.childNodes[3].childNodes[3].childNodes[2].textContent = data[0]["ram_util"].trim() + "%";
+
+            dropdownTitle(host.id, total + free + used, '.server-ram.dropend');
+
+        } else {
             throw new Error("N/A");
         }
     } catch (e) {
         host.childNodes[3].childNodes[3].childNodes[1].src = na;
-        console.log(e)
+        console.log(e);
     }
-
-
-    host.childNodes[3].childNodes[3].childNodes[2].textContent = err ? `${data[0]["ram_util"]}%` : "N/A";
-
-    let total = err ? data[1]["ram_total"].trim() : "";
-    let free = err ? data[2]["ram_free"].trim() : "";
-    let used = err ? data[3]["ram_used"].trim() : "";
-
-    host.childNodes[3].childNodes[3]
-        .title = err ? `Total RAM: ${total}GB\nFree RAM: ${free}GB\nUsed RAM: ${used}GB` : ""
 }
 
-function cpuAnalysis(data, host) {
-    let err = data[0]["cpu_load"] !== undefined;
+function cpuTopAnalysis(data, host) {
+    let status = data[0]["all_cores"] !== undefined;
+    let na = "/static/dashboard/images/dashboard-cpu.svg";
 
-    let na = "/static/dashboard/images/dashboard-cpu.svg"
     try {
-        let threshold = parseFloat(data[0]["cpu_load"]);
-        if (threshold > 0.0 && threshold < 50.0) {
-            host.childNodes[3].childNodes[1].childNodes[1].src =
-                "/static/dashboard/images/dashboard-cpu-normal.svg";
-        } else if (threshold > 50.0 && threshold < 75.0) {
-            host.childNodes[3].childNodes[1].childNodes[1].src =
-                "/static/dashboard/images/dashboard-cpu-warning.svg";
-        } else if (threshold > 75.0 && threshold <= 100.0) {
-            host.childNodes[3].childNodes[1].childNodes[1].src =
-                "/static/dashboard/images/dashboard-cpu-danger.svg";
-        } else if (!err) {
+        if (status) {
+            let threshold = parseFloat(data[0]["all_cores"]["cpu_load"]);
+            if (threshold > 0.0 && threshold < 50.0) {
+                host.childNodes[3].childNodes[1].childNodes[1].src =
+                    "/static/dashboard/images/dashboard-cpu-normal.svg";
+            } else if (threshold > 50.0 && threshold < 75.0) {
+                host.childNodes[3].childNodes[1].childNodes[1].src =
+                    "/static/dashboard/images/dashboard-cpu-warning.svg";
+            } else if (threshold > 75.0 && threshold <= 100.0) {
+                host.childNodes[3].childNodes[1].childNodes[1].src =
+                    "/static/dashboard/images/dashboard-cpu-danger.svg";
+            }
+
+            host.childNodes[3].childNodes[1].childNodes[2].textContent = data[0]["all_cores"]["cpu_load"] + "%";
+
+            let cores = "";
+
+            for (let core = 0; core < data[1]["each_core"].length; core++) {
+                cores += `<li><a class="dropdown-item">Core${core}: ${data[1]["each_core"][core][`core${core}`]}%</a></li>`
+            }
+
+            dropdownTitle(host.id, cores, '.server-cpu.dropend')
+
+        } else {
             throw new Error("N/A");
         }
     } catch (e) {
+        host.childNodes[3].childNodes[1].childNodes[2].textContent = "N/A";
         host.childNodes[3].childNodes[1].childNodes[1].src = na;
         console.log(e)
     }
 
-    host.childNodes[3].childNodes[1].childNodes[2].textContent = err ? `${data[0]["cpu_load"]}%` : "N/A";
-
-    //вывод всех ядер и количества ядер
-    let core = 0
-    let cores  = err ? "".concat(data.slice(2, -1).map(el => `Core ${core++}: ${Object.values(el)[0]}%`))
-        .replace( /,/g, '\n') : "";
-
-    host.childNodes[3].childNodes[1]
-        .title = err ? `CPU idle: ${data[1]["cpu_idle"]}%\nCPU cores: ${data[data.length - 1]["cpu_cores"]}\n`
-        + cores  : "";
 
 }
 
 function execAnalysis(data, host) {
-    let err = data[0]["status"] !== undefined;
+    let status = data[0]["status"] !== undefined;
 
-    let processesArray = data.map(el => {
-        let st = ''
-        switch (el["status"]) {
-            case 'running':
-                st += ' [+]'
-                break
-            case 'stopped':
-                st += ' [-]'
-                break
-            default:
-                st += ' [?]'
-                break
+    try {
+        if (status) {
+            let processesArray = data.map(el => {
+                let st = ''
+                switch (el["status"]) {
+                    case 'running':
+                        st += ' [+]'
+                        break
+                    case 'stopped':
+                        st += ' [-]'
+                        break
+                    default:
+                        st += ' [?]'
+                        break
+                }
+                return `<li><a class="dropdown-item">${el["service"]}: ${el["status"]}${st}</a></li>`;
+            });
+
+            let processesTooltip, processesCount;
+
+            [processesTooltip, processesCount] = ["".concat(processesArray).replace(/,/g, '\n'),
+                processesArray.length];
+
+            //processes
+            host.childNodes[3].childNodes[7].childNodes[2].textContent = processesCount;
+            host.childNodes[3].childNodes[7].childNodes[1].src = "/static/dashboard/images/dashboard-apps-normal.svg";
+
+            dropdownTitle(host.id, processesTooltip, '.server-processes.dropend')
+
+        } else {
+            throw new Error("N/A");
         }
-        return `${el["service"]}: ${el["status"]}${st}`;
-    });
-    let processesTooltip, processesCount;
-
-    [processesTooltip, processesCount] = ["".concat(processesArray).replace(/,/g, '\n'),
-        processesArray.length];
-
-    //processes
-    host.childNodes[3].childNodes[7].title = err ? processesTooltip : "";
-    host.childNodes[3].childNodes[7].childNodes[1].src =
-        err ? "/static/dashboard/images/dashboard-apps-normal.svg" :
-            "/static/dashboard/images/dashboard-apps.svg";
-    host.childNodes[3].childNodes[7].childNodes[2].textContent = err ? processesCount : 0;
-
-
+    } catch (e) {
+        host.childNodes[3].childNodes[7].childNodes[2].textContent = 0;
+        host.childNodes[3].childNodes[7].childNodes[1].src = "/static/dashboard/images/dashboard-apps.svg";
+    }
 }
 
 function updateServerNode(hostname, data, id, server_role, callback) {
@@ -244,7 +253,7 @@ function updateServerNode(hostname, data, id, server_role, callback) {
     let err = data[0]["connection_error"] === undefined;
 
     // set hostname
-    host.childNodes[1].childNodes[1].childNodes[3].textContent = err  ? hostname : "Хост недоступен\n";
+    host.childNodes[1].childNodes[1].childNodes[5].textContent = err  ? hostname : "Хост недоступен\n";
 
     // server status
 
@@ -339,7 +348,7 @@ async function getInterval(url, method, headers) {
 }
 
 async function inspectServers() {
-    setTimeout(getMetrics, 0,"cpu-info/", "GET", headers, cpuAnalysis);
+    setTimeout(getMetrics, 0,"cpu-top-info/", "GET", headers, cpuTopAnalysis);
     setTimeout(getMetrics, 0,"ram-info/", "GET", headers, ramAnalysis);
     setTimeout(getMetrics, 0,"disk-info/", "GET", headers, fileSysAnalysisParts);
     setTimeout(getMetrics, 0,"processes/", "GET", headers, execAnalysis);

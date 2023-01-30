@@ -122,22 +122,56 @@ class TestAuth(TestCase):
         pass
 
 
+def add_targets():
+    from logic import pass_handler
+    from django.conf import settings
+
+    key = settings.ENCRYPTION_KEY
+
+    encrypted_passwd = pass_handler.encrypt_pass(password="test", encryption_key=key)
+
+    query = [
+        models.Target(
+            address="2.0.96.5", port=22, username="test", password=encrypted_passwd,
+            server_role=models.Target.ServerRole.MEDIA
+        ),
+        models.Target(
+            address="2.0.96.6", port=22, username="test", password=encrypted_passwd,
+            server_role=models.Target.ServerRole.MEDIA
+        ),
+        # models.Target(
+        #     address="192.168.248.4", port=2249, username="info-admin", password="Rt3$YiOO",
+        #     server_role=models.Target.ServerRole.HEAD
+        # ),
+    ]
+
+    for q in query:
+        q.save()
+
+
 class DashboardTests(TestCase):
     @classmethod
     def add_targets(cls):
+        from logic import pass_handler
+        from django.conf import settings
+
+        key = settings.ENCRYPTION_KEY
+
+        encrypted_passwd = pass_handler.encrypt_pass(password="test", encryption_key=key)
+
         query = [
             models.Target(
-                address="2.0.96.5", port=22, username="test", password="test",
+                address="2.0.96.5", port=22, username="test", password=encrypted_passwd,
                 server_role=models.Target.ServerRole.MEDIA
             ),
             models.Target(
-                address="2.0.96.6", port=22, username="test", password="test",
+                address="2.0.96.6", port=22, username="test", password=encrypted_passwd,
                 server_role=models.Target.ServerRole.MEDIA
             ),
-            models.Target(
-                address="192.168.248.4", port=2249, username="info-admin", password="Rt3$YiOO",
-                server_role=models.Target.ServerRole.HEAD
-            ),
+            # models.Target(
+            #     address="192.168.248.4", port=2249, username="info-admin", password="Rt3$YiOO",
+            #     server_role=models.Target.ServerRole.HEAD
+            # ),
         ]
 
         for q in query:
@@ -148,8 +182,9 @@ class DashboardTests(TestCase):
         return models.Target.objects.all()
 
     def setUp(self) -> None:
-        self.add_targets()
-        self.targets = self.get_targets()
+        # self.add_targets()
+        # self.targets = self.get_targets()
+        self.targets = None
 
     def test_index(self):
         response = self.client.get(urls.reverse("dashboard"))
@@ -157,6 +192,12 @@ class DashboardTests(TestCase):
 
     def test_cpu_info(self):
         response: http.JsonResponse = self.client.get(urls.reverse("dashboard:cpu_info"))
+        pprint(json.loads(response.content))
+        self.assertEqual(response.status_code, 200)
+
+    def test_cpu_top_info(self):
+        add_targets()
+        response: http.JsonResponse = self.client.get(urls.reverse("dashboard:cpu_top_info"))
         pprint(json.loads(response.content))
         self.assertEqual(response.status_code, 200)
 

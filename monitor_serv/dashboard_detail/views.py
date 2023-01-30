@@ -16,3 +16,7 @@ class NetDetail(mixins.ServerAnalysisDetailMixin):
     # UPD: дано разрешение выполнять команду iftop без прав админа: sudo chmod +s $(which /usr/sbin/iftop)
     cmd = "uname -n && /usr/sbin/iftop -t -s 1 -P"
     callback_iva_metrics_handler = IvaMetricsHandler.net_analysis_detail
+
+
+# TODO: class LoadAverage
+# TODO: class CPUUsageDetail

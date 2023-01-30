@@ -154,6 +154,45 @@ class IvaMetricsHandler:
         return {"hostname": hostname, "task": cls.exec_analysis.__name__, "data": processes_list}
 
     @classmethod
+    def _cpu_analysis(cls, cpu_data, core_num: int = None):
+        idle = cpu_data.get('id').strip()
+        total = sum(map(lambda i: float(i), (v for v in cpu_data.values())))
+
+        key = "cpu_load" if core_num is None else f"core{core_num}"
+
+        if total != 0:
+            cpu_data |= {key: f"{(1 - float(idle) / total) * 100:10.2f}".strip()}
+        else:
+            cpu_data |= {key: f"{(1 - float(idle)) * 100:10.2f}".strip()}
+
+    @classmethod
+    def cpu_top_analysis(cls, data: str):
+        """
+        Выводит информацию о загрузке процессора, количестве ядер и загрузку каждого ядра.\n
+        :param data: Данные о загрузке процессора
+        :return: {}
+        """
+        if type(data) == dict:
+            return cls.error_result(cls.cpu_analysis.__name__)
+
+        hostname, all_cores, *each_core = data.split("\n")
+
+        if 'no connection with server.' in all_cores:
+            return {"hostname": hostname, "task": cls.cpu_analysis.__name__, "data": [{"connection_error": True}]}
+
+        all_cores_data = {i[-2:]: i[:-2] for i in re.split(",\s+|,", all_cores.split(":")[1].strip()[:-1])}
+        each_core_data = [{i[-2:]: i[:-2] for i in re.split(",\s+|,", x.split(":")[1].strip())} for x in each_core[:-1]]
+
+        cls._cpu_analysis(cpu_data=all_cores_data)
+
+        for num, core in enumerate(each_core_data):
+            cls._cpu_analysis(cpu_data=core, core_num=num)
+
+        tmp_data = [{"all_cores": all_cores_data}, {"each_core": each_core_data}]
+
+        return {"hostname": hostname, "task": cls.cpu_analysis.__name__, "data": tmp_data}
+
+    @classmethod
     def cpu_analysis(cls, data: str) -> {}:
         """
         Выводит информацию о загрузке процессора, количестве ядер и загрузку каждого ядра.\n
@@ -187,7 +226,7 @@ class IvaMetricsHandler:
                 {"cpu_idle": f"{100 - cpu_load:10.2f}".strip()},
             ]
 
-            # cpu load even core
+            # cpu load every core
             for num, core in enumerate(remaining_cores[:-1]):
                 idle, total = re.split(split_pattern, core)[1:][3].split()[0], \
                     sum(map(lambda x: float(x.split()[0]), re.split(split_pattern, core)[1:]))
@@ -463,8 +502,6 @@ class DataAccessLayerServer:
 
         exist_server: models.Server = await models.Server.objects.aget(target_uuid=query.target_uuid)
 
-
-
         #
         # if len(exist_server) > 0:
         #     pass
@@ -482,5 +519,5 @@ class DataAccessLayerServer:
     def __insert_into_server(cls, query: models.Server):
         print(query)
         query.save()
-    pass
 
+    pass

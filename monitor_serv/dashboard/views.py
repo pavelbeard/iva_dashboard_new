@@ -45,7 +45,9 @@ def index_view(request):
 @cache_control(no_cache=True, must_revalidate=True, no_store=True)
 def dashboard_view(request):
     targets = models.Target.objects.all()
-    addresses = [{"address": f"{target.address}:{target.port}", "role": target.server_role} for target in targets]
+    addresses = [{"address": f"{target.address}:{target.port}",
+                  "id": f"{target.address.replace('.', '')}{target.port}", "role": target.server_role}
+                 for target in targets]
     return render(
         request=request,
         template_name="base/4_dashboard.html",
@@ -62,6 +64,11 @@ class CPU(mixins.ServerAnalysisMixin):
     # cmd = "echo $[100-$(vmstat 1 2|tail -1|awk '{print $15}')] && lscpu | egrep 'CPU\(s\):'"
     cmd = 'uname -n && top -bn 1 | grep -P "^(%)" && top 1 -w 70 -bn 1 | grep -P "^(%)"'
     callback_iva_metrics_handler = IvaMetricsHandler.cpu_analysis
+
+
+class CPUTop(mixins.ServerAnalysisMixin):
+    cmd = 'uname -n && top -bn 1 -d.2 | grep "Cpu" && top 1 -w 70 -bn 1 | grep -P "^(%)"'
+    callback_iva_metrics_handler = IvaMetricsHandler.cpu_top_analysis
 
 
 class RAM(mixins.ServerAnalysisMixin):

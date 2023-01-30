@@ -5,7 +5,6 @@ from django.contrib.auth.models import AbstractUser
 from django.utils.translation import gettext_lazy as _
 import uuid
 
-
 # Create your models here.
 SERVER_ROLE = (
     ('media', "MEDIA"),
@@ -53,15 +52,31 @@ class Server(models.Model):
 class CPU(models.Model):
     uuid_record = fields.UUIDField(default=uuid.uuid4, primary_key=True)
     cpu_cores = fields.IntegerField(null=False, default=0, verbose_name="Количество ядер:")
-    cpu_load = fields.FloatField(null=False, default=0, verbose_name="Загрузка процессора %:")
+    # cpu_load = fields.FloatField(null=False, default=0, verbose_name="Загрузка процессора %:")
     cpu_idle = fields.FloatField(null=False, default=0, verbose_name="Простой процессора %:")
+    cpu_iowait = fields.FloatField(null=False, default=0, verbose_name="Ожидание ввода/вывода %:")
+    cpu_irq = fields.FloatField(null=False, default=0, verbose_name="Запросы на прерывание %:")
+    cpu_nice = fields.FloatField(null=False, default=0, verbose_name="'Приятная' загрузка процессора %:")
+    cpu_softirq = fields.FloatField(null=False, default=0, verbose_name="Программные прерывания %:")
+    cpu_steal = fields.FloatField(null=False, default=0, verbose_name="Нехватка времени в ВМ %:")
+    cpu_sys = fields.FloatField(null=False, default=0, verbose_name='Системное время %:')
+    cpu_user = fields.FloatField(null=False, default=0, verbose_name='Пользовательское время %:')
     record_date = fields.DateTimeField(auto_now=True, null=False, verbose_name="Время сканирования:")
+
+    # TODO: idle, iowait, irq, nice, softirq, steal, system, user
 
     server_id = models.ForeignKey(Server, on_delete=models.CASCADE, verbose_name="Сервер:")
 
     def __str__(self):
         return f"Server(server_id={self.server_id}, cpu_cores={self.cpu_cores}, " \
-               f"cpu_load={self.cpu_load}, cpu_idle={self.cpu_idle}, record_date={self.record_date})"
+               f"cpu_idle={self.cpu_idle}, cpu_iowait={self.cpu_iowait}, " \
+               f"cpu_irq={self.cpu_irq}, cpu_nice={self.cpu_nice}, " \
+               f"cpu_softirq={self.cpu_softirq}, cpu_steal={self.cpu_steal}, " \
+               f"cpu_sys={self.cpu_sys}, cpu_user={self.cpu_user}, " \
+               f"record_date={self.record_date})"
+
+
+# TODO: class LoadAverage:
 
 
 class RAM(models.Model):
