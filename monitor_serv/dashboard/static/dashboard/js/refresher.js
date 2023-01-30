@@ -2,16 +2,16 @@ import {zip} from "./extensions.js";
 
 function dropdownTitle(hostId, html, cardPart) {
     $(document).ready(function () {
-            $(`div#${hostId}.server`).find(cardPart).hover(function () {
-                $(this).addClass('show');
-                $(this).find('.dropdown-menu').addClass('show');
-                $(this).find('.dropdown-menu').html(html);
-            }, function () {
-                $(this).removeClass('show');
-                $(this).find('.dropdown-menu').removeClass('show');
-                $(this).find('.dropdown-menu').empty()
-            });
+        $(`div#${hostId}.server`).find(cardPart).hover(function () {
+            $(this).addClass('show');
+            $(this).find('.dropdown-menu').addClass('show');
+            $(this).find('.dropdown-menu').html(html);
+        }, function () {
+            $(this).removeClass('show');
+            $(this).find('.dropdown-menu').removeClass('show');
+            $(this).find('.dropdown-menu').empty()
         });
+    });
 }
 
 function uptime(data, host) {
@@ -31,7 +31,7 @@ function netAnalysis(data, host) {
         "/static/dashboard/images/dashboard-ethernet-up.svg" :
         cmdNotFound ? "/static/dashboard/images/dashboard-ethernet-down.svg" :
              "/static/dashboard/images/dashboard-ethernet.svg";
-    host.childNodes[3].childNodes[9].childNodes[2].textContent = status ? "UP" : cmdNotFound ? "DOWN" : "N/A" ;
+    host.childNodes[3].childNodes[9].childNodes[3].childNodes[1].textContent = status ? "UP" : cmdNotFound ? "DOWN" : "N/A" ;
 
     if (status) {
         let ifaces =
@@ -63,7 +63,7 @@ function netAnalysis(data, host) {
         // host.childNodes[3].childNodes[9].title = "".concat(titleInfo).replace(/,/g, "");
         dropdownTitle(
             host.id, ``.concat(titleInfo).replace(/,/g, ""),
-            '.server-network.dropend')
+            '.server-network-text.dropend')
     }
 }
 
@@ -96,7 +96,7 @@ function fileSysAnalysisParts(data, host) {
             let mostValuablePartUsed = data[data.length - 3]["most_valuable_part_used"];
             let mostValuablePartAvailable = data[data.length - 2]["most_valuable_part_available"];
 
-            host.childNodes[3].childNodes[5].childNodes[2].textContent = `${mostValuablePartUsePercent}`;
+            host.childNodes[3].childNodes[5].childNodes[3].childNodes[1].textContent = `${mostValuablePartUsePercent}`;
 
             //title
             //filesystem size used available use% mounted on
@@ -119,14 +119,14 @@ function fileSysAnalysisParts(data, host) {
                 <li><a class="dropdown-item">${mostValuablePartFs} size use in %: ${mostValuablePartUsePercent}</a></li>
             ` + cols + title;
 
-            dropdownTitle(host.id, html, '.server-disk.dropend');
+            dropdownTitle(host.id, html, '.server-disk-text.dropend');
 
         } else {
             throw new Error("N/A");
         }
     } catch (e) {
         host.childNodes[3].childNodes[5].childNodes[1].src = na;
-        host.childNodes[3].childNodes[5].childNodes[2].textContent = "N/A";
+        host.childNodes[3].childNodes[5].childNodes[3].childNodes[1].textContent = "N/A";
         console.log(e);
     }
 }
@@ -153,9 +153,9 @@ function ramAnalysis(data, host) {
             let free = `<li><a class="dropdown-item">Free RAM: ${data[2]["ram_free"].trim()}GB</a></li>`;
             let used = `<li><a class="dropdown-item">Used RAM: ${data[3]["ram_used"].trim()}GB</a></li>`;
 
-            host.childNodes[3].childNodes[3].childNodes[2].textContent = data[0]["ram_util"].trim() + "%";
+            host.childNodes[3].childNodes[3].childNodes[3].childNodes[1].textContent = data[0]["ram_util"].trim() + "%";
 
-            dropdownTitle(host.id, total + free + used, '.server-ram.dropend');
+            dropdownTitle(host.id, total + free + used, '.server-ram-text.dropend');
 
         } else {
             throw new Error("N/A");
@@ -184,7 +184,7 @@ function cpuTopAnalysis(data, host) {
                     "/static/dashboard/images/dashboard-cpu-danger.svg";
             }
 
-            host.childNodes[3].childNodes[1].childNodes[2].textContent = data[0]["all_cores"]["cpu_load"] + "%";
+            host.childNodes[3].childNodes[1].childNodes[3].childNodes[1].textContent = data[0]["all_cores"]["cpu_load"] + "%";
 
             let cores = "";
 
@@ -192,7 +192,7 @@ function cpuTopAnalysis(data, host) {
                 cores += `<li><a class="dropdown-item">Core${core}: ${data[1]["each_core"][core][`core${core}`]}%</a></li>`
             }
 
-            dropdownTitle(host.id, cores, '.server-cpu.dropend')
+            dropdownTitle(host.id, cores, '.server-cpu-text.dropend')
 
         } else {
             throw new Error("N/A");
@@ -233,16 +233,16 @@ function execAnalysis(data, host) {
                 processesArray.length];
 
             //processes
-            host.childNodes[3].childNodes[7].childNodes[2].textContent = processesCount;
+            host.childNodes[3].childNodes[7].childNodes[3].childNodes[1].textContent = processesCount;
             host.childNodes[3].childNodes[7].childNodes[1].src = "/static/dashboard/images/dashboard-apps-normal.svg";
 
-            dropdownTitle(host.id, processesTooltip, '.server-processes.dropend')
+            dropdownTitle(host.id, processesTooltip, '.server-apps-text.dropend')
 
         } else {
             throw new Error("N/A");
         }
     } catch (e) {
-        host.childNodes[3].childNodes[7].childNodes[2].textContent = 0;
+        host.childNodes[3].childNodes[7].childNodes[3].childNodes[1].textContent = 0;
         host.childNodes[3].childNodes[7].childNodes[1].src = "/static/dashboard/images/dashboard-apps.svg";
     }
 }
@@ -253,7 +253,7 @@ function updateServerNode(hostname, data, id, server_role, callback) {
     let err = data[0]["connection_error"] === undefined;
 
     // set hostname
-    host.childNodes[1].childNodes[1].childNodes[5].textContent = err  ? hostname : "Хост недоступен\n";
+    host.childNodes[1].childNodes[1].childNodes[7].textContent = err  ? hostname : "Хост недоступен\n";
 
     // server status
 
@@ -280,7 +280,7 @@ function monitorUnavailable(servers, reason) {
         // title
         server.childNodes[1].childNodes[1].childNodes[3].setAttribute('style', 'white-space: pre;')
         server.childNodes[1].childNodes[1].childNodes[3].textContent = reason
-        server.childNodes[1].childNodes[1].childNodes[5].textContent = "no data"
+        server.childNodes[1].childNodes[1].childNodes[7].textContent = "no data"
         // server status
         server.childNodes[1].childNodes[1].style.backgroundColor = bg_unavailable
 
@@ -289,8 +289,7 @@ function monitorUnavailable(servers, reason) {
         for (let i = 1; i < server_info_pane.length; i += 2) {
             // изменяем все индикаторы
             server_info_pane[i].style.backgroundColor = bg_unavailable
-            server_info_pane[i].title = ""
-            server_info_pane[i].childNodes[2].textContent = "?  "
+                server_info_pane[i].childNodes[2].textContent = "?  "
         }
     }
 }

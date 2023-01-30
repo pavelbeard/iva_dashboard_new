@@ -1,0 +1,12 @@
+{% load static %}
+
+<div class="server-indicator server-disk">
+    <img class="server-info-icon"
+         width="64"
+         src="{% static "dashboard/images/dashboard-ssd-card.svg" %}"
+         alt="server-disk">
+    <div class="server-disk-text dropend">
+        <p data-bs-toggle="dropdown">N/A</p>
+        <ul class="dropdown-menu"></ul>
+    </div>
+</div>

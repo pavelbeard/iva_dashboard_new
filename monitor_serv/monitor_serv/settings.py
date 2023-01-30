@@ -196,4 +196,4 @@ MESSAGE_TAGS = {
 MAIL_TO_DEV = os.getenv("MAIL_TO_DEV", "borodinpa@css.rzd")
 CALL_TO_DEV = os.getenv("CALL_TO_DEV", "77619")
 
-APP_VERSION = "v0.7.1"
+APP_VERSION = "v0.7.2"

@@ -9,7 +9,6 @@ urlpatterns = [
     urls.path('main/', include([
         urls.path('', views.dashboard_view, name="dashboard"),
         urls.path('processes/', views.Processes.as_view(), name="processes"),
-        urls.path('cpu-info/', views.CPU.as_view(), name="cpu_info"),
         urls.path('cpu-top-info/', views.CPUTop.as_view(), name="cpu_top_info"),
         urls.path('ram-info/', views.RAM.as_view(), name="ram_info"),
         urls.path('disk-info/', views.DiskSpace.as_view(), name="disk_info"),

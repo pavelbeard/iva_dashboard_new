@@ -4,9 +4,9 @@ import aiohttp
 import yaml
 from aiohttp import web
 from asgiref.sync import sync_to_async
-
 from dashboard import models
 
+# TODO: убрать хостнеймы и создать обработчик 
 
 class ValidationException(Exception):
     def __init__(self, message):

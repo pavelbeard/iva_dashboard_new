@@ -10,8 +10,11 @@ from django.http import HttpResponseRedirect
 from django.shortcuts import render
 from django.urls import reverse_lazy
 from django.views.decorators.cache import cache_control
+from logic import(
+    IvaMetricsHandler,
+    DataAccessLayerServer,
+)
 
-from logic import IvaMetricsHandler, DataAccessLayerServer
 from . import mixins
 from . import models
 
@@ -60,18 +63,15 @@ class Processes(mixins.ServerAnalysisMixin):
     callback_iva_metrics_handler = IvaMetricsHandler.exec_analysis
 
 
-class CPU(mixins.ServerAnalysisMixin):
-    # cmd = "echo $[100-$(vmstat 1 2|tail -1|awk '{print $15}')] && lscpu | egrep 'CPU\(s\):'"
-    cmd = 'uname -n && top -bn 1 | grep -P "^(%)" && top 1 -w 70 -bn 1 | grep -P "^(%)"'
-    callback_iva_metrics_handler = IvaMetricsHandler.cpu_analysis
-
-
 class CPUTop(mixins.ServerAnalysisMixin):
+    model = models.CPU
+    template_name = "dashboard/parts/1_server.html"
     cmd = 'uname -n && top -bn 1 -d.2 | grep "Cpu" && top 1 -w 70 -bn 1 | grep -P "^(%)"'
     callback_iva_metrics_handler = IvaMetricsHandler.cpu_top_analysis
 
 
 class RAM(mixins.ServerAnalysisMixin):
+    model = models.RAM
     cmd = "uname -n && free -k"
     callback_iva_metrics_handler = IvaMetricsHandler.ram_analysis
 
@@ -83,11 +83,13 @@ class DiskSpace(mixins.ServerAnalysisMixin):
     #
     # UPD: дано разрешение выполнять команду du без прав админа: sudo chmod +s $(which du)
     # UPD: "du -sh --exclude=mnt --exclude=proc /" - не используется из-за огромной нагрузки на процессор
+    model = models.DiskSpace
     cmd = 'uname -n && df -h && lsblk | grep -E "^sda"'
     callback_iva_metrics_handler = IvaMetricsHandler.file_sys_analysis
 
 
 class Net(mixins.ServerAnalysisMixin):
+    model = models.NetInterface
     cmd = "uname -n && /usr/sbin/ifconfig"
     callback_iva_metrics_handler = IvaMetricsHandler.net_analysis
 
@@ -110,6 +112,7 @@ def get_interval(request):
 
 
 class ServerData(mixins.ServerAnalysisMixin):
+    model = models.Server
     cmd = "uname -n && uname -r && cat /etc/os-release"
     callback_iva_metrics_handler = IvaMetricsHandler.hostnamectl
     callback_data_access_layer = DataAccessLayerServer.check_server_data

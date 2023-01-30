@@ -1,0 +1,12 @@
+{% load static %}
+
+<div class="server-indicator server-ram">
+    <img class="server-info-icon"
+         width="64"
+         src="{% static "dashboard/images/dashboard-ram.svg" %}"
+         alt="server-ram">
+    <div class="server-ram-text dropend">
+        <p data-bs-toggle="dropdown">N/A%</p>
+        <ul class="dropdown-menu"></ul>
+    </div>
+</div>

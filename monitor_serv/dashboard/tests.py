@@ -197,7 +197,7 @@ class DashboardTests(TestCase):
 
     def test_cpu_top_info(self):
         add_targets()
-        response: http.JsonResponse = self.client.get(urls.reverse("dashboard:cpu_top_info"))
+        response = self.client.get(urls.reverse("dashboard:cpu_top_info"))
         pprint(json.loads(response.content))
         self.assertEqual(response.status_code, 200)
 

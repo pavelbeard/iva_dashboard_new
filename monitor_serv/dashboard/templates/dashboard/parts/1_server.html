@@ -1,0 +1,19 @@
+{% load static %}
+
+{% for address in addresses %}
+    <div class="server" id="{{ address.id }}">
+        <div class="server-left-part">
+            {% include "dashboard/parts/2_server-img.html" %}
+            <div class="server-empty justify-content-center">
+                {# Свободное место #}
+            </div>
+        </div>
+        <div class="server-info">
+            {% include "dashboard/parts/3_server-cpu.html" %}
+            {% include "dashboard/parts/4_server-ram.html" %}
+            {% include "dashboard/parts/5_server-disk.html" %}
+            {% include "dashboard/parts/6_server-apps.html" %}
+            {% include "dashboard/parts/7_server-network.html" %}
+        </div>
+    </div>
+{% endfor %}
