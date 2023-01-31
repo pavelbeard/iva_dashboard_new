@@ -207,6 +207,12 @@ class DashboardTests(TestCase):
         self.assertEqual(response.status_code, 200)
         # self.assertContains(response, )
 
+    def test_ram_info(self):
+        add_targets()
+        response = self.client.get(urls.reverse("dashboard:ram_info"))
+        pprint(json.loads(response.content))
+        self.assertEqual(response.status_code, 200)
+
     def test_net_info(self):
         response: http.JsonResponse = self.client.get(urls.reverse("dashboard:net_info"))
         print(json.loads(response.content))

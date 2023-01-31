@@ -14,6 +14,12 @@ function dropdownTitle(hostId, html, cardPart) {
     });
 }
 
+function hostnamectl(data, host) {
+    let status = data[0]["hostname"] !== undefined;
+    // set hostname
+    host.childNodes[1].childNodes[1].childNodes[7].textContent = status  ? data[0]["hostname"] : "Хост недоступен\n";
+}
+
 function uptime(data, host) {
     let status = data[0]["uptime"] !== undefined;
 
@@ -247,13 +253,9 @@ function execAnalysis(data, host) {
     }
 }
 
-function updateServerNode(hostname, data, id, server_role, callback) {
+function updateServerNode(data, id, server_role, callback) {
     let host = document.getElementById(id);
-
     let err = data[0]["connection_error"] === undefined;
-
-    // set hostname
-    host.childNodes[1].childNodes[1].childNodes[7].textContent = err  ? hostname : "Хост недоступен\n";
 
     // server status
 
@@ -312,7 +314,7 @@ function redrawTableElements(parsedData, callback) {
         monitorUnavailable(document
             .getElementsByClassName('server'), 'Целевые хосты\r\nне найдены!')
     else
-        parsedData.forEach(el => updateServerNode(el.hostname, el.data, el.id, el.role, callback));
+        parsedData.forEach(el => updateServerNode(el.data, el.id, el.role, callback));
 
 }
 
@@ -347,6 +349,7 @@ async function getInterval(url, method, headers) {
 }
 
 async function inspectServers() {
+    setTimeout(getMetrics, 0,"hostnamectl/", "GET", headers, hostnamectl)
     setTimeout(getMetrics, 0,"cpu-top-info/", "GET", headers, cpuTopAnalysis);
     setTimeout(getMetrics, 0,"ram-info/", "GET", headers, ramAnalysis);
     setTimeout(getMetrics, 0,"disk-info/", "GET", headers, fileSysAnalysisParts);
@@ -361,7 +364,6 @@ async function inspectServers() {
 // main //
 setTimeout(async function () {
     await inspectServers();
-    setTimeout(getMetrics, 0, 'dal/hostnamectl/', "GET")
     let interval = await getInterval("interval/", "GET", headers);
     setInterval(inspectServers, interval);
 }, 0);

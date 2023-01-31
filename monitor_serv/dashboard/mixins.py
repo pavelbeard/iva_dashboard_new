@@ -25,14 +25,25 @@ class ServerAnalysisMixin(generic.ListView):
     server_config_file = settings.SERVER_CONFIG_FILE
     encryption_key = settings.ENCRYPTION_KEY
 
-    @classmethod
-    def _update_response_data(cls, response_data: list, targets: list) -> {}:
+    @staticmethod
+    def _json_response(data) -> http.JsonResponse:
+        return http.JsonResponse(json.dumps(data), safe=False)
+
+    @staticmethod
+    def _update_response_data(response_data: list, targets: list):
+        """Вспомогательный метод для дополнения ответных данных"""
         for rd, target in zip(response_data, targets):
             if rd is not None:
                 rd['id'] = f"{target.get('host').replace('.', '')}{target.get('port')}"
                 rd['role'] = f"{target.get('role')}"
 
-    async def _get_targets(self):
+    async def _scrape_data(self, targets, scraper):
+        data = await scraper.scrape_metrics_from_agent()
+
+        return [self.callback_iva_metrics_handler(d) for d in data]
+
+    async def _get_targets(self) -> list:
+        """Воспомогательный метод для получения целевых хостов"""
         query = self.__target.objects.all()
         targets = [
             {
@@ -42,7 +53,7 @@ class ServerAnalysisMixin(generic.ListView):
                 "password": pass_handler.decrypt_pass(self.encryption_key, q.password),
                 "cmd": self.cmd,
                 "role": q.server_role,
-            } async for q in query
+            } async for q in query if q.is_being_scan
         ]
 
         if len(targets) == 0:
@@ -53,28 +64,27 @@ class ServerAnalysisMixin(generic.ListView):
     async def get(self, request, *args, **kwargs):
         scraper = None
         try:
+            # get targets
             targets = await self._get_targets()
+
+            # scrape data
             scraper = IvaMetrics(targets={"hosts": targets}, server_config_path=self.server_config_file)
-            data = await scraper.scrape_metrics_from_agent()
+            response_data = await self._scrape_data(targets, scraper)
 
-            response_data = [self.callback_iva_metrics_handler(d) for d in data]
-
-            # TODO: добавить экспорт метрик в базу данных
-            tasks_export_to_db = None
-
+            # update data
             self._update_response_data(response_data, targets)
 
-            return http.JsonResponse(json.dumps(response_data), safe=False)
+            # send to db
+
+            # return!
+            return self._json_response(response_data)
         except aiohttp.ClientConnectionError:
-            return http.JsonResponse(json.dumps({"ClientConnectionError": f"{scraper.monitor_url} is unreachable."}),
-                                     safe=False)
+            return self._json_response({"ClientConnectionError": f"{scraper.monitor_url} is unreachable."})
         except utils.ProgrammingError:
-            return http.JsonResponse(json.dumps({"ProgrammingError": "The table 'Targets' is not exists!"}),
-                                     safe=False)
+            return self._json_response({"ProgrammingError": "The table 'Targets' is not exists!"})
         except FileNotFoundError:
-            return http.JsonResponse(json.dumps({"FileNotFoundError": "Config file not found."}),
-                                     safe=False)
+            return self._json_response({"FileNotFoundError": "Config file not found."})
         except TargetsIsEmpty as tie:
-            return http.JsonResponse(json.dumps({"TargetsIsEmpty": tie.message}), safe=False)
+            return self._json_response({"TargetsIsEmpty": tie.message})
         except ValidationException as err:
-            return http.JsonResponse(json.dumps({"ValidationException": err.message}), safe=False)
+            return self._json_response({"ValidationException": err.message})

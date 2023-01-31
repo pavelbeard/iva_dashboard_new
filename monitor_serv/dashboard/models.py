@@ -1,6 +1,5 @@
 from django.db import models
 from django.db.models import fields
-from django.contrib.auth.hashers import BCryptSHA256PasswordHasher, make_password
 from django.contrib.auth.models import AbstractUser
 from django.utils.translation import gettext_lazy as _
 import uuid
@@ -22,8 +21,16 @@ class Target(models.Model):
     port = fields.SmallIntegerField(null=False, verbose_name="Порт сервера:")
     username = fields.CharField(max_length=32, null=False, verbose_name="Логин сервера:")
     password = fields.CharField(max_length=255, null=False, verbose_name="Пароль сервера:")
-    server_role = fields.CharField(max_length=6, choices=ServerRole.choices, default=ServerRole.MEDIA,
-                                   verbose_name="Роль сервера:")
+    server_role = fields.CharField(
+        max_length=6, choices=ServerRole.choices, default=ServerRole.MEDIA,
+        verbose_name="Роль сервера:"
+    )
+    # данные сервера
+    hostname = fields.CharField(max_length=64, blank=True, editable=False, verbose_name="Имя сервера:")
+    os = fields.CharField(max_length=32, blank=True, editable=False, verbose_name="Операционная система:")
+    kernel = fields.CharField(max_length=64, blank=True, editable=False, verbose_name="Ядро ОС:")
+
+    is_being_scan = fields.BooleanField(default=True, verbose_name="Сервер сканируется?")
 
     class Meta:
         verbose_name = "Целевой хост"
@@ -31,28 +38,13 @@ class Target(models.Model):
 
     def __str__(self):
         return f"Target(address={self.address}, port={self.port}, username={self.username}, " \
+               f"hostname={self.hostname}, os={self.os}, kernel={self.kernel}, " \
                f"server_role={self.server_role})"
-
-
-class Server(models.Model):
-    hostname = fields.CharField(max_length=64, null=False, default="none", verbose_name="Имя сервера:")
-    os = fields.CharField(max_length=32, null=False, default="none", verbose_name="Операционная система:")
-    kernel = fields.CharField(max_length=64, null=False, default="none", verbose_name="Ядро ОС:")
-
-    server = models.OneToOneField(Target, on_delete=models.CASCADE, verbose_name="Целевой хост:", primary_key=True)
-
-    class Meta:
-        verbose_name = "Данные сервера"
-        verbose_name_plural = "Данные сервера"
-
-    def __str__(self):
-        return f"Server(hostname={self.hostname}, os={self.os}, kernel={self.kernel})"
 
 
 class CPU(models.Model):
     uuid_record = fields.UUIDField(default=uuid.uuid4, primary_key=True)
     cpu_cores = fields.IntegerField(null=False, default=0, verbose_name="Количество ядер:")
-    # cpu_load = fields.FloatField(null=False, default=0, verbose_name="Загрузка процессора %:")
     cpu_idle = fields.FloatField(null=False, default=0, verbose_name="Простой процессора %:")
     cpu_iowait = fields.FloatField(null=False, default=0, verbose_name="Ожидание ввода/вывода %:")
     cpu_irq = fields.FloatField(null=False, default=0, verbose_name="Запросы на прерывание %:")
@@ -61,11 +53,10 @@ class CPU(models.Model):
     cpu_steal = fields.FloatField(null=False, default=0, verbose_name="Нехватка времени в ВМ %:")
     cpu_sys = fields.FloatField(null=False, default=0, verbose_name='Системное время %:')
     cpu_user = fields.FloatField(null=False, default=0, verbose_name='Пользовательское время %:')
+    cpu_util = fields.FloatField(null=False, default=0, verbose_name="Загрузка процессора %:")
     record_date = fields.DateTimeField(auto_now=True, null=False, verbose_name="Время сканирования:")
 
-    # TODO: idle, iowait, irq, nice, softirq, steal, system, user
-
-    server_id = models.ForeignKey(Server, on_delete=models.CASCADE, verbose_name="Сервер:")
+    server_id = models.ForeignKey(Target, on_delete=models.CASCADE, verbose_name="Сервер:")
 
     def __str__(self):
         return f"Server(server_id={self.server_id}, cpu_cores={self.cpu_cores}, " \
@@ -76,21 +67,25 @@ class CPU(models.Model):
                f"record_date={self.record_date})"
 
 
-# TODO: class LoadAverage:
-
-
 class RAM(models.Model):
     uuid_record = fields.UUIDField(default=uuid.uuid4, primary_key=True)
     total_ram = fields.FloatField(null=False, default=0, verbose_name="Всего RAM:")
-    ram_free = fields.FloatField(null=False, default=0, verbose_name="Свободной памяти:")
     ram_used = fields.FloatField(null=False, default=0, verbose_name="Занятой памяти:")
+    ram_free = fields.FloatField(null=False, default=0, verbose_name="Свободной памяти:")
+    ram_shared = fields.FloatField(null=False, default=0, verbose_name="Общей памяти:")
+    ram_buff_cached = fields.FloatField(null=False, default=0, verbose_name="Буферизованной/кэшированной памяти:")
+    ram_avail = fields.FloatField(null=False, default=0, verbose_name="Доступной памяти:")
+    ram_util = fields.FloatField(null=False, default=0, verbose_name="Загрузка памяти %:")
     record_date = fields.DateTimeField(auto_now=True, null=False, verbose_name="Время сканирования:")
 
-    server_id = models.ForeignKey(Server, on_delete=models.CASCADE, verbose_name="Сервер:")
+    server_id = models.ForeignKey(Target, on_delete=models.CASCADE, verbose_name="Сервер:")
 
     def __str__(self):
         return f"Server(server_id={self.server_id}, total_ram={self.total_ram}, " \
-               f"ram_free={self.ram_free}, ram_used={self.ram_used}, record_date={self.record_date})"
+               f"ram_free={self.ram_free}, ram_used={self.ram_used}, " \
+               f"ram_shared={self.ram_shared}, ram_buff_cached={self.ram_buff_cached}, " \
+               f"ram_avail={self.ram_avail}, ram_util={self.ram_util}" \
+               f"record_date={self.record_date})"
 
 
 class DiskSpace(models.Model):
@@ -103,7 +98,7 @@ class DiskSpace(models.Model):
     mounted_on = fields.CharField(null=False, default="none", max_length=128, verbose_name="Подключено к:")
     record_date = fields.DateTimeField(auto_now=True, null=False, verbose_name="Время сканирования:")
 
-    server_id = models.ForeignKey(Server, on_delete=models.CASCADE, verbose_name="Сервер:")
+    server_id = models.ForeignKey(Target, on_delete=models.CASCADE, verbose_name="Сервер:")
 
     def __str__(self):
         return f"Server(server_id={self.server_id}, file_system={self.file_system}, " \
@@ -132,7 +127,7 @@ class NetInterface(models.Model):
     tx_errors_collisions = fields.FloatField(null=False, default=0, verbose_name="Отправлено пакетов с коллизиями:")
     record_date = fields.DateTimeField(auto_now=True, null=False, verbose_name="Время сканирования:")
 
-    server_id = models.ForeignKey(Server, on_delete=models.CASCADE, verbose_name="Сервер:")
+    server_id = models.ForeignKey(Target, on_delete=models.CASCADE, verbose_name="Сервер:")
 
     def __str__(self):
         return f"Server(server_id={self.server_id}, interface={self.interface}, " \
@@ -143,9 +138,3 @@ class NetInterface(models.Model):
                f"tx_errors_dropped={self.tx_errors_dropped}, tx_errors_overruns={self.tx_errors_overruns}, " \
                f"tx_errors_carrier={self.tx_errors_carrier}, tx_errors_collisions={self.tx_errors_collisions}, " \
                f"record_date={self.record_date})"
-
-    # TODO: Закончить перевод полей для verbose_names
-
-# Не нужно
-# class Services(models.Model):
-#     uuid_record = fields.UUIDField(default=uuid.uuid4, primary_key=True)

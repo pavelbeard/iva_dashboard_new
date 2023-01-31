@@ -6,11 +6,6 @@ from . import forms
 
 # Register your models here.
 
-@admin.register(dashboard_models.Server)
-class ServerAdmin(admin.ModelAdmin):
-    pass
-
-
 @admin.register(dashboard_models.Target)
 class TargetAdmin(admin.ModelAdmin):
     form = forms.TargetForm

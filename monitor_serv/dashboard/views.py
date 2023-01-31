@@ -28,8 +28,6 @@ call_to = settings.CALL_TO_DEV
 def index_view(request):
     if request.user.is_authenticated:
         return HttpResponseRedirect(redirect_to=reverse_lazy("dashboard:dashboard"))
-    # elif not request.user.is_active:
-    #     messages.info(request, 'Дождитесь активации вашего аккаунта администратором')
     else:
 
         storage = get_messages(request)
@@ -50,7 +48,7 @@ def dashboard_view(request):
     targets = models.Target.objects.all()
     addresses = [{"address": f"{target.address}:{target.port}",
                   "id": f"{target.address.replace('.', '')}{target.port}", "role": target.server_role}
-                 for target in targets]
+                 for target in targets if target.is_being_scan]
     return render(
         request=request,
         template_name="base/4_dashboard.html",
@@ -59,20 +57,20 @@ def dashboard_view(request):
 
 
 class Processes(mixins.ServerAnalysisMixin):
-    cmd = "uname -n && /usr/sbin/service --status-all"
+    cmd = "/usr/sbin/service --status-all"
     callback_iva_metrics_handler = IvaMetricsHandler.exec_analysis
 
 
 class CPUTop(mixins.ServerAnalysisMixin):
     model = models.CPU
     template_name = "dashboard/parts/1_server.html"
-    cmd = 'uname -n && top -bn 1 -d.2 | grep "Cpu" && top 1 -w 70 -bn 1 | grep -P "^(%)"'
+    cmd = 'top -bn 1 -d.2 | grep "Cpu" && top 1 -w 70 -bn 1 | grep -P "^(%)"'
     callback_iva_metrics_handler = IvaMetricsHandler.cpu_top_analysis
 
 
 class RAM(mixins.ServerAnalysisMixin):
     model = models.RAM
-    cmd = "uname -n && free -k"
+    cmd = "free -kh --si"
     callback_iva_metrics_handler = IvaMetricsHandler.ram_analysis
 
 
@@ -84,13 +82,13 @@ class DiskSpace(mixins.ServerAnalysisMixin):
     # UPD: дано разрешение выполнять команду du без прав админа: sudo chmod +s $(which du)
     # UPD: "du -sh --exclude=mnt --exclude=proc /" - не используется из-за огромной нагрузки на процессор
     model = models.DiskSpace
-    cmd = 'uname -n && df -h && lsblk | grep -E "^sda"'
+    cmd = 'df -h && lsblk | grep -E "^sda"'
     callback_iva_metrics_handler = IvaMetricsHandler.file_sys_analysis
 
 
 class Net(mixins.ServerAnalysisMixin):
     model = models.NetInterface
-    cmd = "uname -n && /usr/sbin/ifconfig"
+    cmd = "/usr/sbin/ifconfig"
     callback_iva_metrics_handler = IvaMetricsHandler.net_analysis
 
 
@@ -112,7 +110,7 @@ def get_interval(request):
 
 
 class ServerData(mixins.ServerAnalysisMixin):
-    model = models.Server
+    model = models.Target
     cmd = "uname -n && uname -r && cat /etc/os-release"
     callback_iva_metrics_handler = IvaMetricsHandler.hostnamectl
     callback_data_access_layer = DataAccessLayerServer.check_server_data

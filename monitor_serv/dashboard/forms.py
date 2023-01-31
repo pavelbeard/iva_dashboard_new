@@ -18,4 +18,4 @@ class TargetForm(forms.ModelForm):
 
     class Meta:
         model = dashboard_models.Target
-        fields = ['address', 'port', 'username', 'password', 'server_role']
+        fields = ['address', 'port', 'username', 'password', 'server_role', 'is_being_scan']
