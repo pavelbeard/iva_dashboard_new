@@ -25,7 +25,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.getenv("SECRET_KEY", "change_me")
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.getenv("DEBUG", 1)
+DEBUG = os.getenv("DEBUG", True)
 
 ALLOWED_HOSTS = os.getenv("DJANGO_ALLOWED_HOSTS", default=["*"])
 
@@ -88,16 +88,32 @@ WSGI_APPLICATION = 'monitor_serv.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/4.1/ref/settings/#databases
 
+DATABASE_ROUTERS = (
+    'logic.database_routers.IvaDashboardRouter',
+)
+
 DATABASES = {
-    # TODO: Здесь будет еще одна база данных: ivcs ivcs
     'default': {
+        'ENGINE': "django.db.backends.sqlite3",
+        'NAME': "iva_dashboard.sqlite3",
+    },
+    'iva_dashboard': {
         'ENGINE': os.getenv("ENGINE", "django.db.backends.postgresql_psycopg2"),
         'NAME': os.getenv('POSTGRES_DB_NAME', "test_db"),
         'USER': os.getenv('POSTGRES_DB_USER', "test_db"),
         'PASSWORD': os.getenv('POSTGRES_DB_PASSWORD', "test_db"),
         'HOST': os.getenv('POSTGRES_DB_HOST', "localhost"),
         'PORT': os.getenv('POSTGRES_DB_PORT', "8002"),
+    },
+    'ivcs': {
+        'ENGINE': os.getenv("ENGINE", "django.db.backends.postgresql_psycopg2"),
+        'NAME': os.getenv('IVCS_POSTGRES_DB_NAME', "ivcs"),
+        'USER': os.getenv('IVCS_POSTGRES_DB_USER', "ivcs"),
+        'PASSWORD': os.getenv('IVCS_POSTGRES_DB_PASSWORD', "kbxa"),
+        'HOST': os.getenv('IVCS_POSTGRES_DB_HOST', "localhost"),
+        'PORT': os.getenv('IVCS_POSTGRES_DB_PORT', "8012")
     }
+
 }
 
 # Password validation
@@ -196,4 +212,4 @@ MESSAGE_TAGS = {
 MAIL_TO_DEV = os.getenv("MAIL_TO_DEV", "borodinpa@css.rzd")
 CALL_TO_DEV = os.getenv("CALL_TO_DEV", "77619")
 
-APP_VERSION = "v0.7.27"
+APP_VERSION = "v0.7.29"

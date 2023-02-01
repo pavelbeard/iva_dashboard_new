@@ -69,20 +69,7 @@ class CustomUser(AbstractUser):
     )
     groups = models.ManyToManyField(Group, blank=True, verbose_name="Группы")
 
-
-class StoredPassword(models.Model):
-    user = models.ForeignKey(
-        settings.AUTH_USER_MODEL,
-        on_delete=models.CASCADE,
-        editable=False
-    )
-    password = models.CharField(
-        'Хэш пароля',
-        max_length=255,
-        editable=False
-    )
-    date = models.DateTimeField(
-        'Дата',
-        auto_now_add=True,
-        editable=False
-    )
+    class Meta:
+        verbose_name = "Пользователь"
+        verbose_name_plural = "Пользователи"
+        app_label = "dashboard_users"

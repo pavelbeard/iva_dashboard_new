@@ -8,6 +8,7 @@ from django import urls
 from django.test import TestCase
 from django.test.runner import DiscoverRunner
 
+import logic.database_routers
 from . import forms
 from . import models
 
@@ -150,6 +151,8 @@ def add_targets():
 
 
 class DashboardTests(TestCase):
+    databases = '__all__'
+
     @classmethod
     def add_targets(cls):
         from logic import pass_handler

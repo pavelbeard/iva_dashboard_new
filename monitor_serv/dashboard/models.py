@@ -2,6 +2,7 @@ from django.db import models
 from django.db.models import fields
 from django.contrib.auth.models import AbstractUser
 from django.utils.translation import gettext_lazy as _
+from django.utils import timezone
 import uuid
 
 # Create your models here.
@@ -25,21 +26,34 @@ class Target(models.Model):
         max_length=6, choices=ServerRole.choices, default=ServerRole.MEDIA,
         verbose_name="Роль сервера:"
     )
-    # данные сервера
-    hostname = fields.CharField(max_length=64, blank=True, editable=False, verbose_name="Имя сервера:")
-    os = fields.CharField(max_length=32, blank=True, editable=False, verbose_name="Операционная система:")
-    kernel = fields.CharField(max_length=64, blank=True, editable=False, verbose_name="Ядро ОС:")
-
     is_being_scan = fields.BooleanField(default=True, verbose_name="Сервер сканируется?")
+
+    def __str__(self):
+        return f"Target(id={self.id}, ip={self.address}, port={self.port})"
 
     class Meta:
         verbose_name = "Целевой хост"
-        verbose_name_plural = "Целевые хосты"
+        verbose_name_plural = "1.Целевые хосты"
+        app_label = "dashboard"
+
+
+class ServerData(models.Model):
+    uuid_record = fields.UUIDField(default=uuid.uuid4, primary_key=True)
+    hostname = fields.CharField(max_length=64, blank=True, verbose_name="Имя сервера:")
+    os = fields.CharField(max_length=32, blank=True, verbose_name="Операционная система:")
+    kernel = fields.CharField(max_length=64, blank=True, verbose_name="Ядро ОС:")
+    record_date = fields.DateTimeField(default=timezone.now, null=False, verbose_name="Время сканирования:")
+
+    server_id = models.ForeignKey(Target, on_delete=models.CASCADE, verbose_name="Сервер:")
 
     def __str__(self):
-        return f"Target(address={self.address}, port={self.port}, username={self.username}, " \
-               f"hostname={self.hostname}, os={self.os}, kernel={self.kernel}, " \
-               f"server_role={self.server_role})"
+        return f"ServerData(uuid_record={self.uuid_record}, " \
+               f"record_date={self.record_date}, server_id={self.server_id_id})"
+
+    class Meta:
+        verbose_name = "Данные сервера"
+        verbose_name_plural = "2.Данные серверов"
+        app_label = "dashboard"
 
 
 class CPU(models.Model):
@@ -54,17 +68,18 @@ class CPU(models.Model):
     cpu_sys = fields.FloatField(null=False, default=0, verbose_name='Системное время %:')
     cpu_user = fields.FloatField(null=False, default=0, verbose_name='Пользовательское время %:')
     cpu_util = fields.FloatField(null=False, default=0, verbose_name="Загрузка процессора %:")
-    record_date = fields.DateTimeField(auto_now=True, null=False, verbose_name="Время сканирования:")
+    record_date = fields.DateTimeField(default=timezone.now, null=False, verbose_name="Время сканирования:")
 
     server_id = models.ForeignKey(Target, on_delete=models.CASCADE, verbose_name="Сервер:")
 
     def __str__(self):
-        return f"Server(server_id={self.server_id}, cpu_cores={self.cpu_cores}, " \
-               f"cpu_idle={self.cpu_idle}, cpu_iowait={self.cpu_iowait}, " \
-               f"cpu_irq={self.cpu_irq}, cpu_nice={self.cpu_nice}, " \
-               f"cpu_softirq={self.cpu_softirq}, cpu_steal={self.cpu_steal}, " \
-               f"cpu_sys={self.cpu_sys}, cpu_user={self.cpu_user}, " \
-               f"record_date={self.record_date})"
+        return f"CPU(uuid_record={self.uuid_record}, " \
+               f"record_date={self.record_date}, server_id={self.server_id_id})"
+
+    class Meta:
+        verbose_name = "Данные процессора"
+        verbose_name_plural = "3.Данные процессоров"
+        app_label = "dashboard"
 
 
 class RAM(models.Model):
@@ -76,16 +91,18 @@ class RAM(models.Model):
     ram_buff_cached = fields.FloatField(null=False, default=0, verbose_name="Буферизованной/кэшированной памяти:")
     ram_avail = fields.FloatField(null=False, default=0, verbose_name="Доступной памяти:")
     ram_util = fields.FloatField(null=False, default=0, verbose_name="Загрузка памяти %:")
-    record_date = fields.DateTimeField(auto_now=True, null=False, verbose_name="Время сканирования:")
+    record_date = fields.DateTimeField(default=timezone.now, null=False, verbose_name="Время сканирования:")
 
     server_id = models.ForeignKey(Target, on_delete=models.CASCADE, verbose_name="Сервер:")
 
     def __str__(self):
-        return f"Server(server_id={self.server_id}, total_ram={self.total_ram}, " \
-               f"ram_free={self.ram_free}, ram_used={self.ram_used}, " \
-               f"ram_shared={self.ram_shared}, ram_buff_cached={self.ram_buff_cached}, " \
-               f"ram_avail={self.ram_avail}, ram_util={self.ram_util}" \
-               f"record_date={self.record_date})"
+        return f"RAMData(uuid_record={self.uuid_record}, " \
+               f"record_date={self.record_date}, server_id={self.server_id_id})"
+
+    class Meta:
+        verbose_name = "Данные ОЗУ"
+        verbose_name_plural = "4.Данные ОЗУ"
+        app_label = "dashboard"
 
 
 class DiskSpace(models.Model):
@@ -96,15 +113,18 @@ class DiskSpace(models.Model):
     fs_used_prc = fields.FloatField(null=False, default=0, verbose_name="Занято в %:")
     fs_avail = fields.FloatField(null=False, default=0, verbose_name="Доступно:")
     mounted_on = fields.CharField(null=False, default="none", max_length=128, verbose_name="Подключено к:")
-    record_date = fields.DateTimeField(auto_now=True, null=False, verbose_name="Время сканирования:")
+    record_date = fields.DateTimeField(default=timezone.now, null=False, verbose_name="Время сканирования:")
 
     server_id = models.ForeignKey(Target, on_delete=models.CASCADE, verbose_name="Сервер:")
 
     def __str__(self):
-        return f"Server(server_id={self.server_id}, file_system={self.file_system}, " \
-               f"fs_size={self.fs_size}, fs_used={self.fs_used}, fs_used_prc={self.fs_used_prc} " \
-               f"fs_avail={self.fs_avail}, mounted_on={self.mounted_on}" \
-               f"record_date={self.record_date})"
+        return f"FileSystemData(uuid_record={self.uuid_record}, " \
+               f"record_date={self.record_date}, server_id={self.server_id_id})"
+
+    class Meta:
+        verbose_name = "Данные файлового накопителя"
+        verbose_name_plural = "5.Данные файловых накопителей"
+        app_label = "dashboard"
 
 
 class NetInterface(models.Model):
@@ -126,16 +146,15 @@ class NetInterface(models.Model):
                                              verbose_name="Перерасходованных при отправке пакетов:")
     tx_errors_carrier = fields.IntegerField(null=False, default=0, verbose_name='Пакетов с потерянными носителями :')
     tx_errors_collisions = fields.IntegerField(null=False, default=0, verbose_name="Отправлено пакетов с коллизиями:")
-    record_date = fields.DateTimeField(auto_now=True, null=False, verbose_name="Время сканирования:")
+    record_date = fields.DateTimeField(default=timezone.now, null=False, verbose_name="Время сканирования:")
 
     server_id = models.ForeignKey(Target, on_delete=models.CASCADE, verbose_name="Сервер:")
 
     def __str__(self):
-        return f"Server(server_id={self.server_id}, interface={self.interface}, " \
-               f"status={self.status}, ip_address={self.ip_address}, rx_bytes={self.rx_bytes}, " \
-               f"rx_packets={self.rx_packets}, rx_errors_dropped={self.rx_errors_dropped}, " \
-               f"rx_errors_overruns={self.rx_errors_overruns}, rx_errors_frame={self.rx_errors_frame}, " \
-               f"tx_bytes={self.tx_bytes}, tx_packets={self.tx_packets}, tx_errors_errors={self.tx_errors_errors}, " \
-               f"tx_errors_dropped={self.tx_errors_dropped}, tx_errors_overruns={self.tx_errors_overruns}, " \
-               f"tx_errors_carrier={self.tx_errors_carrier}, tx_errors_collisions={self.tx_errors_collisions}, " \
-               f"record_date={self.record_date})"
+        return f"NetData(uuid_record={self.uuid_record}, " \
+               f"record_date={self.record_date}, server_id={self.server_id_id})"
+
+    class Meta:
+        verbose_name = "Данные сетевых интерфейсов"
+        verbose_name_plural = "6.Данные сетевых интерфейсов"
+        app_label = "dashboard"

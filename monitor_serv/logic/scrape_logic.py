@@ -4,6 +4,8 @@ import aiohttp
 import yaml
 from aiohttp import web
 from asgiref.sync import sync_to_async
+from django.core.exceptions import ObjectDoesNotExist
+from django.utils import timezone
 
 from dashboard import models
 
@@ -391,14 +393,30 @@ class DataAccessLayerServer:
     @classmethod
     async def insert_server_data(cls, *args, **kwargs):
         t = kwargs.get('target')
-        data = kwargs.get("data").get('data')[0]
         pk = t.get("pk")
+        data = kwargs.get("data").get('data')[0]
 
         target = await models.Target.objects.aget(pk=pk)
-        target.hostname = data.get('hostname')
-        target.os = data.get('os')
-        target.kernel = data.get('kernel')
-        await sync_to_async(target.save)()
+
+        server_data, created = await models.ServerData.objects.aupdate_or_create(
+            server_id_id=pk,
+            defaults={
+                "hostname": data.get('hostname'),
+                "os": data.get('os'),
+                "kernel": data.get('kernel'),
+                "server_id": target,
+            }
+        )
+
+        if not created:
+            server_data.hostname = data.get('hostname'),
+            server_data.os = data.get('os'),
+            server_data.kernel = data.get('kernel'),
+            server_data.record_date = timezone.now()
+            await sync_to_async(server_data.save)()
+
+        else:
+            await sync_to_async(server_data.save)()
 
     @classmethod
     async def insert_cpu_data(cls, *args, **kwargs):
@@ -441,5 +459,3 @@ class DataAccessLayerServer:
                 server_id=target
             )
             await sync_to_async(q.save)()
-
-        pass

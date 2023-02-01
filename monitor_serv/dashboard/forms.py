@@ -19,3 +19,18 @@ class TargetForm(forms.ModelForm):
     class Meta:
         model = dashboard_models.Target
         fields = ['address', 'port', 'username', 'password', 'server_role', 'is_being_scan']
+
+
+class ServerDataForm(forms.ModelForm):
+    uuid_record = forms.UUIDField(disabled=True, label="UUID записи:")
+    hostname = forms.CharField(disabled=True, label="Имя сервера:")
+    os = forms.CharField(disabled=True, label="ОС Сервера:")
+    kernel = forms.CharField(disabled=True, label="Ядро ОС:")
+    record_date = forms.DateTimeField(disabled=True, label="Время сканирования:")
+    server_id = forms.ModelChoiceField(disabled=True, queryset=dashboard_models.Target.objects.all(),
+                                       label="Целевой хост:")
+
+    class Meta:
+        model = dashboard_models.ServerData
+        fields = "__all__"
+

@@ -6,11 +6,6 @@ from . import models
 # Register your models here.
 
 
-# class DashboardAdmin(AdminSite):
-#     site_title = gettext_lazy("")
-#     pass
-
-
 @admin.register(models.CustomUser)
 class CustomUserAdmin(UserAdmin):
     form = forms.UserChangeForm
