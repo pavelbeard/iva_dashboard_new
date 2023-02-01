@@ -3,6 +3,8 @@ import re
 import aiohttp
 import yaml
 from aiohttp import web
+from asgiref.sync import sync_to_async
+
 from dashboard import models
 
 
@@ -219,7 +221,7 @@ class IvaMetricsHandler:
         ram_avail = ram_data[0][5]
         ram_util = \
             f"{100 - (((float(ram_free[:-1]) + float(ram_buff_cache[:-1])) * 100) / float(ram_total[:-1])):10.2f}" \
-            .strip()
+                .strip()
 
         tmp_data = [
             {"ram_util": ram_util},
@@ -376,30 +378,68 @@ class IvaMetricsHandler:
         }
 
 
+# задаток
+class SendToDatabase:
+    def __init__(self, func):
+        self.func = func
+
+    def __call__(self, *args, **kwargs):
+        self.func(*args, **kwargs)
+
+
 class DataAccessLayerServer:
     @classmethod
-    async def check_server_data(cls, data: dict):
-        # query = models.Server(**data)
+    async def insert_server_data(cls, *args, **kwargs):
+        t = kwargs.get('target')
+        data = kwargs.get("data").get('data')[0]
+        pk = t.get("pk")
 
-        # exist_server: models.Server = await models.Server.objects.aget(target_uuid=query.target_uuid)
+        target = await models.Target.objects.aget(pk=pk)
+        target.hostname = data.get('hostname')
+        target.os = data.get('os')
+        target.kernel = data.get('kernel')
+        await sync_to_async(target.save)()
 
-        #
-        # if len(exist_server) > 0:
-        #     pass
-
-        # exist_server = await sync_to_async(models.Server.objects.get)(target_uuid=query.target_uuid)
-
-        # print(query)
-        # await sync_to_async(query.save)()
-        #
-        # return {"status": "ok"}
+    @classmethod
+    async def insert_cpu_data(cls, *args, **kwargs):
         pass
 
-    # SERVER CRUD
-    # Create
     @classmethod
-    def __insert_into_server(cls, query: models.Target):
-        print(query)
-        query.save()
+    async def insert_ram_data(cls, *args, **kwargs):
+        pass
+
+    @classmethod
+    async def insert_disk_data(cls, *args, **kwargs):
+        pass
+
+    @classmethod
+    async def insert_net_data(cls, *args, **kwargs):
+        t = kwargs.get('target')
+        data = kwargs.get('data').get('data')
+        pk = t.get('pk')
+
+        target = await models.Target.objects.aget(pk=pk)
+
+        for iface_data in data:
+            q = await models.NetInterface.objects.acreate(
+                interface=iface_data.get('iface'),
+                status=iface_data.get('status'),
+                ip_address=iface_data.get('ipaddress'),
+                rx_bytes=float(iface_data.get('rx_bytes')[:-2]),
+                rx_packets=iface_data.get('rx_packets'),
+                rx_errors_errors=iface_data.get('rx_errors').get('errors'),
+                rx_errors_dropped=iface_data.get('rx_errors').get('dropped'),
+                rx_errors_overruns=iface_data.get('rx_errors').get('overruns'),
+                rx_errors_frame=iface_data.get('rx_errors').get('frame'),
+                tx_bytes=float(iface_data.get('tx_bytes')[:-2]),
+                tx_packets=iface_data.get('tx_packets'),
+                tx_errors_errors=iface_data.get('tx_errors').get('errors'),
+                tx_errors_dropped=iface_data.get('tx_errors').get('dropped'),
+                tx_errors_overruns=iface_data.get('tx_errors').get('overruns'),
+                tx_errors_carrier=iface_data.get('tx_errors').get('carrier'),
+                tx_errors_collisions=iface_data.get('tx_errors').get('collisions'),
+                server_id=target
+            )
+            await sync_to_async(q.save)()
 
         pass

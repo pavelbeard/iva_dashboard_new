@@ -10,7 +10,7 @@ from django.http import HttpResponseRedirect
 from django.shortcuts import render
 from django.urls import reverse_lazy
 from django.views.decorators.cache import cache_control
-from logic import(
+from logic import (
     IvaMetricsHandler,
     DataAccessLayerServer,
 )
@@ -45,10 +45,15 @@ def index_view(request):
 @login_required(login_url=reverse_lazy("dashboard_users:login"))
 @cache_control(no_cache=True, must_revalidate=True, no_store=True)
 def dashboard_view(request):
-    targets = models.Target.objects.all()
-    addresses = [{"address": f"{target.address}:{target.port}",
-                  "id": f"{target.address.replace('.', '')}{target.port}", "role": target.server_role}
-                 for target in targets if target.is_being_scan]
+    targets = models.Target.objects.filter(is_being_scan=True)
+    addresses = [
+        {
+            "address": f"{target.address}:{target.port}",
+            "id": f"{target.address.replace('.', '')}{target.port}",
+            "role": target.server_role
+        }
+        for target in targets
+    ]
     return render(
         request=request,
         template_name="base/4_dashboard.html",
@@ -90,6 +95,7 @@ class Net(mixins.ServerAnalysisMixin):
     model = models.NetInterface
     cmd = "/usr/sbin/ifconfig"
     callback_iva_metrics_handler = IvaMetricsHandler.net_analysis
+    callback_data_access_layer = DataAccessLayerServer.insert_net_data
 
 
 class Uptime(mixins.ServerAnalysisMixin):
@@ -113,4 +119,4 @@ class ServerData(mixins.ServerAnalysisMixin):
     model = models.Target
     cmd = "uname -n && uname -r && cat /etc/os-release"
     callback_iva_metrics_handler = IvaMetricsHandler.hostnamectl
-    callback_data_access_layer = DataAccessLayerServer.check_server_data
+    callback_data_access_layer = DataAccessLayerServer.insert_server_data

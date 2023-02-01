@@ -79,19 +79,19 @@ h4 {
     align-items: center;
 }
 
-div.server-cpu-text.dropend, div.server-ram-text.dropend,
-div.server-disk-text.dropend, div.server-apps-text.dropend,
-div.server-network-text.dropend {
+div[class*="-text"] {
     width: 50px;
     text-align: left;
     margin-left: 10px;
 }
 
-div.server-cpu-text.dropend > p, div.server-ram-text.dropend > p,
-div.server-disk-text.dropend > p, div.server-apps-text.dropend > p,
-div.server-network-text.dropend > p  {
+div[class*="-text"] > p  {
     margin-top: 0;
     margin-bottom: 0;
+}
+
+div[class*="-text"]:hover > p {
+    color: #0000ff;
 }
 
 .server-cpu, .server-ram, .server-disk, .server-processes, .server-network {

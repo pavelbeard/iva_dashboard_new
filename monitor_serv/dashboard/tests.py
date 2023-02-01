@@ -228,6 +228,13 @@ class DashboardTests(TestCase):
         print(objects)
 
     def test_db_filling(self):
-        response: http.JsonResponse = self.client.get(urls.reverse("dashboard:dal_hostnamectl"))
-        print(json.loads(response.content))
+        add_targets()
+        response: http.JsonResponse = self.client.get(urls.reverse("dashboard:hostnamectl"))
+        # print(json.loads(response.content))
         self.assertEqual(response.status_code, 200)
+
+    def test_net_model_filling(self):
+        add_targets()
+        res = self.client.get(urls.reverse("dashboard:net_info"))
+        self.assertEqual(res.status_code, 200)
+        self.assertEqual(isinstance(res.content, bytes), True)
