@@ -90,7 +90,10 @@ WSGI_APPLICATION = 'monitor_serv.wsgi.application'
 
 DATABASE_ROUTERS = (
     'logic.database_routers.IvaDashboardRouter',
+    'logic.database_routers.IvcsRouter',
 )
+
+DEFAULT_IVCS_SCHEMAS = "search_path=auth,billing,instantmessaging,smpp,statistic,storage,updates,videoconference"
 
 DATABASES = {
     'default': {
@@ -107,6 +110,9 @@ DATABASES = {
     },
     'ivcs': {
         'ENGINE': os.getenv("ENGINE", "django.db.backends.postgresql_psycopg2"),
+        'OPTIONS': {
+            'options': f'-c {os.getenv("IVCS_SCHEMAS", DEFAULT_IVCS_SCHEMAS)}'
+        },
         'NAME': os.getenv('IVCS_POSTGRES_DB_NAME', "ivcs"),
         'USER': os.getenv('IVCS_POSTGRES_DB_USER', "ivcs"),
         'PASSWORD': os.getenv('IVCS_POSTGRES_DB_PASSWORD', "kbxa"),
