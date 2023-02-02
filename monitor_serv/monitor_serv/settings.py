@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     # custom apps
     'dashboard',
     'dashboard_detail',
+    'dashboard_ivcs',
     'dashboard_users',
     # pip apps
     'bootstrap_modal_forms',
@@ -190,9 +191,6 @@ STATICFILES_DIRS = (
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # Custom const variables
-SERVER_CONFIG_FILE = os.getenv('IVA_DASHBOARD_SERVER_CONFIG_FILE',
-                               "C:\\Users\\pavel\\.iva_monitoring\\server-config.yml")
-
 CSRF_TRUSTED_ORIGINS = os.getenv('CSRF_TRUSTED_ORIGINS', default="http://*localhost:8004").split(" ")
 
 CONN_HEALTH_CHECKS = True
@@ -218,4 +216,7 @@ MESSAGE_TAGS = {
 MAIL_TO_DEV = os.getenv("MAIL_TO_DEV", "borodinpa@css.rzd")
 CALL_TO_DEV = os.getenv("CALL_TO_DEV", "77619")
 
-APP_VERSION = "v0.7.29"
+SCRAPER_URL = os.getenv("SCRAPER_URL", "http://2.0.96.1:8000/api/monitor/metrics")
+SCRAPE_INTERVAL = os.getenv("SCRAPE_INTERVAL", 15)
+
+APP_VERSION = "v0.7.33"

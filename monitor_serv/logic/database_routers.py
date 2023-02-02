@@ -70,11 +70,11 @@ class IvaDashboardRouter(BaseDBRouter):
 
 
 class IvcsRouter(BaseDBRouter):
-    router_app_labels = {'dashboard', 'dashboard_detail'}
+    router_app_labels = {'dashboard_ivcs', 'dashboard_ivcs_detail'}
 
     def db_for_read(self, model, **hints):
         # __db = "test_db" if DEBUG else "iva_dashboard"
-        __db = "icvs"
+        __db = "ivcs"
 
         if model._meta.app_label in self.router_app_labels:
             return __db

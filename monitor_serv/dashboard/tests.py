@@ -151,7 +151,7 @@ def add_targets():
 
 
 class DashboardTests(TestCase):
-    databases = '__all__'
+    databases = {'iva_dashboard', 'default'}
 
     @classmethod
     def add_targets(cls):
@@ -241,3 +241,4 @@ class DashboardTests(TestCase):
         res = self.client.get(urls.reverse("dashboard:net_info"))
         self.assertEqual(res.status_code, 200)
         self.assertEqual(isinstance(res.content, bytes), True)
+

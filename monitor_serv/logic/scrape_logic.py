@@ -66,16 +66,10 @@ class DigitalDataConverters:
 
 
 class IvaMetrics:
-    def __init__(self, targets: dict, server_config_path):
+    def __init__(self, targets: dict, settings):
         self.targets = targets
-        self.server_config_path = server_config_path
-
-        try:
-            with open(self.server_config_path, 'r') as file:
-                self.__config = yaml.safe_load(file)
-                self.monitor_url = self.__config.get('settings').get('scraper_url')
-        except FileNotFoundError:
-            raise FileNotFoundError
+        self.settings = settings
+        self.monitor_url = self.settings.get('scraper_url')
 
     async def scrape_metrics_from_agent(self):
         """Собирает метрики с агента"""

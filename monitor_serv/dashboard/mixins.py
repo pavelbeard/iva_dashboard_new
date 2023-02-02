@@ -24,8 +24,15 @@ class ServerAnalysisMixin(generic.ListView):
     callback_iva_metrics_handler: Callable = None
     callback_insert_into_table: Callable = None
     callback_data_access_layer: Callable = None
-    server_config_file = settings.SERVER_CONFIG_FILE
     encryption_key = settings.ENCRYPTION_KEY
+
+    @staticmethod
+    async def get_settings():
+        dboard_settings = await models.DashboardSettings.objects.aget(command_id=1)
+        return {
+            'scraper_url': dboard_settings.scraper_url,
+            'scrape_interval': dboard_settings.scrape_interval
+        }
 
     @staticmethod
     def _json_response(data) -> http.JsonResponse:
@@ -41,8 +48,12 @@ class ServerAnalysisMixin(generic.ListView):
                 rd['role'] = f"{target.get('role')}"
 
     async def _scrape_data(self, targets, scraper):
-        data = await scraper.scrape_metrics_from_agent()
-        return [self.callback_iva_metrics_handler(d) for d in data]
+        try:
+            data = await scraper.scrape_metrics_from_agent()
+            return [self.callback_iva_metrics_handler(d) for d in data]
+        except aiohttp.ClientConnectionError as e:
+            raise aiohttp.ClientConnectionError
+
 
     @lru_cache(3)
     async def _get_targets(self) -> list:
@@ -72,8 +83,11 @@ class ServerAnalysisMixin(generic.ListView):
             # get targets
             targets = await self._get_targets()
 
+            # get dboard_settings
+            dboard_settings = await self.get_settings()
+
             # scrape data
-            scraper = IvaMetrics(targets={"hosts": targets}, server_config_path=self.server_config_file)
+            scraper = IvaMetrics(targets={"hosts": targets}, settings=dboard_settings)
             response_data = await self._scrape_data(targets, scraper)
 
             # send to db
@@ -91,12 +105,14 @@ class ServerAnalysisMixin(generic.ListView):
             return self._json_response({"ClientConnectionError": f"{scraper.monitor_url} is unreachable."})
         except utils.ProgrammingError:
             return self._json_response({"ProgrammingError": "The table 'Targets' is not exists!"})
-        except FileNotFoundError:
-            return self._json_response({"FileNotFoundError": "Config file not found."})
+        except models.DashboardSettings.DoesNotExist:
+            return self._json_response({"DoesNotExist": "SettingsObject not found."})
         except TargetsIsEmpty as tie:
             return self._json_response({"TargetsIsEmpty": tie.message})
         except ValidationException as err:
             return self._json_response({"ValidationException": err.message})
+        except Exception as e:
+            print(e)
         finally:
             # await a work with db
             if self.callback_data_access_layer is not None:

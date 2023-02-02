@@ -6,9 +6,11 @@ from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.messages import get_messages
+from django.core.exceptions import ObjectDoesNotExist
 from django.http import HttpResponseRedirect
 from django.shortcuts import render
 from django.urls import reverse_lazy
+from django.views import generic
 from django.views.decorators.cache import cache_control
 from logic import (
     IvaMetricsHandler,
@@ -106,13 +108,11 @@ class Uptime(mixins.ServerAnalysisMixin):
 def get_interval(request):
     """Возвращает интервал снятия метрик в секундах"""
     try:
-        server_config_file = settings.SERVER_CONFIG_FILE
-        with open(server_config_file, 'r') as file:
-            config = yaml.safe_load(file)
-            interval = config.get('settings').get('interval')
-            return http.JsonResponse(json.dumps({"interval": interval}), safe=False)
-    except FileNotFoundError:
-        http.JsonResponse(json.dumps({"file_not_found": "no data."}), safe=False)
+        dboard_settings = models.DashboardSettings.objects.get(command_id=1)
+        interval = dboard_settings.scrape_interval
+        return http.JsonResponse(json.dumps({"interval": interval}), safe=False)
+    except models.DashboardSettings.DoesNotExist:
+        http.JsonResponse(json.dumps({"SettingsObjectNotFound": "no data."}), safe=False)
 
 
 class ServerData(mixins.ServerAnalysisMixin):
@@ -120,3 +120,5 @@ class ServerData(mixins.ServerAnalysisMixin):
     cmd = "uname -n && uname -r && cat /etc/os-release"
     callback_iva_metrics_handler = IvaMetricsHandler.hostnamectl
     callback_data_access_layer = DataAccessLayerServer.insert_server_data
+
+

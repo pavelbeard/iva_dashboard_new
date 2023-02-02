@@ -17,8 +17,4 @@ urlpatterns = [
         urls.path('uptime/', views.Uptime.as_view(), name="uptime"),
         urls.path('interval/', views.get_interval, name="interval"),
     ])),
-    # data access urls
-    # urls.path('dal/', include([
-    #     urls.path('hostnamectl/', views.py.ServerData.as_view(), name="dal_hostnamectl")
-    # ]))
 ]

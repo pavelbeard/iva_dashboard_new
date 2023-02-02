@@ -15,6 +15,7 @@ class TargetAdmin(admin.ModelAdmin):
 class ServerDataAdmin(admin.ModelAdmin):
     form = forms.ServerDataForm
 
+
 @admin.register(dashboard_models.CPU)
 class CPUAdmin(admin.ModelAdmin):
     pass
@@ -32,4 +33,9 @@ class DiskSpaceAdmin(admin.ModelAdmin):
 
 @admin.register(dashboard_models.NetInterface)
 class NetInterfaceAdmin(admin.ModelAdmin):
+    pass
+
+
+@admin.register(dashboard_models.DashboardSettings)
+class DashboardSettingsAdmin(admin.ModelAdmin):
     pass
