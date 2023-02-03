@@ -209,6 +209,9 @@ class IvaMetricsHandler:
             {"ram_total": ram_total},
             {"ram_free": ram_free},
             {"ram_used": ram_used},
+            {"ram_shared": ram_shared},
+            {"ram_avail": ram_avail},
+            {"ram_buff_cache": ram_buff_cache},
         ]
 
         return {"hostname": "hostname", "task": cls.ram_analysis.__name__, "data": tmp_data}
@@ -382,12 +385,12 @@ class DataAccessLayerServer:
         target = await models.Target.objects.aget(pk=pk)
 
         server_data, created = await models.ServerData.objects.aupdate_or_create(
-            server_id_id=pk,
+            target_id=pk,
             defaults={
                 "hostname": data.get('hostname'),
                 "os": data.get('os'),
                 "kernel": data.get('kernel'),
-                "server_id": target,
+                "target": target,
             }
         )
 
@@ -420,14 +423,34 @@ class DataAccessLayerServer:
             cpu_steal=data.get(' s'),
             cpu_cores=cpu_cores,
             cpu_util=data.get('cpu_load'),
-            server_id=target
+            target=target
         )
 
         await sync_to_async(q.save)()
 
     @classmethod
     async def insert_ram_data(cls, *args, **kwargs):
-        pass
+        pk = kwargs.get('target_pk')
+        dct = {}
+        [dct.update(d) for d in kwargs.get('data').get('data')]
+
+        ram_data = {k: DigitalDataConverters.convert_metric_to_bytes(v) for k, v in dct.items() if k != 'ram_util'}
+
+        target = await models.Target.objects.aget(pk=pk)
+
+        q = await models.RAM.objects.acreate(
+            total_ram=ram_data.get('ram_total'),
+            ram_used=ram_data.get('ram_used'),
+            ram_free=ram_data.get('ram_free'),
+            ram_shared=ram_data.get('ram_shared'),
+            ram_buff_cached=ram_data.get('ram_buff_cache'),
+            ram_avail=ram_data.get('ram_avail'),
+            ram_util=dct.get('ram_util'),
+            record_date=timezone.now(),
+            target=target
+        )
+
+        await sync_to_async(q.save)()
 
     @classmethod
     async def insert_disk_data(cls, *args, **kwargs):
@@ -445,7 +468,7 @@ class DataAccessLayerServer:
                 fs_used_prc=disk_data.get('use_percent')[:-1],
                 mounted_on=disk_data.get('mounted_on'),
                 record_date=timezone.now(),
-                server_id=target
+                target=target
             )
             await sync_to_async(q.save)()
 
@@ -474,6 +497,6 @@ class DataAccessLayerServer:
                 tx_errors_overruns=iface_data.get('tx_errors').get('overruns'),
                 tx_errors_carrier=iface_data.get('tx_errors').get('carrier'),
                 tx_errors_collisions=iface_data.get('tx_errors').get('collisions'),
-                server_id=target
+                target=target
             )
             await sync_to_async(q.save)()

@@ -44,10 +44,10 @@ class ServerData(models.Model):
     kernel = fields.CharField(max_length=64, blank=True, verbose_name="Ядро ОС:")
     record_date = fields.DateTimeField(default=timezone.now, null=False, verbose_name="Время сканирования:")
 
-    server_id = models.ForeignKey(Target, on_delete=models.CASCADE, verbose_name="Сервер:")
+    target = models.ForeignKey(Target, on_delete=models.CASCADE, verbose_name="Сервер:")
 
     def __str__(self):
-        return f"ServerData(server_id={self.server_id_id}, record_date={self.record_date})"
+        return f"ServerData(target={self.target_id}, record_date={self.record_date})"
 
     class Meta:
         verbose_name = "Данные сервера"
@@ -69,10 +69,10 @@ class CPU(models.Model):
     cpu_util = fields.FloatField(null=False, default=0, verbose_name="Загрузка процессора %:")
     record_date = fields.DateTimeField(default=timezone.now, null=False, verbose_name="Время сканирования:")
 
-    server_id = models.ForeignKey(Target, on_delete=models.CASCADE, verbose_name="Сервер:")
+    target = models.ForeignKey(Target, on_delete=models.CASCADE, verbose_name="Сервер:")
 
     def __str__(self):
-        return f"CPU(server_id={self.server_id_id}, cpu_util={self.cpu_util}, " \
+        return f"CPU(target={self.target_id}, cpu_util={self.cpu_util}, " \
                f"cpu_cores={self.cpu_cores}, record_date={self.record_date})"
 
     class Meta:
@@ -92,10 +92,10 @@ class RAM(models.Model):
     ram_util = fields.FloatField(null=False, default=0, verbose_name="Загрузка памяти %:")
     record_date = fields.DateTimeField(default=timezone.now, null=False, verbose_name="Время сканирования:")
 
-    server_id = models.ForeignKey(Target, on_delete=models.CASCADE, verbose_name="Сервер:")
+    target = models.ForeignKey(Target, on_delete=models.CASCADE, verbose_name="Сервер:")
 
     def __str__(self):
-        return f"RAMData(server_id={self.server_id_id}, total_ram={self.total_ram},  " \
+        return f"RAMData(target={self.target_id}, total_ram={self.total_ram},  " \
                f"ram_free={self.ram_free}, ram_util={self.ram_util}, record_date={self.record_date}, )"
 
     class Meta:
@@ -114,10 +114,10 @@ class DiskSpace(models.Model):
     mounted_on = fields.CharField(null=False, default="none", max_length=128, verbose_name="Подключено к:")
     record_date = fields.DateTimeField(default=timezone.now, null=False, verbose_name="Время сканирования:")
 
-    server_id = models.ForeignKey(Target, on_delete=models.CASCADE, verbose_name="Сервер:")
+    target = models.ForeignKey(Target, on_delete=models.CASCADE, verbose_name="Сервер:")
 
     def __str__(self):
-        return f"FileSystemData(server_id={self.server_id_id}, fs={self.file_system}, " \
+        return f"FileSystemData(target={self.target_id}, fs={self.file_system}, " \
                f"fs_size={self.fs_size}, fs_used={self.fs_used}, fs_used%={self.fs_used_prc}," \
                f" record_date={self.record_date}, )"
 
@@ -148,10 +148,10 @@ class NetInterface(models.Model):
     tx_errors_collisions = fields.IntegerField(null=False, default=0, verbose_name="Отправлено пакетов с коллизиями:")
     record_date = fields.DateTimeField(default=timezone.now, null=False, verbose_name="Время сканирования:")
 
-    server_id = models.ForeignKey(Target, on_delete=models.CASCADE, verbose_name="Сервер:")
+    target = models.ForeignKey(Target, on_delete=models.CASCADE, verbose_name="Сервер:")
 
     def __str__(self):
-        return f"NetInterface(server_id={self.server_id_id}, iface={self.interface}, ip={self.ip_address}, " \
+        return f"NetInterface(target={self.target_id}, iface={self.interface}, ip={self.ip_address}, " \
                f"status={self.status}, record_date={self.record_date})"
 
     class Meta:

@@ -263,3 +263,11 @@ class DashboardTests(TestCase):
         res = self.client.get(urls.reverse("dashboard:cpu_top_info"))
         self.assertEqual(res.status_code, 200)
         self.assertEqual(isinstance(res.content, bytes), True)
+
+    def test_ram_model_filling(self):
+        add_settings()
+        add_targets()
+        res = self.client.get(urls.reverse("dashboard:ram_info"))
+        self.assertEqual(res.status_code, 200)
+        self.assertEqual(isinstance(res.content, bytes), True)
+

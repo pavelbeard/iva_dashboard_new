@@ -27,7 +27,7 @@ class ServerDataForm(forms.ModelForm):
     os = forms.CharField(disabled=True, label="ОС Сервера:")
     kernel = forms.CharField(disabled=True, label="Ядро ОС:")
     record_date = forms.DateTimeField(disabled=True, label="Время сканирования:")
-    server_id = forms.ModelChoiceField(disabled=True, queryset=dashboard_models.Target.objects.all(),
+    target = forms.ModelChoiceField(disabled=True, queryset=dashboard_models.Target.objects.all(),
                                        label="Целевой хост:")
 
     class Meta:

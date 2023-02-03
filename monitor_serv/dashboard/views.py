@@ -88,6 +88,7 @@ class RAM(mixins.ServerAnalysisMixin):
     model = models.RAM
     cmd = "free -kh --si"
     callback_iva_metrics_handler = IvaMetricsHandler.ram_analysis
+    callback_data_access_layer = DataAccessLayerServer.insert_ram_data
 
 
 class DiskSpace(mixins.ServerAnalysisMixin):
