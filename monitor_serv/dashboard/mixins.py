@@ -102,11 +102,11 @@ class ServerAnalysisMixin(generic.ListView):
             # return!
             return self._json_response(response_data)
         except aiohttp.ClientConnectionError:
-            return self._json_response({"ClientConnectionError": f"{scraper.monitor_url} is unreachable."})
+            return self._json_response({"ClientConnectionError": "монитор недоступен."})
         except utils.ProgrammingError:
-            return self._json_response({"ProgrammingError": "The table 'Targets' is not exists!"})
+            return self._json_response({"ProgrammingError": "таблица Targets не создана!"})
         except models.DashboardSettings.DoesNotExist:
-            return self._json_response({"DoesNotExist": "SettingsObject not found."})
+            return self._json_response({"DoesNotExist": "сервер мониторинга не настроен."})
         except TargetsIsEmpty as tie:
             return self._json_response({"TargetsIsEmpty": tie.message})
         except ValidationException as err:

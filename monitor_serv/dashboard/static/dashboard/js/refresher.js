@@ -1,16 +1,18 @@
 import {zip} from "./extensions.js";
 
 function dropdownTitle(hostId, html, cardPart) {
-    $(document).ready(function () {
-        $(`div#${hostId}.server`).find(cardPart).hover(function () {
-            $(this).addClass('show');
-            $(this).find('.dropdown-menu').addClass('show');
-            $(this).find('.dropdown-menu').html(html);
-        }, function () {
-            $(this).removeClass('show');
-            $(this).find('.dropdown-menu').removeClass('show');
-            $(this).find('.dropdown-menu').empty()
-        });
+    $(function () {
+         $(`div#${hostId}.server`).find(cardPart).hover(function () {
+             if ($(`#${hostId}`).attr('data-available') !== "false") {
+                 $(this).addClass('show');
+                 $(this).find('.dropdown-menu').addClass('show');
+                 $(this).find('.dropdown-menu').html(html);
+             }
+         }, function () {
+             $(this).removeClass('show');
+             $(this).find('.dropdown-menu').removeClass('show');
+             $(this).find('.dropdown-menu').empty()
+         });
     });
 }
 
@@ -26,12 +28,12 @@ function hostnamectl(data, host) {
         }
     } catch (e) {
         host.childNodes[1].childNodes[1].childNodes[7].textContent = "Хост недоступен\n";
-        console.log(e)
     }
 }
 
 function uptime(data, host) {
     let status = data[0]["uptime"] !== undefined;
+    $(`#${host.id}`).attr('data-available', status);
 
     try {
         if (status) {
@@ -41,13 +43,14 @@ function uptime(data, host) {
             throw new Error(`Хост ${host.id} недоступен`)
         }
     } catch (e) {
-        console.log(e)
+        // TODO: logging
     }
 }
 
 function netAnalysis(data, host) {
-    let status = data[0]["iface"] !== undefined
-    let cmdNotFound = data[0]["command_not_found"] !== undefined
+    let status = data[0]["iface"] !== undefined;
+    let cmdNotFound = data[0]["command_not_found"] !== undefined;
+    $(`#${host.id}`).attr('data-available', status);
 
     host.childNodes[3].childNodes[9].childNodes[1].src = status ?
         "/static/dashboard/images/dashboard-ethernet-up.svg" :
@@ -82,22 +85,25 @@ function netAnalysis(data, host) {
             ).map(i => i.replace(/,(?!\d+)/g, ' | ').replace(/,(?=\d+)/g, '='));
 
             let titleInfo = [...zip(ifaces, ipAddresses, rxBytes, rxPackets, rxErrors, txBytes, txPackets, txErrors)];
-
             dropdownTitle(
-                host.id, ``.concat(titleInfo).replace(/,/g, ""),
-                '.server-network-text.dropend')
+                host.id,
+                  ``.concat(titleInfo).replace(/,/g, ""),
+                '.server-network-text.dropend'
+            );
         } else {
             throw new Error(`Хост ${host.id} недоступен`)
         }
     } catch (e) {
-        console.log(e)
     }
 }
 
 
 function fileSysAnalysisParts(data, host) {
+    let fsIndicatorImage = host.childNodes[3].childNodes[5].childNodes[1];
+    let fsIndicatorTextContent = host.childNodes[3].childNodes[5].childNodes[3].childNodes[1];
     let status = data[0]["filesystem"] !== undefined;
-    let na = "/static/dashboard/images/dashboard-ssd-card.svg"
+    let na = "/static/dashboard/images/dashboard-ssd-card.svg";
+    $(`#${host.id}`).attr('data-available', status);
 
     try {
         if (status) {
@@ -107,13 +113,13 @@ function fileSysAnalysisParts(data, host) {
             //style
             let threshold = parseFloat(mostValuablePartUsePercent.slice(0,-1))
             if (threshold > 0.0 && threshold < 50.0) {
-                host.childNodes[3].childNodes[5].childNodes[1].src =
+                fsIndicatorImage.src =
                     "/static/dashboard/images/dashboard-ssd-card-normal.svg";
             } else if (threshold > 50.0 && threshold < 75.0) {
-                host.childNodes[3].childNodes[5].childNodes[1].src =
+                fsIndicatorImage.src =
                     "/static/dashboard/images/dashboard-ssd-card-warning.svg";
             } else if (threshold > 75.0 && threshold <= 100.0) {
-                host.childNodes[3].childNodes[5].childNodes[1].src =
+                fsIndicatorImage.src =
                     "/static/dashboard/images/dashboard-ssd-card-danger.svg";
             }
 
@@ -123,7 +129,7 @@ function fileSysAnalysisParts(data, host) {
             let mostValuablePartUsed = data[data.length - 3]["most_valuable_part_used"];
             let mostValuablePartAvailable = data[data.length - 2]["most_valuable_part_available"];
 
-            host.childNodes[3].childNodes[5].childNodes[3].childNodes[1].textContent = `${mostValuablePartUsePercent}`;
+            fsIndicatorTextContent.textContent = `${mostValuablePartUsePercent}`;
 
             //title
             //filesystem size used available use% mounted on
@@ -132,7 +138,8 @@ function fileSysAnalysisParts(data, host) {
             let htmlCols = "".concat(Object.keys(slicedData[0])).replace(/,/g, " | ")
             let cols = `<li><a class="dropdown-item">${htmlCols}</a></li>`;
             let slicedArray = slicedData.map(el =>
-                `<li><a class="dropdown-item">${el.filesystem} | ${el.size} | ${el.used} | ${el.available} | ${el.use_percent} | ${el.mounted_on}</a></li>`
+                `<li><a class="dropdown-item">${el["filesystem"]} | ${el["size"]} | ${el["used"]} |` +
+                `${el["available"]} | ${el["use_percent"]} | ${el["mounted_on"]}</a></li>`
             )
             let htmlTitle = "".concat(slicedArray).replace(/,/g, "");
             let title = `<li><a class="dropdown-item">${htmlTitle}</a></li>`
@@ -152,38 +159,37 @@ function fileSysAnalysisParts(data, host) {
             throw new Error(`Хост ${host.id} недоступен`);
         }
     } catch (e) {
-        host.childNodes[3].childNodes[5].childNodes[1].src = na;
-        host.childNodes[3].childNodes[5].childNodes[3].childNodes[1].textContent = "N/A";
-        console.log(e);
+        fsIndicatorImage.src = na;
+        fsIndicatorTextContent.textContent = "N/A";
     }
 }
 
 function ramAnalysis(data, host) {
+    let ramIndicatorImage = host.childNodes[3].childNodes[3].childNodes[1];
+    let ramIndicatorTextContent = host.childNodes[3].childNodes[3].childNodes[3].childNodes[1];
     let status = data[0]["ram_util"] !== undefined;
     let na = "/static/dashboard/images/dashboard-ram.svg"
+    $(`#${host.id}`).attr('data-available', status);
 
     try {
         if (status) {
             let threshold = parseFloat(data[0]["ram_util"])
             if (threshold > 0.0 && threshold < 50.0) {
-                host.childNodes[3].childNodes[3].childNodes[1].src =
+                ramIndicatorImage.src =
                     "/static/dashboard/images/dashboard-ram-normal.svg";
             } else if (threshold > 50.0 && threshold < 75.0) {
-                host.childNodes[3].childNodes[3].childNodes[1].src =
+                ramIndicatorImage.src =
                     "/static/dashboard/images/dashboard-ram-warning.svg";
             } else if (threshold > 75.0 && threshold <= 100.0) {
-                host.childNodes[3].childNodes[3].childNodes[1].src =
+                ramIndicatorImage.src =
                     "/static/dashboard/images/dashboard-ram-danger.svg";
             }
 
-            let total = `<li><a class="dropdown-item">Total RAM: ${data[1]["ram_total"]}GB</a></li>`;
-            let free = `<li><a class="dropdown-item">Free RAM: ${data[2]["ram_free"]}GB</a></li>`;
-            let used = `<li><a class="dropdown-item">Used RAM: ${data[3]["ram_used"]}GB</a></li>`;
+            let total = `<li><a class="dropdown-item">Total RAM: ${data[1]["ram_total"]}</a></li>`;
+            let free = `<li><a class="dropdown-item">Free RAM: ${data[2]["ram_free"]}</a></li>`;
+            let used = `<li><a class="dropdown-item">Used RAM: ${data[3]["ram_used"]}</a></li>`;
 
-            host.childNodes[3]
-                .childNodes[3]
-                .childNodes[3]
-                .childNodes[1].textContent = data[0]["ram_util"].trim() + "%";
+            ramIndicatorTextContent.textContent = data[0]["ram_util"].trim() + "%";
 
             dropdownTitle(host.id, total + free + used, '.server-ram-text.dropend');
 
@@ -191,9 +197,8 @@ function ramAnalysis(data, host) {
             throw new Error(`Хост ${host.id} недоступен`);
         }
     } catch (e) {
-        host.childNodes[3].childNodes[3].childNodes[3].childNodes[1].textContent = "N/A";
-        host.childNodes[3].childNodes[3].childNodes[1].src = na;
-        console.log(e);
+        ramIndicatorTextContent.textContent = "N/A";
+        ramIndicatorImage.src = na;
     }
 }
 
@@ -201,9 +206,10 @@ function cpuTopAnalysis(data, host) {
     let cpuIndicator = host.childNodes[3].childNodes[1];
     let cpuIndicatorImage = cpuIndicator.childNodes[1];
     let cpuIndicatorTextContent = host.childNodes[3].childNodes[1].childNodes[3].childNodes[1];
-
     let status = data[0]["all_cores"] !== undefined;
     let na = "/static/dashboard/images/dashboard-cpu.svg";
+    $(`#${host.id}`).attr('data-available', status);
+
 
     try {
         if (status) {
@@ -227,7 +233,7 @@ function cpuTopAnalysis(data, host) {
                 cores += `<li><a class="dropdown-item">Core${core}: ${data[1]["each_core"][core][`core${core}`]}%</a></li>`
             }
 
-            dropdownTitle(host.id, cores, '.server-cpu-text.dropend')
+            dropdownTitle(host.id, cores, '.server-cpu-text.dropend');
 
         } else {
             throw new Error(`Хост ${host.id} недоступен`);
@@ -235,10 +241,7 @@ function cpuTopAnalysis(data, host) {
     } catch (e) {
         cpuIndicatorTextContent.textContent = "N/A";
         cpuIndicatorImage.src = na;
-        console.log(e)
     }
-
-
 }
 
 function execAnalysis(data, host) {
@@ -246,6 +249,8 @@ function execAnalysis(data, host) {
     let processesIndicatorImage = processesIndicator.childNodes[1];
     let processesIndicatorTextContent = processesIndicator.childNodes[3].childNodes[1];
     let status = data[0]["status"] !== undefined;
+    $(`#${host.id}`).attr('data-available', status);
+
 
     try {
         if (status) {
@@ -274,7 +279,7 @@ function execAnalysis(data, host) {
             processesIndicatorTextContent.textContent = processesCount;
             processesIndicatorImage.src = "/static/dashboard/images/dashboard-apps-normal.svg";
 
-            dropdownTitle(host.id, processesTooltip, '.server-apps-text.dropend')
+            dropdownTitle(host.id, processesTooltip, '.server-apps-text.dropend');
 
         } else {
             throw new Error("Хост недоступен.");
@@ -340,7 +345,6 @@ function monitorAvailability(servers, reason, available= false) {
             let head = "/static/dashboard/images/dashboard-server-head.svg";
             let media = "/static/dashboard/images/dashboard-server-media.svg";
             server.childNodes[1].childNodes[1].childNodes[1].src = role ? head : media;
-
         }
 
         // server status
@@ -361,26 +365,34 @@ function monitorAvailability(servers, reason, available= false) {
 }
 
 function redrawTableElements(parsedData, callback) {
+    // если отсутствует ключ task, то мониторинг пал и
+    // ставим дата-атрибут для каждого сервера false - это выключает dropdown
+    if (parsedData["task"] === undefined) {
+        let servers = $('.server');
+        for (let server of servers) {
+            $(`#${server.id}`).attr('data-available', false);
+        }
+    }
+
     ///если мониторинг пал
     if (parsedData['ClientConnectionError'] !== undefined)
         monitorAvailability(document
-            .getElementsByClassName('server'), 'мониторинг\r\nнедоступен!')
+            .getElementsByClassName('server'), parsedData['ClientConnectionError']);
     //если конфигурация сервера мониторинга не найдена
     else if (parsedData['DoesNotExist'] !== undefined)
         monitorAvailability(document
-            .getElementsByClassName('server'), 'конфигурация в БД инфопанели\r\n не найдена!')
+            .getElementsByClassName('server'), parsedData['DoesNotExist']);
     //агент не может валидировать данные
     else if (parsedData['ValidationException'] !== undefined)
         monitorAvailability(document
-            .getElementsByClassName('server'), 'агент не распознал\r\nданные!')
+            .getElementsByClassName('server'), parsedData['ValidationException']);
     //таблица с целевыми хостами отсутствует
     else if (parsedData["ProgrammingError"] !== undefined || parsedData['TargetsIsEmpty'] !== undefined)
         monitorAvailability(document
-            .getElementsByClassName('server'), 'Целевые хосты\r\nне найдены!')
+            .getElementsByClassName('server'), parsedData["ProgrammingError"]);
     else {
         monitorAvailability(document
-            .getElementsByClassName('server'), "", true
-        )
+            .getElementsByClassName('server'), "", true);
         parsedData.forEach(el => updateServerNode(el.data, el.id, el.role, callback));
     }
 
@@ -417,13 +429,14 @@ async function getInterval(url, method, headers) {
 }
 
 async function inspectServers() {
-    setTimeout(getMetrics, 0,"hostnamectl/", "GET", headers, hostnamectl)
-    setTimeout(getMetrics, 0,"cpu-top-info/", "GET", headers, cpuTopAnalysis);
-    setTimeout(getMetrics, 0,"ram-info/", "GET", headers, ramAnalysis);
-    setTimeout(getMetrics, 0,"disk-info/", "GET", headers, fileSysAnalysisParts);
-    setTimeout(getMetrics, 0,"processes/", "GET", headers, execAnalysis);
-    setTimeout(getMetrics, 0,"net-info/", "GET", headers, netAnalysis);
-    setTimeout(getMetrics, 0,"uptime/", "GET", headers, uptime);
+
+    let funcArray = [
+        hostnamectl, cpuTopAnalysis, ramAnalysis, fileSysAnalysisParts,
+        execAnalysis, netAnalysis, uptime
+    ];
+
+    funcArray.forEach(func => setTimeout(
+        getMetrics, 0, func.name.toLocaleLowerCase() + "/", "GET", headers, func))
 
     // TODO: создать новый js файл для чисто iva-утилит
     // TODO: переписать в функциях часть кода, отвечающий за обработку ошибок в промисы
