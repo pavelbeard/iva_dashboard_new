@@ -59,7 +59,15 @@ def dashboard_view(request):
     return render(
         request=request,
         template_name="base/4_dashboard.html",
-        context={"addresses": addresses, "app_version": app_version}
+        context={"addresses": addresses, "app_version": app_version, "mon_agent_available": True}
+    )
+
+
+def dashboard_monitor_unavailable(request):
+    return render(
+        request=request,
+        template_name="base/4_dashboard.html",
+        context={"app_version": app_version}
     )
 
 
@@ -73,6 +81,7 @@ class CPUTop(mixins.ServerAnalysisMixin):
     template_name = "dashboard/parts/1_server.html"
     cmd = 'top -bn 1 -d.2 | grep "Cpu" && top 1 -w 70 -bn 1 | grep -P "^(%)"'
     callback_iva_metrics_handler = IvaMetricsHandler.cpu_top_analysis
+    callback_data_access_layer = DataAccessLayerServer.insert_cpu_data
 
 
 class RAM(mixins.ServerAnalysisMixin):
@@ -91,6 +100,7 @@ class DiskSpace(mixins.ServerAnalysisMixin):
     model = models.DiskSpace
     cmd = 'df -h && lsblk | grep -E "^sda"'
     callback_iva_metrics_handler = IvaMetricsHandler.file_sys_analysis
+    callback_data_access_layer = DataAccessLayerServer.insert_disk_data
 
 
 class Net(mixins.ServerAnalysisMixin):
@@ -120,5 +130,3 @@ class ServerData(mixins.ServerAnalysisMixin):
     cmd = "uname -n && uname -r && cat /etc/os-release"
     callback_iva_metrics_handler = IvaMetricsHandler.hostnamectl
     callback_data_access_layer = DataAccessLayerServer.insert_server_data
-
-

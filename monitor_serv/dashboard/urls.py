@@ -16,5 +16,7 @@ urlpatterns = [
         urls.path('net-info/', views.Net.as_view(), name="net_info"),
         urls.path('uptime/', views.Uptime.as_view(), name="uptime"),
         urls.path('interval/', views.get_interval, name="interval"),
+
+        urls.path('unavailable/', views.dashboard_monitor_unavailable, name="unavailable")
     ])),
 ]

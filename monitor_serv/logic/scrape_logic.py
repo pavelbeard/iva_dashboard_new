@@ -1,10 +1,9 @@
 import json
 import re
+
 import aiohttp
-import yaml
 from aiohttp import web
 from asgiref.sync import sync_to_async
-from django.core.exceptions import ObjectDoesNotExist
 from django.utils import timezone
 
 from dashboard import models
@@ -106,23 +105,6 @@ class IvaMetricsHandler:
         return {"hostname": "no_data", "task": task, "data": [{"no_data": "no_data"}]}
 
     @classmethod
-    def systemctl_list_units_parser(cls, data: str) -> {}:
-        """
-        Парсит команду systemctl list-units --type=service.\n
-        :param data: Данные, выведенные командой
-        :return: :{}:
-        """
-        hostname, *other_data = data.split("\n")
-
-        tmp_list = []  # временный список для данных
-        for row in other_data[1:-7]:
-            tmp = row.split()[1:] + ['failed'] if "●" in row else row.split()
-            unit, load, active, sub, *desc = tmp
-            tmp_list.append({"unit": unit, "load": load, "active": active, "sub": sub})
-
-        return {"hostname": hostname, "task": cls.systemctl_list_units_parser.__name__, "data": tmp_list}
-
-    @classmethod
     def exec_analysis(cls, data: str) -> {}:
         """
         Парсит команду service --status-all.\n
@@ -135,7 +117,7 @@ class IvaMetricsHandler:
         other_data = data.split("\n")
 
         processes_list = []
-        if other_data[0] == "no connection with server." or other_data[0] == "bad credentials.":
+        if "no connection with server." in data or "bad credentials." in data:
             return {"hostname": "hostname", "task": cls.exec_analysis.__name__, "data": [{"connection_error": True}]}
 
         for d in other_data[:-1]:
@@ -175,7 +157,7 @@ class IvaMetricsHandler:
 
         all_cores, *each_core = data.split("\n")
 
-        if 'no connection with server.' in all_cores:
+        if 'no connection with server.' in data:
             return {"hostname": "hostname", "task": cls.cpu_top_analysis.__name__, "data": [{"connection_error": True}]}
 
         all_cores_data = {i[-2:]: i[:-2] for i in re.split(",\s+|,", all_cores.split(":")[1].strip()[:-1])}
@@ -202,7 +184,7 @@ class IvaMetricsHandler:
 
         ram_data = data.split("\n")
 
-        if "no connection with server." in ram_data:
+        if "no connection with server." in data:
             return {"hostname": "hostname", "task": cls.ram_analysis.__name__, "data": [{"connection_error": True}]}
 
         # total used free shared buff/cache available
@@ -215,9 +197,12 @@ class IvaMetricsHandler:
         ram_shared = ram_data[0][3]
         ram_buff_cache = ram_data[0][4]
         ram_avail = ram_data[0][5]
-        ram_util = \
-            f"{100 - (((float(ram_free[:-1]) + float(ram_buff_cache[:-1])) * 100) / float(ram_total[:-1])):10.2f}" \
-                .strip()
+
+        __ram_free = DigitalDataConverters.convert_metric_to_bytes(ram_free)
+        __ram_buff_cache = DigitalDataConverters.convert_metric_to_bytes(ram_buff_cache)
+        __ram_total = DigitalDataConverters.convert_metric_to_bytes(ram_total)
+
+        ram_util = f"{100 - (((__ram_free + __ram_buff_cache) * 100) / __ram_total):10.2f}".strip()
 
         tmp_data = [
             {"ram_util": ram_util},
@@ -242,7 +227,7 @@ class IvaMetricsHandler:
 
         tmp_data = []
 
-        if "no connection with server." in fs_data:
+        if "no connection with server." in data:
             return {
                 "hostname": "hostname",
                 "task": cls.file_sys_analysis.__name__,
@@ -283,9 +268,11 @@ class IvaMetricsHandler:
 
         net_data = data.split("\n")
 
-        if "no connection with server." in net_data:
-            return {"hostname": "hostname", "task": cls.net_analysis.__name__, "data": [{"connection_error": True}]}
-        if net_data == ['']:
+        if "no connection with server." in data:
+            return {"hostname": "hostname", "task": cls.net_analysis.__name__, "data": [
+                {"connection_error": True}
+            ]}
+        elif data == ['']:
             return {"hostname": "hostname", "task": cls.net_analysis.__name__, "data": [
                 {"command_not_found": True}
             ]}
@@ -345,7 +332,7 @@ class IvaMetricsHandler:
 
         hostname, *uptime_data = data.split("\n")
 
-        if "no connection with server." in uptime_data:
+        if "no connection with server." in data:
             return {"hostname": hostname, "task": cls.uptime.__name__, "data": [{"connection_error": True}]}
 
         tmp_data = [{"uptime": uptime_data[0].split(',')[0]}]
@@ -363,6 +350,9 @@ class IvaMetricsHandler:
             return cls.error_result(cls.uptime.__name__)
 
         splitted_data = data.split("\n")
+
+        if "no connection with server." in data:
+            return {"failed": "hostname", "task": cls.uptime.__name__, "data": [{"connection_error": True}]}
 
         hostname = splitted_data[0]
         os_version = re.search("PRETTY_NAME=\"(.*)\"", data)[1]
@@ -386,8 +376,7 @@ class SendToDatabase:
 class DataAccessLayerServer:
     @classmethod
     async def insert_server_data(cls, *args, **kwargs):
-        t = kwargs.get('target')
-        pk = t.get("pk")
+        pk = kwargs.get('target_pk')
         data = kwargs.get("data").get('data')[0]
 
         target = await models.Target.objects.aget(pk=pk)
@@ -414,7 +403,27 @@ class DataAccessLayerServer:
 
     @classmethod
     async def insert_cpu_data(cls, *args, **kwargs):
-        pass
+        pk = kwargs.get('target_pk')
+        data = kwargs.get('data').get('data')[0].get('all_cores')
+        cpu_cores = len(kwargs.get('data').get('data')[1].get('each_core'))
+
+        target = await models.Target.objects.aget(pk=pk)
+
+        q = await models.CPU.objects.acreate(
+            cpu_user=data.get('us'),
+            cpu_sys=data.get('sy'),
+            cpu_nice=data.get('ni'),
+            cpu_idle=data.get('id'),
+            cpu_iowait=data.get('wa'),
+            cpu_irq=data.get('hi'),
+            cpu_softirq=data.get('si'),
+            cpu_steal=data.get(' s'),
+            cpu_cores=cpu_cores,
+            cpu_util=data.get('cpu_load'),
+            server_id=target
+        )
+
+        await sync_to_async(q.save)()
 
     @classmethod
     async def insert_ram_data(cls, *args, **kwargs):
@@ -422,13 +431,28 @@ class DataAccessLayerServer:
 
     @classmethod
     async def insert_disk_data(cls, *args, **kwargs):
-        pass
+        pk = kwargs.get('target_pk')
+        data = kwargs.get('data').get('data')
+
+        target = await models.Target.objects.aget(pk=pk)
+
+        for disk_data in data[:-6]:
+            q = await models.DiskSpace.objects.acreate(
+                file_system=disk_data.get('filesystem'),
+                fs_size=disk_data.get('size'),
+                fs_used=disk_data.get('used'),
+                fs_avail=disk_data.get('available'),
+                fs_used_prc=disk_data.get('use_percent')[:-1],
+                mounted_on=disk_data.get('mounted_on'),
+                record_date=timezone.now(),
+                server_id=target
+            )
+            await sync_to_async(q.save)()
 
     @classmethod
     async def insert_net_data(cls, *args, **kwargs):
-        t = kwargs.get('target')
+        pk = kwargs.get('target_pk')
         data = kwargs.get('data').get('data')
-        pk = t.get('pk')
 
         target = await models.Target.objects.aget(pk=pk)
 

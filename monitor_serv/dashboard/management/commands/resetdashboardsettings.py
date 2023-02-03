@@ -4,10 +4,7 @@ from dashboard.models import DashboardSettings as Settings
 
 
 class Command(BaseCommand):
-    help = "Сбрасывает настройки сервера мониторинга"
-    #
-    # def add_arguments(self, parser):
-    #     parser.add_argument('resetdashboardsettings')
+    help = "Сбрасывает настройки сервера мониторинга."
 
     def handle(self, *args, **options):
         try:

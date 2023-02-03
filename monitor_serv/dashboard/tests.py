@@ -150,6 +150,14 @@ def add_targets():
         q.save()
 
 
+def add_settings():
+    models.DashboardSettings(
+        command_id=1,
+        scraper_url="http://localhost:8001/api/monitor/metrics",
+        scrape_interval=15
+    ).save()
+
+
 class DashboardTests(TestCase):
     databases = {'iva_dashboard', 'default'}
 
@@ -242,3 +250,16 @@ class DashboardTests(TestCase):
         self.assertEqual(res.status_code, 200)
         self.assertEqual(isinstance(res.content, bytes), True)
 
+    def test_disk_model_filling(self):
+        add_settings()
+        add_targets()
+        res = self.client.get(urls.reverse("dashboard:disk_info"))
+        self.assertEqual(res.status_code, 200)
+        self.assertEqual(isinstance(res.content, bytes), True)
+
+    def test_cpu_model_filling(self):
+        add_settings()
+        add_targets()
+        res = self.client.get(urls.reverse("dashboard:cpu_top_info"))
+        self.assertEqual(res.status_code, 200)
+        self.assertEqual(isinstance(res.content, bytes), True)

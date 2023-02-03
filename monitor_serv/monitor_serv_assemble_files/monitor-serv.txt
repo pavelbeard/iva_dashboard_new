@@ -1,4 +1,3 @@
-IVA_DASHBOARD_SERVER_CONFIG_FILE=/etc/iva_dashboard/server-config.yml
 SECRET_KEY=*****
 ENGINE=django.db.backends.postgresql_psycopg2
 POSTGRES_DB_HOST=2.0.96.2
@@ -6,5 +5,18 @@ POSTGRES_DB_PORT=5432
 POSTGRES_DB_NAME=*****
 POSTGRES_DB_USER=*****
 POSTGRES_DB_PASSWORD=*****
+IVCS_SCHEMAS=search_path=auth,billing,instantmessaging,smpp,statistic,storage,updates,videoconference
+IVCS_POSTGRES_DB_NAME=ivcs
+IVCS_POSTGRES_DB_USER=ivcs
+IVCS_POSTGRES_DB_PASSWORD=kxba
+IVCS_POSTGRES_DB_HOST=2.0.96.12
+IVCS_POSTGRES_DB_PORT=5432
 CSRF_TRUSTED_ORIGINS=http://*1.0.96.49:8004 http://*1.0.96.50:8004 http://*localhost:8004
 ENCRYPTION_KEY=*****
+DJANGO_SUPERUSER_USERNAME=admin
+DJANGO_SUPERUSER_EMAIL=admin@example.com
+DJANGO_SUPERUSER_PASSWORD=Admin@123
+MAIL_TO_DEV="borodinpa@css.rzd"
+CALL_TO_DEV=77619
+SCRAPER_URL=http://2.0.96.1:8000/api/monitor/metrics
+SCRAPE_INTERVAL=15

@@ -15,5 +15,8 @@ fi
 python3.11 manage.py migrate --noinput
 python3.11 manage.py collectstatic --noinput --clear
 python3.11 manage.py createsuperuser --noinput
+python3.11 manage.py setupdashboard
+
+export ENCRYPTION_KEY=$(python3.11 manage.py genencryptionkey)
 
 exec "$@"

@@ -50,10 +50,10 @@ class ServerAnalysisMixin(generic.ListView):
     async def _scrape_data(self, targets, scraper):
         try:
             data = await scraper.scrape_metrics_from_agent()
-            return [self.callback_iva_metrics_handler(d) for d in data]
+            result = [self.callback_iva_metrics_handler(d) for d in data]
+            return result
         except aiohttp.ClientConnectionError as e:
             raise aiohttp.ClientConnectionError
-
 
     @lru_cache(3)
     async def _get_targets(self) -> list:
@@ -93,7 +93,7 @@ class ServerAnalysisMixin(generic.ListView):
             # send to db
             if self.callback_data_access_layer is not None:
                 tasks = [asyncio.create_task(
-                    self.callback_data_access_layer(target=t, data=el)
+                    self.callback_data_access_layer(target_pk=t.get('pk'), data=el)
                 ) for t, el in zip(targets, response_data)]
 
             # update data
@@ -111,8 +111,6 @@ class ServerAnalysisMixin(generic.ListView):
             return self._json_response({"TargetsIsEmpty": tie.message})
         except ValidationException as err:
             return self._json_response({"ValidationException": err.message})
-        except Exception as e:
-            print(e)
         finally:
             # await a work with db
             if self.callback_data_access_layer is not None:

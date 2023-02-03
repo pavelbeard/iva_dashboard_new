@@ -17,15 +17,31 @@ function dropdownTitle(hostId, html, cardPart) {
 function hostnamectl(data, host) {
     let status = data[0]["hostname"] !== undefined;
     // set hostname
-    host.childNodes[1].childNodes[1].childNodes[7].textContent = status  ? data[0]["hostname"] : "Хост недоступен\n";
+
+    try {
+        if (status) {
+            host.childNodes[1].childNodes[1].childNodes[7].textContent = data[0]["hostname"]
+        } else {
+            throw new Error(`Хост ${host.id} недоступен`)
+        }
+    } catch (e) {
+        host.childNodes[1].childNodes[1].childNodes[7].textContent = "Хост недоступен\n";
+        console.log(e)
+    }
 }
 
 function uptime(data, host) {
     let status = data[0]["uptime"] !== undefined;
 
-    if (status) {
-        let html = `<li><a class="dropdown-item">${data[0]["uptime"]}</a></li>`;
-        dropdownTitle(host.id, html, '.server-img.dropend');
+    try {
+        if (status) {
+            let html = `<li><a class="dropdown-item">${data[0]["uptime"]}</a></li>`;
+            dropdownTitle(host.id, html, '.server-img.dropend');
+        } else {
+            throw new Error(`Хост ${host.id} недоступен`)
+        }
+    } catch (e) {
+        console.log(e)
     }
 }
 
@@ -39,37 +55,42 @@ function netAnalysis(data, host) {
              "/static/dashboard/images/dashboard-ethernet.svg";
     host.childNodes[3].childNodes[9].childNodes[3].childNodes[1].textContent = status ? "UP" : cmdNotFound ? "DOWN" : "N/A" ;
 
-    if (status) {
-        let ifaces =
-            data.map(i => `<li><a class="dropdown-item">interface: ${i["iface"]} - status: ${i["status"]}</a></li>`);
-        let ipAddresses =
-            data.map(i => `<li><a class="dropdown-item">ip address: ${i["ipaddress"]}</a></li>`);
-        let rxBytes =
-            data.map(i => `<li><a class="dropdown-item">RX bytes: ${i["rx_bytes"]}</a></li>`);
-        let rxPackets =
-            data.map(i => `<li><a class="dropdown-item">RX packets: ${i["rx_packets"]}</a></li>`);
-        let rxErrors = data.map(i =>
-            `<li><a class="dropdown-item">RX errors: ${Object.entries(i["rx_errors"])}</a></li>`
-        ).map(
-            i => i.replace(/,(?!\d+)/g, ' | ').replace(/,(?=\d+)/g, '=')
-        );
-        let txBytes = data.map(i =>
-            `<li><a class="dropdown-item">TX bytes: ${i["tx_bytes"]}</a> </li>`
-        );
-        let txPackets = data.map(i =>
-            `<li><a class="dropdown-item">TX packets: ${i["tx_packets"]}</a></li>`
-        );
-        let divider =  `<li><hr class="dropdown-divider"></li>`;
-        let txErrors = data.map(i =>
-            `<li><a class="dropdown-item">TX errors: ${Object.entries(i["tx_errors"])}</a></li>${divider}`
-        ).map(i => i.replace(/,(?!\d+)/g, ' | ').replace(/,(?=\d+)/g, '='));
+    try {
+        if (status) {
+            let ifaces =
+                data.map(i => `<li><a class="dropdown-item">interface: ${i["iface"]} - status: ${i["status"]}</a></li>`);
+            let ipAddresses =
+                data.map(i => `<li><a class="dropdown-item">ip address: ${i["ipaddress"]}</a></li>`);
+            let rxBytes =
+                data.map(i => `<li><a class="dropdown-item">RX bytes: ${i["rx_bytes"]}</a></li>`);
+            let rxPackets =
+                data.map(i => `<li><a class="dropdown-item">RX packets: ${i["rx_packets"]}</a></li>`);
+            let rxErrors = data.map(i =>
+                `<li><a class="dropdown-item">RX errors: ${Object.entries(i["rx_errors"])}</a></li>`
+            ).map(
+                i => i.replace(/,(?!\d+)/g, ' | ').replace(/,(?=\d+)/g, '=')
+            );
+            let txBytes = data.map(i =>
+                `<li><a class="dropdown-item">TX bytes: ${i["tx_bytes"]}</a> </li>`
+            );
+            let txPackets = data.map(i =>
+                `<li><a class="dropdown-item">TX packets: ${i["tx_packets"]}</a></li>`
+            );
+            let divider =  `<li><hr class="dropdown-divider"></li>`;
+            let txErrors = data.map(i =>
+                `<li><a class="dropdown-item">TX errors: ${Object.entries(i["tx_errors"])}</a></li>${divider}`
+            ).map(i => i.replace(/,(?!\d+)/g, ' | ').replace(/,(?=\d+)/g, '='));
 
-        let titleInfo = [...zip(ifaces, ipAddresses, rxBytes, rxPackets, rxErrors, txBytes, txPackets, txErrors)];
+            let titleInfo = [...zip(ifaces, ipAddresses, rxBytes, rxPackets, rxErrors, txBytes, txPackets, txErrors)];
 
-        // host.childNodes[3].childNodes[9].title = "".concat(titleInfo).replace(/,/g, "");
-        dropdownTitle(
-            host.id, ``.concat(titleInfo).replace(/,/g, ""),
-            '.server-network-text.dropend')
+            dropdownTitle(
+                host.id, ``.concat(titleInfo).replace(/,/g, ""),
+                '.server-network-text.dropend')
+        } else {
+            throw new Error(`Хост ${host.id} недоступен`)
+        }
+    } catch (e) {
+        console.log(e)
     }
 }
 
@@ -128,7 +149,7 @@ function fileSysAnalysisParts(data, host) {
             dropdownTitle(host.id, html, '.server-disk-text.dropend');
 
         } else {
-            throw new Error("N/A");
+            throw new Error(`Хост ${host.id} недоступен`);
         }
     } catch (e) {
         host.childNodes[3].childNodes[5].childNodes[1].src = na;
@@ -155,24 +176,32 @@ function ramAnalysis(data, host) {
                     "/static/dashboard/images/dashboard-ram-danger.svg";
             }
 
-            let total = `<li><a class="dropdown-item">Total RAM: ${data[1]["ram_total"].trim()}GB</a></li>`;
-            let free = `<li><a class="dropdown-item">Free RAM: ${data[2]["ram_free"].trim()}GB</a></li>`;
-            let used = `<li><a class="dropdown-item">Used RAM: ${data[3]["ram_used"].trim()}GB</a></li>`;
+            let total = `<li><a class="dropdown-item">Total RAM: ${data[1]["ram_total"]}GB</a></li>`;
+            let free = `<li><a class="dropdown-item">Free RAM: ${data[2]["ram_free"]}GB</a></li>`;
+            let used = `<li><a class="dropdown-item">Used RAM: ${data[3]["ram_used"]}GB</a></li>`;
 
-            host.childNodes[3].childNodes[3].childNodes[3].childNodes[1].textContent = data[0]["ram_util"].trim() + "%";
+            host.childNodes[3]
+                .childNodes[3]
+                .childNodes[3]
+                .childNodes[1].textContent = data[0]["ram_util"].trim() + "%";
 
             dropdownTitle(host.id, total + free + used, '.server-ram-text.dropend');
 
         } else {
-            throw new Error("N/A");
+            throw new Error(`Хост ${host.id} недоступен`);
         }
     } catch (e) {
+        host.childNodes[3].childNodes[3].childNodes[3].childNodes[1].textContent = "N/A";
         host.childNodes[3].childNodes[3].childNodes[1].src = na;
         console.log(e);
     }
 }
 
 function cpuTopAnalysis(data, host) {
+    let cpuIndicator = host.childNodes[3].childNodes[1];
+    let cpuIndicatorImage = cpuIndicator.childNodes[1];
+    let cpuIndicatorTextContent = host.childNodes[3].childNodes[1].childNodes[3].childNodes[1];
+
     let status = data[0]["all_cores"] !== undefined;
     let na = "/static/dashboard/images/dashboard-cpu.svg";
 
@@ -180,17 +209,17 @@ function cpuTopAnalysis(data, host) {
         if (status) {
             let threshold = parseFloat(data[0]["all_cores"]["cpu_load"]);
             if (threshold > 0.0 && threshold < 50.0) {
-                host.childNodes[3].childNodes[1].childNodes[1].src =
+                cpuIndicatorImage.src =
                     "/static/dashboard/images/dashboard-cpu-normal.svg";
             } else if (threshold > 50.0 && threshold < 75.0) {
-                host.childNodes[3].childNodes[1].childNodes[1].src =
+                cpuIndicatorImage.src =
                     "/static/dashboard/images/dashboard-cpu-warning.svg";
             } else if (threshold > 75.0 && threshold <= 100.0) {
-                host.childNodes[3].childNodes[1].childNodes[1].src =
+                cpuIndicatorImage.src =
                     "/static/dashboard/images/dashboard-cpu-danger.svg";
             }
 
-            host.childNodes[3].childNodes[1].childNodes[3].childNodes[1].textContent = data[0]["all_cores"]["cpu_load"] + "%";
+            cpuIndicatorTextContent.textContent = data[0]["all_cores"]["cpu_load"] + "%";
 
             let cores = "";
 
@@ -201,11 +230,11 @@ function cpuTopAnalysis(data, host) {
             dropdownTitle(host.id, cores, '.server-cpu-text.dropend')
 
         } else {
-            throw new Error("N/A");
+            throw new Error(`Хост ${host.id} недоступен`);
         }
     } catch (e) {
-        host.childNodes[3].childNodes[1].childNodes[2].textContent = "N/A";
-        host.childNodes[3].childNodes[1].childNodes[1].src = na;
+        cpuIndicatorTextContent.textContent = "N/A";
+        cpuIndicatorImage.src = na;
         console.log(e)
     }
 
@@ -213,6 +242,9 @@ function cpuTopAnalysis(data, host) {
 }
 
 function execAnalysis(data, host) {
+    let processesIndicator = host.childNodes[3].childNodes[7];
+    let processesIndicatorImage = processesIndicator.childNodes[1];
+    let processesIndicatorTextContent = processesIndicator.childNodes[3].childNodes[1];
     let status = data[0]["status"] !== undefined;
 
     try {
@@ -239,59 +271,91 @@ function execAnalysis(data, host) {
                 processesArray.length];
 
             //processes
-            host.childNodes[3].childNodes[7].childNodes[3].childNodes[1].textContent = processesCount;
-            host.childNodes[3].childNodes[7].childNodes[1].src = "/static/dashboard/images/dashboard-apps-normal.svg";
+            processesIndicatorTextContent.textContent = processesCount;
+            processesIndicatorImage.src = "/static/dashboard/images/dashboard-apps-normal.svg";
 
             dropdownTitle(host.id, processesTooltip, '.server-apps-text.dropend')
 
         } else {
-            throw new Error("N/A");
+            throw new Error("Хост недоступен.");
         }
     } catch (e) {
-        host.childNodes[3].childNodes[7].childNodes[3].childNodes[1].textContent = 0;
-        host.childNodes[3].childNodes[7].childNodes[1].src = "/static/dashboard/images/dashboard-apps.svg";
+        processesIndicatorTextContent.textContent = "N/A";
+        processesIndicatorImage.src = "/static/dashboard/images/dashboard-apps.svg";
     }
 }
 
 function updateServerNode(data, id, server_role, callback) {
     let host = document.getElementById(id);
+    let serverNodeImage = host.childNodes[1].childNodes[1].childNodes[1];
+    let serverNodeTextContent = host.childNodes[1].childNodes[1].childNodes[5];
     let err = data[0]["connection_error"] === undefined;
 
     // server status
 
     //if server media else server head
+    let mediaUp = "/static/dashboard/images/dashboard-server-media-up.svg";
+    let mediaDown = "/static/dashboard/images/dashboard-server-media-down.svg";
+    let headUp = "/static/dashboard/images/dashboard-server-head-up.svg";
+    let headDown = "/static/dashboard/images/dashboard-server-head-down.svg";
 
-    if (server_role === 'media') {
-        host.childNodes[1].childNodes[1].childNodes[1].src = err ?
-            "/static/dashboard/images/dashboard-server-media-up.svg" :
-            "/static/dashboard/images/dashboard-server-media-down.svg"
-    } else {
-        host.childNodes[1].childNodes[1].childNodes[1].src = err ?
-            "/static/dashboard/images/dashboard-server-head-up.svg" :
-            "/static/dashboard/images/dashboard-server-head-down.svg"
-    }
-    host.childNodes[1].childNodes[1].childNodes[5].textContent = err ? "UP\n" : "DOWN\n";
+
+    if (server_role === 'media')
+        serverNodeImage.src = err ? mediaUp : mediaDown
+    else
+        serverNodeImage.src = err ? headUp : headDown
+
+    serverNodeTextContent.textContent = err ? "UP\n" : "DOWN\n";
 
     callback(data, host)
 
 }
 
-function monitorUnavailable(servers, reason) {
-    let bg_unavailable = "#bebdbd"
+function monitorAvailability(servers, reason, available= false) {
+    let agentStatus = document.getElementById("agent-status");
+
+    agentStatus.innerHTML = available ? "монитор в норме." : reason
+    agentStatus.style.color = available ? "#00ff33AA" : "#ff0033AA";
+    let bg = available ? "#ececec" : "#bebdbd";
+
+    let imgArray = [
+        "/static/dashboard/images/dashboard-cpu.svg",
+        "/static/dashboard/images/dashboard-ram.svg",
+        "/static/dashboard/images/dashboard-ssd-card.svg",
+        "/static/dashboard/images/dashboard-apps.svg",
+        "/static/dashboard/images/dashboard-ethernet.svg",
+    ];
+
     for (let server of servers) {
-        // title
-        server.childNodes[1].childNodes[1].childNodes[3].setAttribute('style', 'white-space: pre;')
-        server.childNodes[1].childNodes[1].childNodes[3].textContent = reason
-        server.childNodes[1].childNodes[1].childNodes[7].textContent = "no data"
+
+        if (!available) {
+
+            let serverInfoPane = server.childNodes[1].childNodes[1];
+            serverInfoPane.childNodes[3].setAttribute('style', 'white-space: pre;');
+            serverInfoPane.childNodes[5].textContent = "no data";
+            serverInfoPane.childNodes[7].textContent = "no data";
+            serverInfoPane.childNodes[11].textContent = "no data";
+
+            let role = serverInfoPane.childNodes[11].innerHTML === "HEAD";
+            let head = "/static/dashboard/images/dashboard-server-head.svg";
+            let media = "/static/dashboard/images/dashboard-server-media.svg";
+            server.childNodes[1].childNodes[1].childNodes[1].src = role ? head : media;
+
+        }
+
         // server status
-        server.childNodes[1].childNodes[1].style.backgroundColor = bg_unavailable
+        server.childNodes[1].childNodes[1].style.backgroundColor = bg;
 
         // server info
-        let server_info_pane = server.childNodes[3].childNodes
-        for (let i = 1; i < server_info_pane.length; i += 2) {
+        let server_info_pane = server.childNodes[3].childNodes;
+
+        for (let i = 1, img = 0; i < server_info_pane.length; i += 2, img++) {
             // изменяем все индикаторы
-            server_info_pane[i].style.backgroundColor = bg_unavailable
-                server_info_pane[i].childNodes[2].textContent = "?  "
+            server_info_pane[i].style.backgroundColor = bg;
+            if (!available) {
+                server_info_pane[i].childNodes[3].childNodes[1].textContent = "N/A";
+                server_info_pane[i].childNodes[1].src = imgArray[img];
+            }
         }
     }
 }
@@ -299,22 +363,26 @@ function monitorUnavailable(servers, reason) {
 function redrawTableElements(parsedData, callback) {
     ///если мониторинг пал
     if (parsedData['ClientConnectionError'] !== undefined)
-        monitorUnavailable(document
-            .getElementsByClassName('server'), 'Агент мониторинга\r\nнедоступен!')
+        monitorAvailability(document
+            .getElementsByClassName('server'), 'мониторинг\r\nнедоступен!')
     //если конфигурация сервера мониторинга не найдена
-    else if (parsedData['FileNotFoundError'] !== undefined)
-        monitorUnavailable(document
-            .getElementsByClassName('server'), 'Файл конфигурации\r\nинфопанели не найден!')
+    else if (parsedData['DoesNotExist'] !== undefined)
+        monitorAvailability(document
+            .getElementsByClassName('server'), 'конфигурация в БД инфопанели\r\n не найдена!')
     //агент не может валидировать данные
     else if (parsedData['ValidationException'] !== undefined)
-        monitorUnavailable(document
-            .getElementsByClassName('server'), 'Агент не распознал\r\nданные!')
+        monitorAvailability(document
+            .getElementsByClassName('server'), 'агент не распознал\r\nданные!')
     //таблица с целевыми хостами отсутствует
     else if (parsedData["ProgrammingError"] !== undefined || parsedData['TargetsIsEmpty'] !== undefined)
-        monitorUnavailable(document
+        monitorAvailability(document
             .getElementsByClassName('server'), 'Целевые хосты\r\nне найдены!')
-    else
+    else {
+        monitorAvailability(document
+            .getElementsByClassName('server'), "", true
+        )
         parsedData.forEach(el => updateServerNode(el.data, el.id, el.role, callback));
+    }
 
 }
 
@@ -340,10 +408,10 @@ async function getInterval(url, method, headers) {
         method: method, headers: headers
     });
 
-    let int = JSON.parse(await response.json());
+    let interval = JSON.parse(await response.json());
 
-    if (int['file_not_found'] === undefined)
-        return  parseInt(int.interval) * 1000;
+    if (interval['DoesNotExist'] === undefined)
+        return  parseInt(interval.interval) * 1000;
     else
         return 5000;
 }

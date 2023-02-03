@@ -5,7 +5,11 @@
 <section class="flex-shrink-0" id="servers">
     <div class="row container-fluid servers-container">
         <div class="col-md-6 left">
-            <div><h4 class="text-dark text-center">Мониторинг серверов</h4></div>
+            <div>
+                <h4 class="text-dark text-center">
+                    Мониторинг серверов: <b id="agent-status">неизвестно.</b>
+                </h4>
+            </div>
             <div class="servers flex-shrink-0">
                 {% include "parts/1_server.html" %}
             </div>
