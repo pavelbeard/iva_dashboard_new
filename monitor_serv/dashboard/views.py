@@ -47,19 +47,19 @@ def index_view(request):
 @login_required(login_url=reverse_lazy("dashboard_users:login"))
 @cache_control(no_cache=True, must_revalidate=True, no_store=True)
 def dashboard_view(request):
-    targets = models.Target.objects.filter(is_being_scan=True)
-    addresses = [
+    query = models.Target.objects.filter(is_being_scan=True)
+    targets = [
         {
             "address": f"{target.address}:{target.port}",
             "id": f"{target.address.replace('.', '')}{target.port}",
             "role": target.server_role
         }
-        for target in targets
+        for target in query
     ]
     return render(
         request=request,
         template_name="base/4_dashboard.html",
-        context={"addresses": addresses, "app_version": app_version, "mon_agent_available": True}
+        context={"targets": targets, "app_version": app_version, "mon_agent_available": True}
     )
 
 

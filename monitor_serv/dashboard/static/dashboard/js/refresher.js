@@ -1,9 +1,12 @@
 import {zip} from "./extensions.js";
 
-function dropdownTitle(hostId, html, cardPart) {
+let imagesPath = "/static/dashboard/images/";
+
+
+function dropdownTitle(hostElem, html, cardPart) {
     $(function () {
-         $(`div#${hostId}.server`).find(cardPart).hover(function () {
-             if ($(`#${hostId}`).attr('data-available') !== "false") {
+         hostElem.find(cardPart).hover(function () {
+             if (hostElem.attr('data-available') !== "false") {
                  $(this).addClass('show');
                  $(this).find('.dropdown-menu').addClass('show');
                  $(this).find('.dropdown-menu').html(html);
@@ -16,47 +19,52 @@ function dropdownTitle(hostId, html, cardPart) {
     });
 }
 
-function hostnamectl(data, host) {
+function hostnamectl(data, hostElem) {
     let status = data[0]["hostname"] !== undefined;
     // set hostname
 
     try {
         if (status) {
-            host.childNodes[1].childNodes[1].childNodes[7].textContent = data[0]["hostname"]
+            hostElem.find('.server-hostname').text(data[0]["hostname"]);
         } else {
-            throw new Error(`Хост ${host.id} недоступен`)
+            throw new Error(`Хост ${hostElem.id} недоступен`)
         }
     } catch (e) {
-        host.childNodes[1].childNodes[1].childNodes[7].textContent = "Хост недоступен\n";
+        hostElem.find('.server-hostname').text("Хост недоступен");
     }
 }
 
-function uptime(data, host) {
+function uptime(data, hostElem) {
     let status = data[0]["uptime"] !== undefined;
-    $(`#${host.id}`).attr('data-available', status);
+    hostElem.attr('data-available', status);
 
     try {
         if (status) {
-            let html = `<li><a class="dropdown-item">${data[0]["uptime"]}</a></li>`;
-            dropdownTitle(host.id, html, '.server-img.dropend');
+            let html = `
+                <li><a class="dropdown-item">${data[0]["uptime"]}</a></li>
+            `;
+            dropdownTitle(hostElem, html, '.server-img.dropend');
         } else {
-            throw new Error(`Хост ${host.id} недоступен`)
+            throw new Error(`Хост ${hostElem.id} недоступен`)
         }
     } catch (e) {
         // TODO: logging
     }
 }
 
-function netAnalysis(data, host) {
+function netAnalysis(data, hostElem) {
     let status = data[0]["iface"] !== undefined;
     let cmdNotFound = data[0]["command_not_found"] !== undefined;
-    $(`#${host.id}`).attr('data-available', status);
 
-    host.childNodes[3].childNodes[9].childNodes[1].src = status ?
-        "/static/dashboard/images/dashboard-ethernet-up.svg" :
-        cmdNotFound ? "/static/dashboard/images/dashboard-ethernet-down.svg" :
-             "/static/dashboard/images/dashboard-ethernet.svg";
-    host.childNodes[3].childNodes[9].childNodes[3].childNodes[1].textContent = status ? "UP" : cmdNotFound ? "DOWN" : "N/A" ;
+    // для dropdown-menu
+    hostElem.attr('data-available', status);
+
+    let src = imagesPath + (status ? "dashboard-ethernet-up.svg" :
+        cmdNotFound ? "dashboard-ethernet-down.svg" : "dashboard-ethernet.svg");
+
+    // status
+    hostElem.find('[data-indicator-type="network"]').attr('src', src);
+    hostElem.find('.server-network-text').find('p').text(status ? "UP" : cmdNotFound ? "DOWN" : "N/A");
 
     try {
         if (status) {
@@ -86,24 +94,26 @@ function netAnalysis(data, host) {
 
             let titleInfo = [...zip(ifaces, ipAddresses, rxBytes, rxPackets, rxErrors, txBytes, txPackets, txErrors)];
             dropdownTitle(
-                host.id,
+                hostElem,
                   ``.concat(titleInfo).replace(/,/g, ""),
                 '.server-network-text.dropend'
             );
         } else {
-            throw new Error(`Хост ${host.id} недоступен`)
+            throw new Error(`Хост ${hostElem.id} недоступен`)
         }
     } catch (e) {
     }
 }
 
 
-function fileSysAnalysisParts(data, host) {
-    let fsIndicatorImage = host.childNodes[3].childNodes[5].childNodes[1];
-    let fsIndicatorTextContent = host.childNodes[3].childNodes[5].childNodes[3].childNodes[1];
+function fileSysAnalysisParts(data, hostElem) {
+    let fsIndicatorImage = hostElem.find('[data-indicator-type="disk"]');
+    let fsIndicatorTextContent = hostElem.find('.server-disk-text').find('p');
     let status = data[0]["filesystem"] !== undefined;
-    let na = "/static/dashboard/images/dashboard-ssd-card.svg";
-    $(`#${host.id}`).attr('data-available', status);
+    let na = imagesPath + "dashboard-ssd-card.svg";
+
+    // dropdown menu
+    hostElem.attr('data-available', status);
 
     try {
         if (status) {
@@ -113,14 +123,11 @@ function fileSysAnalysisParts(data, host) {
             //style
             let threshold = parseFloat(mostValuablePartUsePercent.slice(0,-1))
             if (threshold > 0.0 && threshold < 50.0) {
-                fsIndicatorImage.src =
-                    "/static/dashboard/images/dashboard-ssd-card-normal.svg";
+                fsIndicatorImage.attr('src', imagesPath + "dashboard-ssd-card-normal.svg");
             } else if (threshold > 50.0 && threshold < 75.0) {
-                fsIndicatorImage.src =
-                    "/static/dashboard/images/dashboard-ssd-card-warning.svg";
+                fsIndicatorImage.attr('src', imagesPath + "dashboard-ssd-card-warning.svg");
             } else if (threshold > 75.0 && threshold <= 100.0) {
-                fsIndicatorImage.src =
-                    "/static/dashboard/images/dashboard-ssd-card-danger.svg";
+                fsIndicatorImage.attr('src', imagesPath + "dashboard-ssd-card-danger.svg");
             }
 
             let totalDiskSize = data[data.length - 6]["total_disk_size"];
@@ -129,7 +136,7 @@ function fileSysAnalysisParts(data, host) {
             let mostValuablePartUsed = data[data.length - 3]["most_valuable_part_used"];
             let mostValuablePartAvailable = data[data.length - 2]["most_valuable_part_available"];
 
-            fsIndicatorTextContent.textContent = `${mostValuablePartUsePercent}`;
+            fsIndicatorTextContent.text(mostValuablePartUsePercent);
 
             //title
             //filesystem size used available use% mounted on
@@ -153,79 +160,76 @@ function fileSysAnalysisParts(data, host) {
                 <li><a class="dropdown-item">${mostValuablePartFs} size use in %: ${mostValuablePartUsePercent}</a></li>
             ` + cols + title;
 
-            dropdownTitle(host.id, html, '.server-disk-text.dropend');
+            dropdownTitle(hostElem, html, '.server-disk-text.dropend');
 
         } else {
-            throw new Error(`Хост ${host.id} недоступен`);
+            throw new Error(`Хост ${hostElem.id} недоступен`);
         }
     } catch (e) {
-        fsIndicatorImage.src = na;
-        fsIndicatorTextContent.textContent = "N/A";
+        fsIndicatorImage.attr('src', na);
+        fsIndicatorTextContent.text("N/A");
     }
 }
 
-function ramAnalysis(data, host) {
-    let ramIndicatorImage = host.childNodes[3].childNodes[3].childNodes[1];
-    let ramIndicatorTextContent = host.childNodes[3].childNodes[3].childNodes[3].childNodes[1];
+function ramAnalysis(data, hostElem) {
+    let ramIndicatorImage = hostElem.find('[data-indicator-type="ram"]');
+    let ramIndicatorTextContent = hostElem.find('.server-ram-text').find('p');
     let status = data[0]["ram_util"] !== undefined;
-    let na = "/static/dashboard/images/dashboard-ram.svg"
-    $(`#${host.id}`).attr('data-available', status);
+    let na = imagesPath + "dashboard-ram.svg"
+
+    // dropdown menu
+    hostElem.attr('data-available', status);
 
     try {
         if (status) {
             let threshold = parseFloat(data[0]["ram_util"])
             if (threshold > 0.0 && threshold < 50.0) {
-                ramIndicatorImage.src =
-                    "/static/dashboard/images/dashboard-ram-normal.svg";
+                ramIndicatorImage.attr('src', imagesPath + "dashboard-ram-normal.svg");
             } else if (threshold > 50.0 && threshold < 75.0) {
-                ramIndicatorImage.src =
-                    "/static/dashboard/images/dashboard-ram-warning.svg";
+                ramIndicatorImage.attr('src', imagesPath + "dashboard-ram-warning.svg");
             } else if (threshold > 75.0 && threshold <= 100.0) {
-                ramIndicatorImage.src =
-                    "/static/dashboard/images/dashboard-ram-danger.svg";
+                ramIndicatorImage.attr('src', imagesPath + "dashboard-ram-danger.svg");
             }
 
             let total = `<li><a class="dropdown-item">Total RAM: ${data[1]["ram_total"]}</a></li>`;
             let free = `<li><a class="dropdown-item">Free RAM: ${data[2]["ram_free"]}</a></li>`;
             let used = `<li><a class="dropdown-item">Used RAM: ${data[3]["ram_used"]}</a></li>`;
 
-            ramIndicatorTextContent.textContent = data[0]["ram_util"].trim() + "%";
+            ramIndicatorTextContent.text(data[0]["ram_util"].trim() + "%");
 
-            dropdownTitle(host.id, total + free + used, '.server-ram-text.dropend');
+            dropdownTitle(hostElem, total + free + used, '.server-ram-text.dropend');
 
         } else {
-            throw new Error(`Хост ${host.id} недоступен`);
+            throw new Error(`Хост ${hostElem.id} недоступен`);
         }
     } catch (e) {
-        ramIndicatorTextContent.textContent = "N/A";
-        ramIndicatorImage.src = na;
+        ramIndicatorTextContent.text("N/A");
+        ramIndicatorImage.attr('src', na);
     }
 }
 
-function cpuTopAnalysis(data, host) {
-    let cpuIndicator = host.childNodes[3].childNodes[1];
-    let cpuIndicatorImage = cpuIndicator.childNodes[1];
-    let cpuIndicatorTextContent = host.childNodes[3].childNodes[1].childNodes[3].childNodes[1];
+function cpuTopAnalysis(data, hostElem) {
+    let cpuIndicatorImage = hostElem.find('[data-indicator-type="cpu"]');
+    let cpuIndicatorTextContent = hostElem.find('.server-cpu-text').find('p');
     let status = data[0]["all_cores"] !== undefined;
-    let na = "/static/dashboard/images/dashboard-cpu.svg";
-    $(`#${host.id}`).attr('data-available', status);
+    let na = imagesPath + "dashboard-cpu.svg";
+
+    // dropdown menu
+    hostElem.attr('data-available', status);
 
 
     try {
         if (status) {
             let threshold = parseFloat(data[0]["all_cores"]["cpu_load"]);
             if (threshold > 0.0 && threshold < 50.0) {
-                cpuIndicatorImage.src =
-                    "/static/dashboard/images/dashboard-cpu-normal.svg";
+                cpuIndicatorImage.attr('src', imagesPath + "dashboard-cpu-normal.svg");
             } else if (threshold > 50.0 && threshold < 75.0) {
-                cpuIndicatorImage.src =
-                    "/static/dashboard/images/dashboard-cpu-warning.svg";
+                cpuIndicatorImage.attr('src', imagesPath + "dashboard-cpu-warning.svg");
             } else if (threshold > 75.0 && threshold <= 100.0) {
-                cpuIndicatorImage.src =
-                    "/static/dashboard/images/dashboard-cpu-danger.svg";
+                cpuIndicatorImage.attr('src', imagesPath + "dashboard-cpu-danger.svg");
             }
 
-            cpuIndicatorTextContent.textContent = data[0]["all_cores"]["cpu_load"] + "%";
+            cpuIndicatorTextContent.text(data[0]["all_cores"]["cpu_load"] + "%");
 
             let cores = "";
 
@@ -233,23 +237,23 @@ function cpuTopAnalysis(data, host) {
                 cores += `<li><a class="dropdown-item">Core${core}: ${data[1]["each_core"][core][`core${core}`]}%</a></li>`
             }
 
-            dropdownTitle(host.id, cores, '.server-cpu-text.dropend');
+            dropdownTitle(hostElem, cores, '.server-cpu-text.dropend');
 
         } else {
-            throw new Error(`Хост ${host.id} недоступен`);
+            throw new Error(`Хост ${hostElem.id} недоступен`);
         }
     } catch (e) {
-        cpuIndicatorTextContent.textContent = "N/A";
-        cpuIndicatorImage.src = na;
+        cpuIndicatorTextContent.text("N/A");
+        cpuIndicatorImage.attr('src', na);
     }
 }
 
-function execAnalysis(data, host) {
-    let processesIndicator = host.childNodes[3].childNodes[7];
-    let processesIndicatorImage = processesIndicator.childNodes[1];
-    let processesIndicatorTextContent = processesIndicator.childNodes[3].childNodes[1];
+function execAnalysis(data, hostElem) {
+    let processesIndicatorImage = hostElem.find('[data-indicator-type="apps"]');
+    let processesIndicatorTextContent = hostElem.find('.server-apps-text').find('p');
     let status = data[0]["status"] !== undefined;
-    $(`#${host.id}`).attr('data-available', status);
+    let na = imagesPath + "dashboard-apps.svg"
+    hostElem.attr('data-available', status);
 
 
     try {
@@ -270,95 +274,96 @@ function execAnalysis(data, host) {
                 return `<li><a class="dropdown-item">${el["service"]}: ${el["status"]}${st}</a></li>`;
             });
 
-            let processesTooltip, processesCount;
-
-            [processesTooltip, processesCount] = ["".concat(processesArray).replace(/,/g, '\n'),
-                processesArray.length];
+            let processesTooltip = "".concat(processesArray).replace(/,/g, '\n');
+            let processesCount = processesArray.length;
 
             //processes
-            processesIndicatorTextContent.textContent = processesCount;
-            processesIndicatorImage.src = "/static/dashboard/images/dashboard-apps-normal.svg";
+            processesIndicatorTextContent.text(processesCount);
+            processesIndicatorImage.attr('src', imagesPath + "dashboard-apps-normal.svg");
 
-            dropdownTitle(host.id, processesTooltip, '.server-apps-text.dropend');
+            dropdownTitle(hostElem, processesTooltip, '.server-apps-text.dropend');
 
         } else {
             throw new Error("Хост недоступен.");
         }
     } catch (e) {
-        processesIndicatorTextContent.textContent = "N/A";
-        processesIndicatorImage.src = "/static/dashboard/images/dashboard-apps.svg";
+        processesIndicatorTextContent.text("N/A");
+        processesIndicatorImage.attr('src', na);
     }
 }
 
 function updateServerNode(data, id, server_role, callback) {
-    let host = document.getElementById(id);
-    let serverNodeImage = host.childNodes[1].childNodes[1].childNodes[1];
-    let serverNodeTextContent = host.childNodes[1].childNodes[1].childNodes[5];
+    let hostElem = $(`#${id}`);
+    let serverNodeImage = hostElem.find('[data-indicator-type="server"]');
+    let serverNodeTextContent = hostElem.find('.server-status');
     let err = data[0]["connection_error"] === undefined;
 
     // server status
 
     //if server media else server head
-    let mediaUp = "/static/dashboard/images/dashboard-server-media-up.svg";
-    let mediaDown = "/static/dashboard/images/dashboard-server-media-down.svg";
-    let headUp = "/static/dashboard/images/dashboard-server-head-up.svg";
-    let headDown = "/static/dashboard/images/dashboard-server-head-down.svg";
+    let mediaUp = imagesPath + "dashboard-server-media-up.svg";
+    let mediaDown = imagesPath + "dashboard-server-media-down.svg";
+    let headUp = imagesPath + "dashboard-server-head-up.svg";
+    let headDown = imagesPath + "dashboard-server-head-down.svg";
 
 
     if (server_role === 'media')
-        serverNodeImage.src = err ? mediaUp : mediaDown
+        serverNodeImage.attr('src', err ? mediaUp : mediaDown);
     else
-        serverNodeImage.src = err ? headUp : headDown
+        serverNodeImage.attr('src', err ? headUp : headDown);
 
-    serverNodeTextContent.textContent = err ? "UP\n" : "DOWN\n";
+    // status
+    serverNodeTextContent.text(err ? "UP\n" : "DOWN\n");
 
-    callback(data, host)
+    callback(data, hostElem)
 
 }
 
 function monitorAvailability(servers, reason, available= false) {
-    let agentStatus = document.getElementById("agent-status");
+    let agentStatus = $('#agent-status');
 
-    agentStatus.innerHTML = available ? "монитор в норме." : reason
-    agentStatus.style.color = available ? "#00ff33AA" : "#ff0033AA";
+    agentStatus.text(available ? "монитор в норме." : reason);
+    agentStatus.css({"color": available ? "#00ff33AA" : "#ff0033AA"});
     let bg = available ? "#ececec" : "#bebdbd";
 
+    let serverInfoPaneLeft = servers.find('.server-left-part');
+
+    serverInfoPaneLeft.css({"background": bg});
+
+    if(!available) {
+        let text = "N/A";
+        serverInfoPaneLeft.find('.server-status').text(text);
+        serverInfoPaneLeft.find('.server-hostname').text(text);
+    }
+
     let imgArray = [
-        "/static/dashboard/images/dashboard-cpu.svg",
-        "/static/dashboard/images/dashboard-ram.svg",
-        "/static/dashboard/images/dashboard-ssd-card.svg",
-        "/static/dashboard/images/dashboard-apps.svg",
-        "/static/dashboard/images/dashboard-ethernet.svg",
+        imagesPath + "dashboard-cpu.svg",
+        imagesPath + "dashboard-ram.svg",
+        imagesPath + "dashboard-ssd-card.svg",
+        imagesPath + "dashboard-apps.svg",
+        imagesPath + "dashboard-ethernet.svg",
     ];
 
     for (let server of servers) {
 
         if (!available) {
 
-            let serverInfoPane = server.childNodes[1].childNodes[1];
-            serverInfoPane.childNodes[3].setAttribute('style', 'white-space: pre;');
-            serverInfoPane.childNodes[5].textContent = "no data";
-            serverInfoPane.childNodes[7].textContent = "no data";
-            serverInfoPane.childNodes[11].textContent = "no data";
-
-            let role = serverInfoPane.childNodes[11].innerHTML === "HEAD";
-            let head = "/static/dashboard/images/dashboard-server-head.svg";
-            let media = "/static/dashboard/images/dashboard-server-media.svg";
-            server.childNodes[1].childNodes[1].childNodes[1].src = role ? head : media;
+            let serverElem = $(`#${server.id}`);
+            let role = serverElem.find('.server-role').textContent === "HEAD";
+            let head = imagesPath + "dashboard-server-head.svg";
+            let media = imagesPath + "dashboard-server-media.svg";
+            serverElem.find('img').attr('src', role ? head : media);
         }
 
-        // server status
-        server.childNodes[1].childNodes[1].style.backgroundColor = bg;
-
         // server info
-        let server_info_pane = server.childNodes[3].childNodes;
+        let serverInfoPaneRight = server.childNodes[3].childNodes;
 
-        for (let i = 1, img = 0; i < server_info_pane.length; i += 2, img++) {
+        for (let i = 1, img = 0; i < serverInfoPaneRight.length; i += 2, img++) {
             // изменяем все индикаторы
-            server_info_pane[i].style.backgroundColor = bg;
+            serverInfoPaneRight[i].style.backgroundColor = bg;
             if (!available) {
-                server_info_pane[i].childNodes[3].childNodes[1].textContent = "N/A";
-                server_info_pane[i].childNodes[1].src = imgArray[img];
+                serverInfoPaneRight[i].childNodes[3].childNodes[1].textContent = "N/A";
+                serverInfoPaneRight[i].childNodes[1].src = imgArray[img];
             }
         }
     }
@@ -376,23 +381,18 @@ function redrawTableElements(parsedData, callback) {
 
     ///если мониторинг пал
     if (parsedData['ClientConnectionError'] !== undefined)
-        monitorAvailability(document
-            .getElementsByClassName('server'), parsedData['ClientConnectionError']);
+        monitorAvailability($('.server'), parsedData['ClientConnectionError']);
     //если конфигурация сервера мониторинга не найдена
     else if (parsedData['DoesNotExist'] !== undefined)
-        monitorAvailability(document
-            .getElementsByClassName('server'), parsedData['DoesNotExist']);
+        monitorAvailability($('.server'), parsedData['DoesNotExist']);
     //агент не может валидировать данные
     else if (parsedData['ValidationException'] !== undefined)
-        monitorAvailability(document
-            .getElementsByClassName('server'), parsedData['ValidationException']);
+        monitorAvailability($('.server'), parsedData['ValidationException']);
     //таблица с целевыми хостами отсутствует
     else if (parsedData["ProgrammingError"] !== undefined || parsedData['TargetsIsEmpty'] !== undefined)
-        monitorAvailability(document
-            .getElementsByClassName('server'), parsedData["ProgrammingError"]);
+        monitorAvailability($('.server'), parsedData["ProgrammingError"]);
     else {
-        monitorAvailability(document
-            .getElementsByClassName('server'), "", true);
+        monitorAvailability($('.server'), "", true);
         parsedData.forEach(el => updateServerNode(el.data, el.id, el.role, callback));
     }
 

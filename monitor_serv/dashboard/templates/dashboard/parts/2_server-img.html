@@ -2,17 +2,18 @@
 
 <div class="server-img dropend">
     <img class="img"
+         data-indicator-type="server"
          data-bs-toggle="dropdown"
          height="48"
-         {% if address.role == 'media' %}
+         {% if target.role == 'media' %}
             src="{% static "dashboard/images/dashboard-server-media.svg" %}"
          {% else %}
             src="{% static "dashboard/images/dashboard-server-head.svg" %}"
          {% endif %}
          alt="server-image">
     <ul class="dropdown-menu"></ul>
-    <div class="server-status">no data</div>
+    <div class="server-status text-center">no data</div>
     <div class="server-hostname text-center">Host undefined</div>
-    <div class="server-address">{{ address.address }}</div>
-    <div class="server-address">{{ address.role|upper }}</div>
+    <div class="server-address text-center">{{ target.address }}</div>
+    <div class="server-role text-center">{{ target.role|upper }}</div>
 </div>
