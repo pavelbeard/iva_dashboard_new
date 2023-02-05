@@ -107,10 +107,10 @@ class RAM(models.Model):
 class DiskSpace(models.Model):
     uuid_record = fields.UUIDField(default=uuid.uuid4, primary_key=True, editable=False)
     file_system = fields.CharField(null=False, default="none", max_length=128, verbose_name="Файловая система:")
-    fs_size = fields.CharField(null=False, max_length=10, default="none", verbose_name="Размер файловой системы:")
-    fs_used = fields.CharField(null=False, max_length=10, default="none", verbose_name="Занято:")
+    fs_size = fields.FloatField(null=False, max_length=10, default="none", verbose_name="Размер файловой системы:")
+    fs_used = fields.FloatField(null=False, max_length=10, default="none", verbose_name="Занято:")
     fs_used_prc = fields.FloatField(null=False, default=0, verbose_name="Занято в %:")
-    fs_avail = fields.CharField(null=False, max_length=10, default="none", verbose_name="Доступно:")
+    fs_avail = fields.FloatField(null=False, max_length=10, default="none", verbose_name="Доступно:")
     mounted_on = fields.CharField(null=False, default="none", max_length=128, verbose_name="Подключено к:")
     record_date = fields.DateTimeField(default=timezone.now, null=False, verbose_name="Время сканирования:")
 

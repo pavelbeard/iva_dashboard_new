@@ -32,6 +32,8 @@ class DigitalDataConverters:
             return float(amount[:-1]) * 1000 ** 2
         elif amount.__contains__("K"):
             return float(amount[:-1]) * 1000
+        elif amount == "0":
+            return float(amount)
         else:
             return float(amount[:-1])
 
@@ -275,7 +277,7 @@ class IvaMetricsHandler:
             return {"hostname": "hostname", "task": cls.net_analysis.__name__, "data": [
                 {"connection_error": True}
             ]}
-        elif data == ['']:
+        elif data == [''] or data == '':
             return {"hostname": "hostname", "task": cls.net_analysis.__name__, "data": [
                 {"command_not_found": True}
             ]}
@@ -455,11 +457,16 @@ class DataAccessLayerServer:
     @classmethod
     async def insert_disk_data(cls, *args, **kwargs):
         pk = kwargs.get('target_pk')
-        data = kwargs.get('data').get('data')
+        data = kwargs.get('data').get('data')[:-6]
+
+        for fs in data:
+            fs['size'] = DigitalDataConverters.convert_metric_to_bytes(fs['size'])
+            fs['used'] = DigitalDataConverters.convert_metric_to_bytes(fs['used'])
+            fs['available'] = DigitalDataConverters.convert_metric_to_bytes(fs['available'])
 
         target = await models.Target.objects.aget(pk=pk)
 
-        for disk_data in data[:-6]:
+        for disk_data in data:
             q = await models.DiskSpace.objects.acreate(
                 file_system=disk_data.get('filesystem'),
                 fs_size=disk_data.get('size'),
@@ -484,13 +491,13 @@ class DataAccessLayerServer:
                 interface=iface_data.get('iface'),
                 status=iface_data.get('status'),
                 ip_address=iface_data.get('ipaddress'),
-                rx_bytes=float(iface_data.get('rx_bytes')[:-2]),
+                rx_bytes=DigitalDataConverters.convert_metric_to_bytes(iface_data.get('rx_bytes')[:-2]),
                 rx_packets=iface_data.get('rx_packets'),
                 rx_errors_errors=iface_data.get('rx_errors').get('errors'),
                 rx_errors_dropped=iface_data.get('rx_errors').get('dropped'),
                 rx_errors_overruns=iface_data.get('rx_errors').get('overruns'),
                 rx_errors_frame=iface_data.get('rx_errors').get('frame'),
-                tx_bytes=float(iface_data.get('tx_bytes')[:-2]),
+                tx_bytes=DigitalDataConverters.convert_metric_to_bytes(iface_data.get('tx_bytes')[:-2]),
                 tx_packets=iface_data.get('tx_packets'),
                 tx_errors_errors=iface_data.get('tx_errors').get('errors'),
                 tx_errors_dropped=iface_data.get('tx_errors').get('dropped'),

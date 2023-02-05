@@ -14,6 +14,7 @@ class TargetAdmin(admin.ModelAdmin):
 @admin.register(dashboard_models.ServerData)
 class ServerDataAdmin(admin.ModelAdmin):
     form = forms.ServerDataForm
+    fields = ("hostname", "os", "kernel", "record_date")
 
 
 @admin.register(dashboard_models.CPU)
@@ -28,7 +29,12 @@ class RAMAdmin(admin.ModelAdmin):
 
 @admin.register(dashboard_models.DiskSpace)
 class DiskSpaceAdmin(admin.ModelAdmin):
-    pass
+    actions = ["truncate_disk_space"]
+
+    @admin.action(description="Очистить таблицу DiskSpace.", permissions=["change"])
+    def truncate_disk_space(self, modeladmin, request, queryset):
+        query = dashboard_models.DiskSpace.objects.all().delete()
+        query.save()
 
 
 @admin.register(dashboard_models.NetInterface)

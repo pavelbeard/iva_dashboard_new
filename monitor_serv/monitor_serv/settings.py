@@ -25,7 +25,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.getenv("SECRET_KEY", "change_me")
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.getenv("DEBUG", True)
+DEBUG = bool(os.getenv("DEBUG", True))
 
 ALLOWED_HOSTS = os.getenv("DJANGO_ALLOWED_HOSTS", default=["*"])
 
@@ -70,6 +70,7 @@ TEMPLATES = [
             BASE_DIR / 'dashboard/templates/dashboard',
             BASE_DIR / 'dashboard_users/templates/dashboard_users',
             BASE_DIR / 'dashboard_detail/templates/dashboard_detail',
+            BASE_DIR / 'dashboard_ivcs/templates/dashboard_ivcs',
         ]
         ,
         'APP_DIRS': True,
@@ -183,6 +184,7 @@ STATICFILES_DIRS = (
     os.path.join(BASE_DIR, "dashboard", "static"),
     os.path.join(BASE_DIR, "dashboard_detail", "static"),
     os.path.join(BASE_DIR, "dashboard_users", "static"),
+    os.path.join(BASE_DIR, "dashboard_ivcs", "static"),
 )
 
 # Default primary key field type
@@ -219,4 +221,4 @@ CALL_TO_DEV = os.getenv("CALL_TO_DEV", "77619")
 SCRAPER_URL = os.getenv("SCRAPER_URL", "http://2.0.96.1:8000/api/monitor/metrics")
 SCRAPE_INTERVAL = os.getenv("SCRAPE_INTERVAL", 15)
 
-APP_VERSION = "v0.7.45"
+APP_VERSION = "v0.7.47"

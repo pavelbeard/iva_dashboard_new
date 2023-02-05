@@ -9,7 +9,7 @@ h4 {
     margin-left: 0;
 }
 
-.servers {
+.servers, .ivcs-users {
     padding: 20px;
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
@@ -17,7 +17,7 @@ h4 {
 }
 
 /*SERVER CARD*/
-.server {
+.server, .ivcs {
     display: grid;
     grid-template-columns: 125px 100px;
     box-sizing: border-box;
@@ -74,6 +74,7 @@ h4 {
     margin-bottom: 3px;
     width: 40px;
 }
+
 .server-cpu, .server-ram, .server-disk, .server-processes, .server-network {
     display: flex;
     align-items: center;

@@ -87,7 +87,7 @@ function netAnalysis(data, hostElem) {
             let txPackets = data.map(i =>
                 `<li><a class="dropdown-item">TX packets: ${i["tx_packets"]}</a></li>`
             );
-            let divider =  `<li><hr class="dropdown-divider"></li>`;
+            let divider = `<li><hr class="dropdown-divider"></li>`;
             let txErrors = data.map(i =>
                 `<li><a class="dropdown-item">TX errors: ${Object.entries(i["tx_errors"])}</a></li>${divider}`
             ).map(i => i.replace(/,(?!\d+)/g, ' | ').replace(/,(?=\d+)/g, '='));
@@ -95,9 +95,15 @@ function netAnalysis(data, hostElem) {
             let titleInfo = [...zip(ifaces, ipAddresses, rxBytes, rxPackets, rxErrors, txBytes, txPackets, txErrors)];
             dropdownTitle(
                 hostElem,
-                  ``.concat(titleInfo).replace(/,/g, ""),
+                ``.concat(titleInfo).replace(/,/g, ""),
                 '.server-network-text.dropend'
             );
+        } else if(cmdNotFound) {
+            dropdownTitle(
+                hostElem, '<li>' +
+                '<a class="dropdown-item">Команда ifconfig не найдена. Установите net-tools!</a></li>',
+                '.server-network-text.dropend'
+            )
         } else {
             throw new Error(`Хост ${hostElem.id} недоступен`)
         }
