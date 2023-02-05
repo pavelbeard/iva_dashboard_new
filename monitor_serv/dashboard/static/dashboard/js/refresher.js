@@ -1,6 +1,6 @@
 import {zip} from "./extensions.js";
 
-let imagesPath = "/static/dashboard/images/";
+let imagesPath = "/static/dashboard/images";
 
 
 function dropdownTitle(hostElem, html, cardPart) {
@@ -59,8 +59,8 @@ function netAnalysis(data, hostElem) {
     // для dropdown-menu
     hostElem.attr('data-available', status);
 
-    let src = imagesPath + (status ? "dashboard-ethernet-up.svg" :
-        cmdNotFound ? "dashboard-ethernet-down.svg" : "dashboard-ethernet.svg");
+    let src = imagesPath + (status ? "/bootstrap-svg/ethernet-n.svg" :
+        cmdNotFound ? "/bootstrap-svg/ethernet-d.svg" : "/bootstrap-svg/ethernet.svg");
 
     // status
     hostElem.find('[data-indicator-type="network"]').attr('src', src);
@@ -110,7 +110,7 @@ function fileSysAnalysisParts(data, hostElem) {
     let fsIndicatorImage = hostElem.find('[data-indicator-type="disk"]');
     let fsIndicatorTextContent = hostElem.find('.server-disk-text').find('p');
     let status = data[0]["filesystem"] !== undefined;
-    let na = imagesPath + "dashboard-ssd-card.svg";
+    let na = imagesPath + "/bootstrap-svg/device-ssd.svg";
 
     // dropdown menu
     hostElem.attr('data-available', status);
@@ -123,11 +123,11 @@ function fileSysAnalysisParts(data, hostElem) {
             //style
             let threshold = parseFloat(mostValuablePartUsePercent.slice(0,-1))
             if (threshold > 0.0 && threshold < 50.0) {
-                fsIndicatorImage.attr('src', imagesPath + "dashboard-ssd-card-normal.svg");
+                fsIndicatorImage.attr('src', imagesPath + "/bootstrap-svg/device-ssd-n.svg");
             } else if (threshold > 50.0 && threshold < 75.0) {
-                fsIndicatorImage.attr('src', imagesPath + "dashboard-ssd-card-warning.svg");
+                fsIndicatorImage.attr('src', imagesPath + "/bootstrap-svg/device-ssd-w.svg");
             } else if (threshold > 75.0 && threshold <= 100.0) {
-                fsIndicatorImage.attr('src', imagesPath + "dashboard-ssd-card-danger.svg");
+                fsIndicatorImage.attr('src', imagesPath + "/bootstrap-svg/device-ssd-d.svg");
             }
 
             let totalDiskSize = data[data.length - 6]["total_disk_size"];
@@ -175,7 +175,7 @@ function ramAnalysis(data, hostElem) {
     let ramIndicatorImage = hostElem.find('[data-indicator-type="ram"]');
     let ramIndicatorTextContent = hostElem.find('.server-ram-text').find('p');
     let status = data[0]["ram_util"] !== undefined;
-    let na = imagesPath + "dashboard-ram.svg"
+    let na = imagesPath + "/bootstrap-svg/memory.svg"
 
     // dropdown menu
     hostElem.attr('data-available', status);
@@ -184,11 +184,11 @@ function ramAnalysis(data, hostElem) {
         if (status) {
             let threshold = parseFloat(data[0]["ram_util"])
             if (threshold > 0.0 && threshold < 50.0) {
-                ramIndicatorImage.attr('src', imagesPath + "dashboard-ram-normal.svg");
+                ramIndicatorImage.attr('src', imagesPath + "/bootstrap-svg/memory-n.svg");
             } else if (threshold > 50.0 && threshold < 75.0) {
-                ramIndicatorImage.attr('src', imagesPath + "dashboard-ram-warning.svg");
+                ramIndicatorImage.attr('src', imagesPath + "/bootstrap-svg/memory-w.svg");
             } else if (threshold > 75.0 && threshold <= 100.0) {
-                ramIndicatorImage.attr('src', imagesPath + "dashboard-ram-danger.svg");
+                ramIndicatorImage.attr('src', imagesPath + "/bootstrap-svg/memory-d.svg");
             }
 
             let total = `<li><a class="dropdown-item">Total RAM: ${data[1]["ram_total"]}</a></li>`;
@@ -212,7 +212,7 @@ function cpuTopAnalysis(data, hostElem) {
     let cpuIndicatorImage = hostElem.find('[data-indicator-type="cpu"]');
     let cpuIndicatorTextContent = hostElem.find('.server-cpu-text').find('p');
     let status = data[0]["all_cores"] !== undefined;
-    let na = imagesPath + "dashboard-cpu.svg";
+    let na = imagesPath + "/bootstrap-svg/cpu.svg";
 
     // dropdown menu
     hostElem.attr('data-available', status);
@@ -222,11 +222,11 @@ function cpuTopAnalysis(data, hostElem) {
         if (status) {
             let threshold = parseFloat(data[0]["all_cores"]["cpu_load"]);
             if (threshold > 0.0 && threshold < 50.0) {
-                cpuIndicatorImage.attr('src', imagesPath + "dashboard-cpu-normal.svg");
+                cpuIndicatorImage.attr('src', imagesPath + "/bootstrap-svg/cpu-n.svg");
             } else if (threshold > 50.0 && threshold < 75.0) {
-                cpuIndicatorImage.attr('src', imagesPath + "dashboard-cpu-warning.svg");
+                cpuIndicatorImage.attr('src', imagesPath + "/bootstrap-svg/cpu-w.svg");
             } else if (threshold > 75.0 && threshold <= 100.0) {
-                cpuIndicatorImage.attr('src', imagesPath + "dashboard-cpu-danger.svg");
+                cpuIndicatorImage.attr('src', imagesPath + "/bootstrap-svg/cpu-d.svg");
             }
 
             cpuIndicatorTextContent.text(data[0]["all_cores"]["cpu_load"] + "%");
@@ -252,7 +252,7 @@ function execAnalysis(data, hostElem) {
     let processesIndicatorImage = hostElem.find('[data-indicator-type="apps"]');
     let processesIndicatorTextContent = hostElem.find('.server-apps-text').find('p');
     let status = data[0]["status"] !== undefined;
-    let na = imagesPath + "dashboard-apps.svg"
+    let na = imagesPath + "/bootstrap-svg/app-indicator.svg"
     hostElem.attr('data-available', status);
 
 
@@ -279,7 +279,7 @@ function execAnalysis(data, hostElem) {
 
             //processes
             processesIndicatorTextContent.text(processesCount);
-            processesIndicatorImage.attr('src', imagesPath + "dashboard-apps-normal.svg");
+            processesIndicatorImage.attr('src', imagesPath + "/bootstrap-svg/app-indicator-n.svg");
 
             dropdownTitle(hostElem, processesTooltip, '.server-apps-text.dropend');
 
@@ -301,10 +301,10 @@ function updateServerNode(data, id, server_role, callback) {
     // server status
 
     //if server media else server head
-    let mediaUp = imagesPath + "dashboard-server-media-up.svg";
-    let mediaDown = imagesPath + "dashboard-server-media-down.svg";
-    let headUp = imagesPath + "dashboard-server-head-up.svg";
-    let headDown = imagesPath + "dashboard-server-head-down.svg";
+    let mediaUp = imagesPath + "/bootstrap-svg/server-n.svg";
+    let mediaDown = imagesPath + "/bootstrap-svg/server-d.svg";
+    let headUp = imagesPath + "/bootstrap-svg/server-head-n.svg";
+    let headDown = imagesPath + "/bootstrap-svg/server-head-d.svg";
 
 
     if (server_role === 'media')
@@ -319,7 +319,13 @@ function updateServerNode(data, id, server_role, callback) {
 
 }
 
-function monitorAvailability(servers, reason, available= false) {
+    /**
+     * функция, перерисовывающая сервера, в зависимости от доступности монитора.
+     * @param servers сервера.
+     * @param reason причина, по умолчанию - undefined.
+     * @param available доступность, по умолчанию - true.
+     */
+function monitorAvailability(servers, reason=undefined, available= true) {
     let agentStatus = $('#agent-status');
 
     agentStatus.text(available ? "монитор в норме." : reason);
@@ -337,21 +343,20 @@ function monitorAvailability(servers, reason, available= false) {
     }
 
     let imgArray = [
-        imagesPath + "dashboard-cpu.svg",
-        imagesPath + "dashboard-ram.svg",
-        imagesPath + "dashboard-ssd-card.svg",
-        imagesPath + "dashboard-apps.svg",
-        imagesPath + "dashboard-ethernet.svg",
+        imagesPath + "/bootstrap-svg/cpu.svg",
+        imagesPath + "/bootstrap-svg/memory.svg",
+        imagesPath + "/bootstrap-svg/device-ssd.svg",
+        imagesPath + "/bootstrap-svg/app-indicator.svg",
+        imagesPath + "/bootstrap-svg/ethernet.svg",
     ];
 
     for (let server of servers) {
+        let serverElem = $(`#${server.id}`);
 
         if (!available) {
-
-            let serverElem = $(`#${server.id}`);
-            let role = serverElem.find('.server-role').textContent === "HEAD";
-            let head = imagesPath + "dashboard-server-head.svg";
-            let media = imagesPath + "dashboard-server-media.svg";
+            let role = serverElem.find('.server-role').text() === "HEAD";
+            let head = imagesPath + "/bootstrap-svg/server-head.svg";
+            let media = imagesPath + "/bootstrap-svg/server.svg";
             serverElem.find('img').attr('src', role ? head : media);
         }
 
@@ -361,14 +366,23 @@ function monitorAvailability(servers, reason, available= false) {
         for (let i = 1, img = 0; i < serverInfoPaneRight.length; i += 2, img++) {
             // изменяем все индикаторы
             serverInfoPaneRight[i].style.backgroundColor = bg;
+
             if (!available) {
                 serverInfoPaneRight[i].childNodes[3].childNodes[1].textContent = "N/A";
                 serverInfoPaneRight[i].childNodes[1].src = imgArray[img];
             }
+
         }
+
     }
+
 }
 
+    /**
+     * функция, перерисывающая инфопанель в завимости от определенных условий
+     * @param parsedData данные с серверов.
+     * @param callback функция обработки данных с серверов.
+     */
 function redrawTableElements(parsedData, callback) {
     // если отсутствует ключ task, то мониторинг пал и
     // ставим дата-атрибут для каждого сервера false - это выключает dropdown
@@ -381,18 +395,18 @@ function redrawTableElements(parsedData, callback) {
 
     ///если мониторинг пал
     if (parsedData['ClientConnectionError'] !== undefined)
-        monitorAvailability($('.server'), parsedData['ClientConnectionError']);
+        monitorAvailability($('.server'), parsedData['ClientConnectionError'], false);
     //если конфигурация сервера мониторинга не найдена
     else if (parsedData['DoesNotExist'] !== undefined)
-        monitorAvailability($('.server'), parsedData['DoesNotExist']);
+        monitorAvailability($('.server'), parsedData['DoesNotExist'], false);
     //агент не может валидировать данные
     else if (parsedData['ValidationException'] !== undefined)
-        monitorAvailability($('.server'), parsedData['ValidationException']);
+        monitorAvailability($('.server'), parsedData['ValidationException'], false);
     //таблица с целевыми хостами отсутствует
     else if (parsedData["ProgrammingError"] !== undefined || parsedData['TargetsIsEmpty'] !== undefined)
-        monitorAvailability($('.server'), parsedData["ProgrammingError"]);
+        monitorAvailability($('.server'), parsedData["ProgrammingError"], false);
     else {
-        monitorAvailability($('.server'), "", true);
+        monitorAvailability($('.server'));
         parsedData.forEach(el => updateServerNode(el.data, el.id, el.role, callback));
     }
 
@@ -403,6 +417,13 @@ let headers = {
     'Content-Type': 'application/json',
 }
 
+    /**
+     * подфункция inspectServers.
+     * @param url url метрики в бэкенде.
+     * @param method HTTP метод.
+     * @param headers AJAX заголовки.
+     * @param callback функция, обрабатывающая результат снятия метрики
+     */
 async function getMetrics (url, method, headers, callback) {
     let response = await fetch(url, {
         method: method, headers: headers
@@ -415,6 +436,11 @@ async function getMetrics (url, method, headers, callback) {
         redrawTableElements(parsedData, callback);
 }
 
+
+    /**
+     * функция берет интервал с бэкенда.
+     * в случае, если бэкенд пал - интервал равен 5с
+     */
 async function getInterval(url, method, headers) {
     let response = await fetch(url, {
         method: method, headers: headers
@@ -428,8 +454,12 @@ async function getInterval(url, method, headers) {
         return 5000;
 }
 
+    /**
+     * функция берет данные с серверов через бэкенд,
+     * раз в 15 секунд по умолчанию.
+     * интервал снятия метрик можно настроить в админке
+     */
 async function inspectServers() {
-
     let funcArray = [
         hostnamectl, cpuTopAnalysis, ramAnalysis, fileSysAnalysisParts,
         execAnalysis, netAnalysis, uptime
@@ -442,7 +472,10 @@ async function inspectServers() {
     // TODO: переписать в функциях часть кода, отвечающий за обработку ошибок в промисы
 }
 
-// main //
+    /**
+     * main
+     * инициализация скрипта
+     */
 setTimeout(async function () {
     await inspectServers();
     let interval = await getInterval("interval/", "GET", headers);

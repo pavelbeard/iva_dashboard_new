@@ -219,4 +219,4 @@ CALL_TO_DEV = os.getenv("CALL_TO_DEV", "77619")
 SCRAPER_URL = os.getenv("SCRAPER_URL", "http://2.0.96.1:8000/api/monitor/metrics")
 SCRAPE_INTERVAL = os.getenv("SCRAPE_INTERVAL", 15)
 
-APP_VERSION = "v0.7.42"
+APP_VERSION = "v0.7.45"
