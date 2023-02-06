@@ -1,15 +1,12 @@
-import paramiko
-import uvicorn
 import asyncio
 import concurrent.futures
 import os
-
-from typing import List
 from asyncio.events import AbstractEventLoop
 from functools import partial
+from typing import List
 
-from pydantic import ValidationError
-from starlette.responses import JSONResponse
+import paramiko
+import uvicorn
 
 from agent import models
 from agent import run_cmd_on_target_host, app, get_logger

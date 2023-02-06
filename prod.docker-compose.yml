@@ -43,14 +43,12 @@ services:
     restart: always
 
   monitor-agent:
-    image: pavelbeard/monitor-agent:v1.2
-    command: uvicorn main:app --reload --host 2.0.96.1 --port 8000
+    build:
+      context: .
+      dockerfile: prod.monitor_agent.Dockerfile
     container_name: monitor-agent
     env_file:
       - env/prod.monitor-agent.env
-    volumes:
-      - ./monitor_agent/:/home/monitor-agent-app/api
-      - ./monitor_agent_logs/:/home/monitor-agent-app/api/logs
     networks:
       iva_dashboard_net:
         ipv4_address: 2.0.96.1
