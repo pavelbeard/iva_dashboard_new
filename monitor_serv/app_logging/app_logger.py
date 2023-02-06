@@ -8,13 +8,14 @@ APP_HOME = os.getenv("APP_HOME", os.getcwd())
 
 
 def get_file_handler():
-    logs_path = os.path.join(os.getcwd(), "logs")
-
-    if not os.path.exists(logs_path):
-        os.mkdir(logs_path)
-
-    fh = logging.handlers.RotatingFileHandler(os.path.join(APP_HOME, "logs", "monitor_server.log"), backupCount=10,
-                                              maxBytes=1024 ** 2)
+    # logs_path = os.path.join(os.getcwd(), "logs")
+    #
+    # if not os.path.exists(logs_path):
+    #     os.mkdir(logs_path)
+    #
+    # fh = logging.handlers.RotatingFileHandler(os.path.join(APP_HOME, "logs", "monitor_server.log"), backupCount=10,
+    #                                           maxBytes=1024 ** 2)
+    fh = logging.StreamHandler()
     fh.setLevel(logging.INFO)
     fh.setFormatter(logging.Formatter(_logging_format))
     return fh
