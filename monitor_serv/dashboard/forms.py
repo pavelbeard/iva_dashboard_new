@@ -5,6 +5,7 @@ from . import models as dashboard_models
 
 
 ENCRYPTION_KEY = settings.ENCRYPTION_KEY
+DEBUG = settings.DEBUG
 
 
 class TargetForm(forms.ModelForm):
@@ -12,7 +13,15 @@ class TargetForm(forms.ModelForm):
 
     def clean_password(self):
         password = self.cleaned_data.get('password')
+
+        if DEBUG:
+            print(password)
+            print(ENCRYPTION_KEY)
+
         encrypted_password = pass_handler.encrypt_pass(password=password, encryption_key=ENCRYPTION_KEY)
+
+        if DEBUG:
+            print(encrypted_password)
 
         return encrypted_password
 

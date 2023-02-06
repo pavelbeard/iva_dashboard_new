@@ -93,7 +93,7 @@ class IvaMetrics:
                 except aiohttp.ClientResponseError:
                     raise aiohttp.ClientResponseError
                 except ValidationException:
-                    raise ValidationException
+                    raise ValidationException("bad validation.")
 
 
 class IvaMetricsHandler:

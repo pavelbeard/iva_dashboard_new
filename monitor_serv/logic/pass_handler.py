@@ -1,6 +1,8 @@
 import base64
-
 from cryptography.fernet import Fernet
+from app_logging import app_logger
+
+logger = app_logger.get_logger(__name__)
 
 
 def encrypt_pass(encryption_key: str | bytes, password: str) -> str | None:
@@ -8,13 +10,11 @@ def encrypt_pass(encryption_key: str | bytes, password: str) -> str | None:
         __pass = password
         cipher_pass = Fernet(encryption_key)
         encrypted_pass = cipher_pass.encrypt(password.encode('ascii'))
-        complete_encrypt_pass = base64.b64encode(encrypted_pass).decode('ascii')
+        complete_encrypt_pass = base64.urlsafe_b64encode(encrypted_pass).decode('ascii')
 
         return complete_encrypt_pass
     except (TypeError, ValueError) as te:
-        # TODO: добавить логгеры
-
-        # logging.getLogger('error_logger').error(traceback.format_exc())
+        logger.error(te.__class__.__name__, exc_info=True)
         return None
 
 
@@ -26,6 +26,5 @@ def decrypt_pass(encryption_key: str | bytes, password: str) -> str | None:
 
         return decode_pass
     except (TypeError, ValueError) as te:
-        # TODO: добавить логгеры
-        # logging.getLogger('error_logger').error(traceback.format_exc())
+        logger.error(te.__class__.__name__, exc_info=True)
         return None

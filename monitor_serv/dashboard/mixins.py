@@ -1,20 +1,25 @@
 import asyncio
 import json
 from functools import lru_cache
+from typing import Callable
 
 import aiohttp
-from typing import Callable
-from django import http, shortcuts
+from django import http
 from django.conf import settings
 from django.db import utils
 from django.views import generic
+
 from logic import (
     IvaMetrics,
     TargetsIsEmpty,
     ValidationException,
     pass_handler,
 )
+from app_logging import app_logger
 from . import models
+
+
+logger = app_logger.get_logger(__name__)
 
 
 class ServerAnalysisMixin(generic.ListView):
@@ -101,19 +106,29 @@ class ServerAnalysisMixin(generic.ListView):
 
             # return!
             return self._json_response(response_data)
-        except aiohttp.ClientConnectionError:
+        except aiohttp.ClientConnectionError as cce:
+            logger.error(cce.__class__.__name__, exc_info=True)
             return self._json_response({"ClientConnectionError": "монитор недоступен."})
-        except utils.ProgrammingError:
+        except utils.ProgrammingError as pe:
+            logger.error(pe.__class__.__name__, exc_info=True)
             return self._json_response({"ProgrammingError": "таблица Targets не создана!"})
-        except models.DashboardSettings.DoesNotExist:
+        except models.DashboardSettings.DoesNotExist as not_exists:
+            logger.error(not_exists.__class__.__name__, exc_info=True)
             return self._json_response({"DoesNotExist": "сервер мониторинга не настроен."})
         except TargetsIsEmpty as tie:
+            logger.error(tie.__class__.__name__, exc_info=True)
             return self._json_response({"TargetsIsEmpty": tie.message})
         except ValidationException as err:
+            logger.error(err.__class__.__name__, exc_info=True)
             return self._json_response({"ValidationException": err.message})
         finally:
             # await a work with db
             if self.callback_data_access_layer is not None:
                 results = await asyncio.gather(*tasks, return_exceptions=True)
                 print(results)
-            # TODO: логировать вывод gather
+
+                for result in results:
+                    if isinstance(result, Exception):
+                        logger.error(result.__class__.__name__, exc_info=True)
+
+

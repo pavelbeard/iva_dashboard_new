@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 if [ "$POSTGRES_DB_NAME" = "iva_dashboard" ]
 then
@@ -12,11 +12,11 @@ then
 
 fi
 
-python3.11 manage.py migrate --noinput
+python3.11 manage.py migrate --database iva_dashboard --noinput
 python3.11 manage.py collectstatic --noinput --clear
-python3.11 manage.py createsuperuser --noinput
+python3.11 manage.py createsuperuser --database iva_dashboard --noinput
 python3.11 manage.py setupdashboard
 
-export ENCRYPTION_KEY=$(python3.11 manage.py genencryptionkey)
+#export ENCRYPTION_KEY=$(python3.11 manage.py genencryptionkey)
 
 exec "$@"
