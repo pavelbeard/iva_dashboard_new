@@ -14,6 +14,11 @@ from agent import run_cmd_on_target_host, app, get_logger
 logger = get_logger(__name__)
 
 
+@app.on_event("startup")
+async def scrape_metrics():
+    asyncio.create_task()
+
+
 @app.post("/api/monitor/metrics")
 async def request_for_metrics(targets: models.Targets) -> list[str | BaseException]:
     """

@@ -5,8 +5,7 @@ import aiohttp
 from aiohttp import web
 from asgiref.sync import sync_to_async
 from django.utils import timezone
-
-from dashboard import models
+from monitor_agent.dashboard import models
 
 
 # TODO: отделить экспортер в БД от scraper'a
