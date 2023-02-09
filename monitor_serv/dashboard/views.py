@@ -1,21 +1,14 @@
 import json
 
-import yaml
 from django import http
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.messages import get_messages
-from django.core.exceptions import ObjectDoesNotExist
 from django.http import HttpResponseRedirect
 from django.shortcuts import render
 from django.urls import reverse_lazy
-from django.views import generic
 from django.views.decorators.cache import cache_control
-from logic import (
-    IvaMetricsHandler,
-    DataAccessLayerServer,
-)
 
 from . import mixins
 from . import models
@@ -73,22 +66,17 @@ def dashboard_monitor_unavailable(request):
 
 class Processes(mixins.ServerAnalysisMixin):
     cmd = "/usr/sbin/service --status-all"
-    callback_iva_metrics_handler = IvaMetricsHandler.exec_analysis
 
 
 class CPUTop(mixins.ServerAnalysisMixin):
     model = models.CPU
     template_name = "dashboard/parts/1_server.html"
     cmd = 'top -bn 1 -d.2 | grep "Cpu" && top 1 -w 70 -bn 1 | grep -P "^(%)"'
-    callback_iva_metrics_handler = IvaMetricsHandler.cpu_top_analysis
-    callback_data_access_layer = DataAccessLayerServer.insert_cpu_data
 
 
 class RAM(mixins.ServerAnalysisMixin):
     model = models.RAM
     cmd = "free -kh --si"
-    callback_iva_metrics_handler = IvaMetricsHandler.ram_analysis
-    callback_data_access_layer = DataAccessLayerServer.insert_ram_data
 
 
 class DiskSpace(mixins.ServerAnalysisMixin):
@@ -100,20 +88,15 @@ class DiskSpace(mixins.ServerAnalysisMixin):
     # UPD: "du -sh --exclude=mnt --exclude=proc /" - не используется из-за огромной нагрузки на процессор
     model = models.DiskSpace
     cmd = 'df -h && lsblk | grep -E "^sda"'
-    callback_iva_metrics_handler = IvaMetricsHandler.file_sys_analysis
-    callback_data_access_layer = DataAccessLayerServer.insert_disk_data
 
 
 class Net(mixins.ServerAnalysisMixin):
     model = models.NetInterface
     cmd = "/usr/sbin/ifconfig"
-    callback_iva_metrics_handler = IvaMetricsHandler.net_analysis
-    callback_data_access_layer = DataAccessLayerServer.insert_net_data
 
 
 class Uptime(mixins.ServerAnalysisMixin):
     cmd = "uname -n && uptime"
-    callback_iva_metrics_handler = IvaMetricsHandler.uptime
 
 
 def get_interval(request):
@@ -129,5 +112,3 @@ def get_interval(request):
 class ServerData(mixins.ServerAnalysisMixin):
     model = models.Target
     cmd = "uname -n && uname -r && cat /etc/os-release"
-    callback_iva_metrics_handler = IvaMetricsHandler.hostnamectl
-    callback_data_access_layer = DataAccessLayerServer.insert_server_data

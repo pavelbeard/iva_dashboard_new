@@ -2,12 +2,16 @@ import asyncio
 import concurrent.futures
 import subprocess
 import unittest
+
+import sqlalchemy.engine
 from binascii import hexlify
 from functools import partial
 from logging import DEBUG
 from typing import List
 
 import paramiko
+
+import monitor_agent.dashboard.models
 
 
 class AutoAddPolicy(paramiko.MissingHostKeyPolicy):
@@ -22,37 +26,51 @@ class AutoAddPolicy(paramiko.MissingHostKeyPolicy):
 
 
 class MonitorTests(unittest.TestCase):
-    def test_known_hosts(self):
-        async def run_client(host):
-            async with iva_dashboard.connect(host="192.168.248.3", port=2249, username="pavelbeard",
-                                             password="Rt3$YiOO",
-                                             known_hosts=iva_dashboard.import_known_hosts(host)) as ssh:
-                result = await ssh.run("uname -n")
-                return result.stdout
-
-        async def p():
-            print("test_await")
-
-        async def set_known_hosts():
-            host = subprocess.run(
-                "ssh-keyscan -t rsa,dsa -p 2249 192.168.248.3".split(), stdout=subprocess.PIPE
-            ).stdout.decode('utf-8')
-
-            tasks = [asyncio.wait_for(run_client(host), timeout=10) for i in range(5)]
-            task1 = asyncio.create_task(p(), name="print await")
-            # await asyncio.sleep(15)
-            result = await asyncio.gather(*tasks, return_exceptions=True)
-            assert type(result) == str
-
-        asyncio.run(set_known_hosts())
-
-    def test_redis(self):
-        async def test_redis_async():
-            from . import redis
-            redis = redis.RedisClient()
+    # def test_known_hosts(self):
+    #     async def run_client(host):
+    #         async with iva_dashboard.connect(host="192.168.248.3", port=2249, username="pavelbeard",
+    #                                          password="Rt3$YiOO",
+    #                                          known_hosts=iva_dashboard.import_known_hosts(host)) as ssh:
+    #             result = await ssh.run("uname -n")
+    #             return result.stdout
+    #
+    #     async def p():
+    #         print("test_await")
+    #
+    #     async def set_known_hosts():
+    #         host = subprocess.run(
+    #             "ssh-keyscan -t rsa,dsa -p 2249 192.168.248.3".split(), stdout=subprocess.PIPE
+    #         ).stdout.decode('utf-8')
+    #
+    #         tasks = [asyncio.wait_for(run_client(host), timeout=10) for i in range(5)]
+    #         task1 = asyncio.create_task(p(), name="print await")
+    #         # await asyncio.sleep(15)
+    #         result = await asyncio.gather(*tasks, return_exceptions=True)
+    #         assert type(result) == str
+    #
+    #     asyncio.run(set_known_hosts())
+    #
+    # def test_redis(self):
+    #     async def test_redis_async():
+    #         from . import redis
+    #         redis = redis.RedisClient()
 
     def test_load_host_keys(self):
         pass
+
+    def test_get_targets(self):
+        from monitor_agent.logic.reader import get_targets
+
+        t = get_targets()
+        print(t[0].scrape_commands_id)
+        self.assertEqual(type(t), list)
+
+    def test_get_settings(self):
+        from monitor_agent.logic.reader import get_settings
+
+        t = get_settings()
+        print(t)
+        self.assertEqual(1, t.command_id)
 
 
 def many_clients(conn_data: tuple):
@@ -69,29 +87,5 @@ def many_clients(conn_data: tuple):
             return err
 
 
-async def main():
-    test_set = [
-        ("localhost", 2000, "test", "test"),
-        ("localhost", 2001, "test", "test"),
-        ("localhost", 2002, "test", "test"),
-        ("localhost", 2003, "test", "test"),
-        ("localhost", 2004, "test", "test"),
-        ("localhost", 2005, "test", "test"),
-    ]
-
-    with concurrent.futures.ProcessPoolExecutor() as process_pool:
-        loop = asyncio.get_running_loop()
-        calls: List[partial[tuple]] = [partial(many_clients, host) for host in test_set]
-        call_coros = []
-
-        for call in calls:
-            call_coros.append(loop.run_in_executor(process_pool, call))
-
-        results = await asyncio.gather(*call_coros)
-
-        for result in results:
-            print(result)
 
 
-if __name__ == '__main__':
-    asyncio.run(main())

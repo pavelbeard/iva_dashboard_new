@@ -3,7 +3,6 @@ import logging
 import paramiko
 from starlette.responses import JSONResponse
 from starlette.requests import Request
-from .application import app
 
 logging.getLogger(__name__)
 
@@ -19,9 +18,4 @@ class NoConnectionWithServer(paramiko.ssh_exception.SSHException):
 # class IncorrectCredentials()
 
 
-@app.exception_handler(NoConnectionWithServer)
-async def timeout_error(request: Request, exc: NoConnectionWithServer):
-    return JSONResponse(
-        status_code=408,
-        content={"message": f"{exc.message}"}
-    )
+

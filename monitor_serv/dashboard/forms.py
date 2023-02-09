@@ -3,7 +3,6 @@ from django.conf import settings
 from logic import pass_handler
 from . import models as dashboard_models
 
-
 ENCRYPTION_KEY = settings.ENCRYPTION_KEY
 DEBUG = settings.DEBUG
 
@@ -27,7 +26,7 @@ class TargetForm(forms.ModelForm):
 
     class Meta:
         model = dashboard_models.Target
-        fields = ['address', 'port', 'username', 'password', 'server_role', 'is_being_scan']
+        fields = ['address', 'port', 'username', 'password', 'server_role', 'is_being_scan', 'scrape_command']
 
 
 class ServerDataForm(forms.ModelForm):
@@ -37,9 +36,8 @@ class ServerDataForm(forms.ModelForm):
     kernel = forms.CharField(disabled=True, label="Ядро ОС:")
     record_date = forms.DateTimeField(disabled=True, label="Время сканирования:")
     target = forms.ModelChoiceField(disabled=True, queryset=dashboard_models.Target.objects.all(),
-                                       label="Целевой хост:")
+                                    label="Целевой хост:")
 
     class Meta:
         model = dashboard_models.ServerData
         fields = "__all__"
-

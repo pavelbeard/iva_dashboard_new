@@ -6,9 +6,8 @@ _logging_format = "[%(asctime)s] loglevel=%(levelname)-6s logger=%(name)s %(func
 
 
 def get_file_handler():
-    # fh = logging.handlers.RotatingFileHandler("logs/monitor_agent.log", backupCount=10,
-    #                                           maxBytes=1024**2)
-    fh = logging.StreamHandler()
+    fh = logging.handlers.RotatingFileHandler("logs/monitor_agent.log", backupCount=10,
+                                              maxBytes=1024**2)
     fh.setLevel(logging.INFO)
     fh.setFormatter(logging.Formatter(_logging_format))
     return fh
@@ -24,6 +23,6 @@ def get_stream_handler():
 def get_logger(name):
     logger = logging.getLogger(name)
     logger.setLevel(logging.INFO)
-    logger.addHandler(get_file_handler())
+    # logger.addHandler(get_file_handler()) # NOT WORK
     logger.addHandler(get_stream_handler())
     return logger

@@ -10,9 +10,7 @@ from django.db import utils
 from django.views import generic
 
 from logic import (
-    IvaMetrics,
     TargetsIsEmpty,
-    ValidationException,
     pass_handler,
 )
 from app_logging import app_logger
@@ -91,15 +89,7 @@ class ServerAnalysisMixin(generic.ListView):
             # get dboard_settings
             dboard_settings = await self.get_settings()
 
-            # scrape data
-            scraper = IvaMetrics(targets={"hosts": targets}, settings=dboard_settings)
-            response_data = await self._scrape_data(targets, scraper)
-
-            # send to db
-            if self.callback_data_access_layer is not None:
-                tasks = [asyncio.create_task(
-                    self.callback_data_access_layer(target_pk=t.get('pk'), data=el)
-                ) for t, el in zip(targets, response_data)]
+            response_data = list()
 
             # update data
             self._update_response_data(response_data, targets)
@@ -118,9 +108,6 @@ class ServerAnalysisMixin(generic.ListView):
         except TargetsIsEmpty as tie:
             logger.error(tie.__class__.__name__, exc_info=True)
             return self._json_response({"TargetsIsEmpty": tie.message})
-        except ValidationException as err:
-            logger.error(err.__class__.__name__, exc_info=True)
-            return self._json_response({"ValidationException": err.message})
         finally:
             # await a work with db
             if self.callback_data_access_layer is not None:

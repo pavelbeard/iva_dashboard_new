@@ -1,60 +1,77 @@
 import asyncio
-import concurrent.futures
-import os
-from asyncio.events import AbstractEventLoop
-from functools import partial
-from typing import List
+from asyncio import Task
+from typing import Any
 
-import paramiko
-import uvicorn
+from fastapi import FastAPI
+from requests import Request
+from starlette.responses import JSONResponse
 
-from agent import models
-from agent import run_cmd_on_target_host, app, get_logger
+from monitor_agent.agent import get_logger
+from monitor_agent.dashboard import models
+from monitor_agent.logic.scraper import ScrapeLogic
+from monitor_agent.agent import NoConnectionWithServer
+from monitor_agent.logic import exporter
 
 logger = get_logger(__name__)
 
+app = FastAPI()
+
+exporters = [
+    exporter.CPUDatabaseExporter(models.CPU).export,
+    exporter.DatabaseExporter(models.RAM).export,
+    exporter.DiskSpaceDatabaseExporter(models.DiskSpace, models.DiskSpaceStatistics).export,
+    exporter.AdvancedDatabaseExporter(models.NetInterface).export,
+    exporter.AdvancedDatabaseExporter(models.Process).export,
+    exporter.DatabaseExporter(models.ServerData).export,
+    exporter.DatabaseExporter(models.Uptime).export,
+]
+
+scraper_task: Task[Any] = None
+
+
+@app.exception_handler(NoConnectionWithServer)
+async def timeout_error(request: Request, exc: NoConnectionWithServer):
+    return JSONResponse(
+        status_code=408,
+        content={"message": f"{exc.message}"}
+    )
+
 
 @app.on_event("startup")
-async def scrape_metrics():
-    asyncio.create_task()
+async def start_scraping():
+    sc = ScrapeLogic()
+    asyncio.create_task(ScrapeLogic.scrape_forever(self=sc, exporters=exporters))
 
 
-@app.post("/api/monitor/metrics")
-async def request_for_metrics(targets: models.Targets) -> list[str | BaseException]:
+@app.on_event("shutdown")
+async def stop_scraping():
+    scraper_task.cancel("stopping task...")
+
+
+@app.get("/api/monitor/ping")
+async def ping() -> JSONResponse:
+    """Проверка состояния агента """
+    return JSONResponse(content={"ping": "ok"}, status_code=200)
+
+
+@app.get("/api/monitor/metrics/targets/all")
+async def get_all_metrics() -> list[str] | JSONResponse:
     """
-    Обратывает запрос на получение метрик из целевых хостов
-    :param targets: Целевые хосты
+    Обратывает запрос на получение метрик из целевых хостов.
+    Возвращает список кортежей: (target_id, data)
     :return: list[str | BaseException]
     """
-    with concurrent.futures.ThreadPoolExecutor(max_workers=5) as thread_pool:
-        loop: AbstractEventLoop = asyncio.get_running_loop()
-        calls: List[partial[tuple]] = [partial(run_cmd_on_target_host, host.dict(), 5) for host in targets.hosts]
-        call_coros = [loop.run_in_executor(thread_pool, call) for call in calls]
-
-        task_results = await asyncio.gather(*call_coros, return_exceptions=True)
-        results = []
-
-        for result, host in zip(task_results, targets.hosts):
-            host, port, *_ = list(host.dict().values())
-
-            if isinstance(result, paramiko.ssh_exception.AuthenticationException):
-                results.append(f"{host}:{port}\nbad credentials.")
-            elif isinstance(result, (
-                    paramiko.ssh_exception.NoValidConnectionsError,
-                    TypeError,
-                    TimeoutError,
-                    PermissionError,
-                    OSError
-            )):
-                results.append(f"{host}:{port}\nno connection with server.")
-            else:
-                results.append(result)
-
-        return results
+    sc = ScrapeLogic()
+    try:
+        scrape_data = await sc.scrape_once()
+        return scrape_data
+    except Exception as e:
+        logger.error(f"Exception {e.args[0]}")
+        return JSONResponse(content={"message", "internal server error."}, status_code=500)
 
 
-if __name__ == '__main__':
-    host = os.getenv('MONITOR_AGENT_ADDRESS')
-    port = os.getenv('MONITOR_AGENT_PORT')
-
-    uvicorn.run(app="main:app", host=host, port=int(port), reload=True)
+# задаток
+@app.get("/api/monitor/metrics/target/{target_id: int}/cpu")
+async def get_cpu_metrics(target_id: int) -> JSONResponse:
+    pass
+    # result = ScrapeLogic.get_data_from_target(target_id=target_id)

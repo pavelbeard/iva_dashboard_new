@@ -5,6 +5,10 @@ from . import forms
 
 
 # Register your models here.
+@admin.register(dashboard_models.ScrapeCommand)
+class ScrapeCommandAdmin(admin.ModelAdmin):
+    pass
+
 
 @admin.register(dashboard_models.Target)
 class TargetAdmin(admin.ModelAdmin):
