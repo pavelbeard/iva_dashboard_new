@@ -3858,7 +3858,7 @@ class ScrollSpy extends BaseComponent {
     return new IntersectionObserver(entries => this._observerCallback(entries), options);
   }
 
-  // The logic of selection
+  // The core_logic of selection
   _observerCallback(entries) {
     const targetElement = entry => this._targetLinks.get(`#${entry.target.id}`);
     const activate = entry => {

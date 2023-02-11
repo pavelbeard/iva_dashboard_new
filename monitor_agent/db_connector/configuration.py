@@ -39,9 +39,6 @@ engine = create_engine(DATABASE_URL("psycopg2"), future=True)
 async_session = async_sessionmaker(async_engine, expire_on_commit=False)
 session = scoped_session(sessionmaker(bind=engine))
 
-# TODO: добавить в агент: экспорт в бд, endpoint состояния агента, импорт из бд настроек для агента,
-#  логику обработки данных с хостов
-# TODO: удалить из сервера мониторинга: экспорт в бд, логику обработки данных из агента мониторинга
 # TODO: добавить в сервер мониторинга: импорт из бд
 # TODO: изменить в сервер мониторинга: логику обработки данных из бд, refresher.js
 

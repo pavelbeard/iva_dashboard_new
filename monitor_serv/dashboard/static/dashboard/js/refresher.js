@@ -390,46 +390,46 @@ function monitorAvailability(servers, reason=undefined, available= true) {
      * @param callback функция обработки данных с серверов.
      */
 function redrawTableElements(parsedData, callback) {
-    // если отсутствует ключ task, то мониторинг пал и
-    // ставим дата-атрибут для каждого сервера false - это выключает dropdown
-    if (parsedData["task"] === undefined) {
-        let servers = $('.server');
-        for (let server of servers) {
-            $(`#${server.id}`).attr('data-available', false);
-        }
-    }
-
-    ///если мониторинг пал
-    if (parsedData['ClientConnectionError'] !== undefined)
-        monitorAvailability($('.server'), parsedData['ClientConnectionError'], false);
-    //если конфигурация сервера мониторинга не найдена
-    else if (parsedData['DoesNotExist'] !== undefined)
-        monitorAvailability($('.server'), parsedData['DoesNotExist'], false);
-    //агент не может валидировать данные
-    else if (parsedData['ValidationException'] !== undefined)
-        monitorAvailability($('.server'), parsedData['ValidationException'], false);
-    //таблица с целевыми хостами отсутствует
-    else if (parsedData["ProgrammingError"] !== undefined || parsedData['TargetsIsEmpty'] !== undefined)
-        monitorAvailability($('.server'), parsedData["ProgrammingError"], false);
-    else {
-        monitorAvailability($('.server'));
-        parsedData.forEach(el => updateServerNode(el.data, el.id, el.role, callback));
-    }
+    let data = parsedData;
+    console.log(data)
+    //
+    // // если отсутствует ключ task, то мониторинг пал и
+    // // ставим дата-атрибут для каждого сервера false - это выключает dropdown
+    // if (parsedData["task"] === undefined) {
+    //     let servers = $('.server');
+    //     for (let server of servers) {
+    //         $(`#${server.id}`).attr('data-available', false);
+    //     }
+    // }
+    //
+    // ///если мониторинг пал
+    // if (parsedData['ClientConnectionError'] !== undefined)
+    //     monitorAvailability($('.server'), parsedData['ClientConnectionError'], false);
+    // //если конфигурация сервера мониторинга не найдена
+    // else if (parsedData['DoesNotExist'] !== undefined)
+    //     monitorAvailability($('.server'), parsedData['DoesNotExist'], false);
+    // //агент не может валидировать данные
+    // else if (parsedData['ValidationException'] !== undefined)
+    //     monitorAvailability($('.server'), parsedData['ValidationException'], false);
+    // //таблица с целевыми хостами отсутствует
+    // else if (parsedData["ProgrammingError"] !== undefined || parsedData['TargetsIsEmpty'] !== undefined)
+    //     monitorAvailability($('.server'), parsedData["ProgrammingError"], false);
+    // else {
+    //     monitorAvailability($('.server'));
+    //     parsedData.forEach(el => updateServerNode(el.data, el.id, el.role, callback));
+    // }
 
 }
 
-let headers = {
-    'X-Requested-With': 'XMLHttpRequest',
-    'Content-Type': 'application/json',
+
+
+function dataDistributor(parsedData) {
+
 }
 
-    /**
-     * подфункция inspectServers.
-     * @param url url метрики в бэкенде.
-     * @param method HTTP метод.
-     * @param headers AJAX заголовки.
-     * @param callback функция, обрабатывающая результат снятия метрики
-     */
+
+
+
 async function getMetrics (url, method, headers, callback) {
     let response = await fetch(url, {
         method: method, headers: headers
@@ -437,6 +437,8 @@ async function getMetrics (url, method, headers, callback) {
 
     let data = await response.json()
     let parsedData = JSON.parse(data);
+
+    // TODO: РАСПАРСИТЬ!!!!!!!!!!!!!!!!
 
     if (callback !== undefined)
         redrawTableElements(parsedData, callback);
@@ -466,13 +468,14 @@ async function getInterval(url, method, headers) {
      * интервал снятия метрик можно настроить в админке
      */
 async function inspectServers() {
-    let funcArray = [
-        hostnamectl, cpuTopAnalysis, ramAnalysis, fileSysAnalysisParts,
-        execAnalysis, netAnalysis, uptime
-    ];
-
-    funcArray.forEach(func => setTimeout(
-        getMetrics, 0, func.name.toLocaleLowerCase() + "/", "GET", headers, func))
+    // let funcArray = [
+    //     hostnamectl, cpuTopAnalysis, ramAnalysis, fileSysAnalysisParts,
+    //     execAnalysis, netAnalysis, uptime
+    // ];
+    //
+    // funcArray.forEach(func => setTimeout(
+    //     getMetrics, 0, func.name.toLocaleLowerCase() + "/", "GET", headers, func))
+    setTimeout(getMetrics, 0, "all-metrics/", "GET", headers, dataDistributor)
 
     // TODO: создать новый js файл для чисто iva-утилит
     // TODO: переписать в функциях часть кода, отвечающий за обработку ошибок в промисы

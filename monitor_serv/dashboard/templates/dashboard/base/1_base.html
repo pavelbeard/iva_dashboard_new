@@ -13,6 +13,7 @@
 
         <script src="{% static 'js/jquery.bootstrap.modal.forms.js' %}"></script>
 
+
         <link rel="stylesheet" href="{% static "dashboard/css/dashboard.css" %}">
         <link rel="stylesheet" href="{% static "dashboard_users/css/dashboard_users.css" %}">
         <link rel="stylesheet" href="{% static "dashboard_ivcs/css/dashboard_ivcs.css" %}">
@@ -20,6 +21,7 @@
 
     {% if user.is_authenticated and targets %}
         <script type="module" src="{% static "dashboard/js/refresher.js" %}"></script>
+        <script type="module" src="{% static 'dashboard/js/monitoring.js' %}"></script>
         <script type="module" src="{% static "dashboard/js/extensions.js" %}"></script>
     {% endif %}
     <title>{% block title %}Dashboard{% endblock %}</title>

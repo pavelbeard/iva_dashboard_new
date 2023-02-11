@@ -1,4 +1,5 @@
 import asyncio
+import re
 import socket
 import time
 from concurrent.futures import ProcessPoolExecutor
@@ -144,6 +145,12 @@ class ScrapeLogic:
                 for key, command in commands.items():
                     if command != '':
                         stdin, stdout, stderr = client.exec_command(command, timeout * 2)
+
+                        stderr_array = bytes.decode(stderr.read(), encoding='utf-8')
+
+                        if len(stderr_array) != 0:
+                            logger.warn(stderr_array)
+
                         result_dict[key] = bytes.decode(stdout.read(), encoding='utf-8')
 
                 return result_dict
@@ -159,11 +166,20 @@ class ScrapeLogic:
             except OSError:
                 raise OSError
 
-    async def scrape_once(self, set_interval: bool=False, interval=None, *args, **kwargs):
+    async def scrape_once(self, set_interval: bool = False, interval=None, *args, **kwargs) -> list:
+        """
+        Метод, берущий метрики при каждом вызове метода.
+        :param set_interval: устанавливается в True в том случае,
+            если этот метод нужно вызвать несколько раз.
+        :param interval: периодичность сбора метрик.
+            используется вне метода, если его нужно вызывать несколько или бесконечное количество раз.
+        """
         print()
 
         targets = self.get_data_from_targets()
 
+        # так как словарь изменяемый объект, то при каждом
+        # вытягивании значения интервала из БД словарь изменится.
         if set_interval:
             interval['value'] = int(get_settings().scrape_interval)
 
@@ -173,17 +189,26 @@ class ScrapeLogic:
 
         for target, result in zip(targets, results):
             if result.get('message') == 'bad credentials.':
-                logger.error(f"AuthenticationException: <{result.get('message')} address={target['address']}, "
-                             f"port={target['port']}>")
+                message = f"AuthenticationException: <{result.get('message')} address={target['address']}, " \
+                          f"port={target['port']}>"
+                targets_handled_data.append(message)
+                logger.error(msg=message)
             elif result.get('message') == 'no connection with server.':
-                logger.error(f"OSError: <{result.get('message')} address={target['address']}, port={target['port']}>")
+                message = f"OSError: <{result.get('message')} address={target['address']}, port={target['port']}>"
+                targets_handled_data.append(message)
+                logger.error(message)
             elif result.get('message') is None:
                 targets_handled_data.append((target.get('id'), self.send_data_to_scrape_handler(result)))
 
         return targets_handled_data
 
     async def scrape_forever(self, exporters):
-        """Бесконечный мониторинг серверов раз в interval"""
+        """
+        Бесконечный мониторинг серверов раз в interval.
+        Интервал меняется в методе scrape_once.
+        :param exporters: экспортеры данных. Любые.
+            Главное, чтобы реализовывали интерфейс Exporter.
+        """
         interval: dict = {"value": 5}  # интервал по умолчанию
 
         while True:
@@ -192,8 +217,9 @@ class ScrapeLogic:
 
                 # export to db
                 for target_data in targets_data:
-                    target_id, data = target_data
-                    [ex(values=values, target_id=target_id) for values, ex in zip(data, exporters)]
+                    if isinstance(target_data, tuple):
+                        target_id, data = target_data
+                        [ex(values=values, target_id=target_id) for values, ex in zip(data, exporters)]
 
             # пока не надо
             # except SSHException as e:

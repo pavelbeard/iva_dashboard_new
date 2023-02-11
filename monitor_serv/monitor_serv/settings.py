@@ -91,8 +91,8 @@ WSGI_APPLICATION = 'monitor_serv.wsgi.application'
 # https://docs.djangoproject.com/en/4.1/ref/settings/#databases
 
 DATABASE_ROUTERS = (
-    'logic.database_routers.IvaDashboardRouter',
-    'logic.database_routers.IvcsRouter',
+    'core_logic.database_routers.IvaDashboardRouter',
+    'core_logic.database_routers.IvcsRouter',
 )
 
 DEFAULT_IVCS_SCHEMAS = "search_path=auth,billing,instantmessaging,smpp,statistic,storage,updates,videoconference"
@@ -218,7 +218,8 @@ MESSAGE_TAGS = {
 MAIL_TO_DEV = os.getenv("MAIL_TO_DEV", "borodinpa@css.rzd")
 CALL_TO_DEV = os.getenv("CALL_TO_DEV", "77619")
 
-SCRAPER_URL = os.getenv("SCRAPER_URL", "http://2.0.96.1:8000/api/monitor/metrics")
+SCRAPER_URL = os.getenv("SCRAPER_URL", "http://2.0.96.1:8000/api/monitor/metrics/targets/all")
+SCRAPER_HEALTH_CHECK = os.getenv("SCRAPER_URL", "http://2.0.96.1:8000/api/monitor/ping")
 SCRAPE_INTERVAL = os.getenv("SCRAPE_INTERVAL", 15)
 
 APP_VERSION = "v0.8.1"

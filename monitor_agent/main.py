@@ -1,16 +1,15 @@
 import asyncio
-from asyncio import Task
-from typing import Any
+import json
 
 from fastapi import FastAPI
 from requests import Request
 from starlette.responses import JSONResponse
 
+from monitor_agent.agent import NoConnectionWithServer
 from monitor_agent.agent import get_logger
 from monitor_agent.dashboard import models
-from monitor_agent.logic.scraper import ScrapeLogic
-from monitor_agent.agent import NoConnectionWithServer
 from monitor_agent.logic import exporter
+from monitor_agent.logic.scraper import ScrapeLogic
 
 logger = get_logger(__name__)
 
@@ -26,7 +25,7 @@ exporters = [
     exporter.DatabaseExporter(models.Uptime).export,
 ]
 
-scraper_task: Task[Any] = None
+scraper_task = {}
 
 
 @app.exception_handler(NoConnectionWithServer)
@@ -40,12 +39,14 @@ async def timeout_error(request: Request, exc: NoConnectionWithServer):
 @app.on_event("startup")
 async def start_scraping():
     sc = ScrapeLogic()
-    asyncio.create_task(ScrapeLogic.scrape_forever(self=sc, exporters=exporters))
+    scraper_task['task'] = asyncio.create_task(
+        ScrapeLogic.scrape_forever(self=sc, exporters=exporters))
 
 
 @app.on_event("shutdown")
 async def stop_scraping():
-    scraper_task.cancel("stopping task...")
+    task = scraper_task['task']
+    task.cancel("stopping task...")
 
 
 @app.get("/api/monitor/ping")
@@ -55,7 +56,7 @@ async def ping() -> JSONResponse:
 
 
 @app.get("/api/monitor/metrics/targets/all")
-async def get_all_metrics() -> list[str] | JSONResponse:
+async def get_all_metrics() -> JSONResponse:
     """
     Обратывает запрос на получение метрик из целевых хостов.
     Возвращает список кортежей: (target_id, data)
@@ -64,7 +65,7 @@ async def get_all_metrics() -> list[str] | JSONResponse:
     sc = ScrapeLogic()
     try:
         scrape_data = await sc.scrape_once()
-        return scrape_data
+        return JSONResponse(content=json.dumps(scrape_data), status_code=200)
     except Exception as e:
         logger.error(f"Exception {e.args[0]}")
         return JSONResponse(content={"message", "internal server error."}, status_code=500)

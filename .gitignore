@@ -5,4 +5,6 @@
 *.http
 *.sql
 *.sqlite3
+crm_status.txt
+
 /postgres-files

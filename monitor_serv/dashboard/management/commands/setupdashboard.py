@@ -15,6 +15,7 @@ class Command(BaseCommand):
             query = Settings.objects.create(
                 command_id=1,
                 scraper_url=settings.SCRAPER_URL,
+                scraper_url_health_check=settings.SCRAPER_HEALTH_CHECK,
                 scrape_interval=int(settings.SCRAPE_INTERVAL)
             )
             query.save()

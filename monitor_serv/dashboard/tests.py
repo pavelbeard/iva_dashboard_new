@@ -1,3 +1,4 @@
+import ast
 import json
 import random
 import unittest
@@ -8,7 +9,7 @@ from django import urls
 from django.test import TestCase
 from django.test.runner import DiscoverRunner
 
-import logic.database_routers
+import core_logic.database_routers
 from . import forms
 from . import models
 
@@ -124,7 +125,7 @@ class TestAuth(TestCase):
 
 
 def add_targets():
-    from logic import pass_handler
+    from core_logic import pass_handler
     from django.conf import settings
 
     key = settings.ENCRYPTION_KEY
@@ -133,17 +134,29 @@ def add_targets():
 
     query = [
         models.Target(
-            address="2.0.96.5", port=22, username="test", password=encrypted_passwd,
+            id=9, address="2.0.96.5", port=22, username="test", password=encrypted_passwd,
             server_role=models.Target.ServerRole.MEDIA
         ),
         models.Target(
-            address="2.0.96.6", port=22, username="test", password=encrypted_passwd,
+            id=8, address="2.0.96.6", port=22, username="test", password=encrypted_passwd,
             server_role=models.Target.ServerRole.MEDIA
         ),
-        # models.Target(
-        #     address="192.168.248.4", port=2249, username="info-admin", password="Rt3$YiOO",
-        #     server_role=models.Target.ServerRole.HEAD
-        # ),
+        models.Target(
+            id=7, address="2.0.96.7", port=22, username="test", password=encrypted_passwd,
+            server_role=models.Target.ServerRole.MEDIA
+        ),
+        models.Target(
+            id=6, address="2.0.96.8", port=22, username="test", password=encrypted_passwd,
+            server_role=models.Target.ServerRole.MEDIA
+        ),
+        models.Target(
+            id=1, address="2.0.96.9", port=22, username="test", password=encrypted_passwd,
+            server_role=models.Target.ServerRole.MEDIA
+        ),
+        models.Target(
+            id=10, address="2.0.96.10", port=22, username="test", password=encrypted_passwd,
+            server_role=models.Target.ServerRole.HEAD
+        ),
     ]
 
     for q in query:
@@ -163,7 +176,7 @@ class DashboardTests(TestCase):
 
     @classmethod
     def add_targets(cls):
-        from logic import pass_handler
+        from core_logic import pass_handler
         from django.conf import settings
 
         key = settings.ENCRYPTION_KEY
@@ -172,12 +185,32 @@ class DashboardTests(TestCase):
 
         query = [
             models.Target(
-                address="2.0.96.5", port=22, username="test", password=encrypted_passwd,
+                id=9, address="2.0.96.5", port=22, username="test", password=encrypted_passwd,
                 server_role=models.Target.ServerRole.MEDIA
             ),
             models.Target(
-                address="2.0.96.6", port=22, username="test", password=encrypted_passwd,
+                id=8, address="2.0.96.6", port=22, username="test", password=encrypted_passwd,
                 server_role=models.Target.ServerRole.MEDIA
+            ),
+            models.Target(
+                id=7, address="2.0.96.7", port=22, username="test", password=encrypted_passwd,
+                server_role=models.Target.ServerRole.MEDIA
+            ),
+            models.Target(
+                id=6, address="2.0.96.8", port=22, username="test", password=encrypted_passwd,
+                server_role=models.Target.ServerRole.MEDIA
+            ),
+            models.Target(
+                id=1, address="2.0.96.9", port=22, username="test", password=encrypted_passwd,
+                server_role=models.Target.ServerRole.MEDIA
+            ),
+            models.Target(
+                id=10, address="2.0.96.10", port=22, username="test", password=encrypted_passwd,
+                server_role=models.Target.ServerRole.HEAD
+            ),
+            models.Target(
+                address="2.0.96.11", port=22, username="test", password=encrypted_passwd,
+                server_role=models.Target.ServerRole.HEAD
             ),
             # models.Target(
             #     address="192.168.248.4", port=2249, username="info-admin", password="Rt3$YiOO",
@@ -268,6 +301,20 @@ class DashboardTests(TestCase):
         add_settings()
         add_targets()
         res = self.client.get(urls.reverse("dashboard:ram_info"))
+        self.assertEqual(res.status_code, 200)
+        self.assertEqual(isinstance(res.content, bytes), True)
+
+    def test_get_all_data_from_agent(self):
+        add_targets()
+        models.DashboardSettings(
+            command_id=1,
+            scraper_url="http://localhost:8001/api/monitor/metrics/targets/all",
+            scraper_url_health_check="http://localhost:8001/api/monitor/ping",
+            scrape_interval=15
+        ).save()
+
+        res = self.client.get(urls.reverse("dashboard:get_all_data_from_agent"))
+        print(res.content)
         self.assertEqual(res.status_code, 200)
         self.assertEqual(isinstance(res.content, bytes), True)
 

@@ -1,6 +1,6 @@
 from django import forms
 from django.conf import settings
-from logic import pass_handler
+from core_logic import pass_handler
 from . import models as dashboard_models
 
 ENCRYPTION_KEY = settings.ENCRYPTION_KEY
@@ -26,7 +26,7 @@ class TargetForm(forms.ModelForm):
 
     class Meta:
         model = dashboard_models.Target
-        fields = ['address', 'port', 'username', 'password', 'server_role', 'is_being_scan', 'scrape_command']
+        fields = ['address', 'port', 'username', 'password', 'is_being_scan', 'scrape_command']
 
 
 class ServerDataForm(forms.ModelForm):

@@ -1,6 +1,10 @@
 from django.db import models
 from django.db.models import fields
 from django.contrib.auth.models import AbstractUser
+from django.contrib.admin.templatetags.admin_urls import admin_urlname
+from django.shortcuts import resolve_url
+from django.utils.html import format_html
+from django.utils.safestring import SafeText
 from django.utils.translation import gettext_lazy as _
 from django.utils import timezone
 import uuid
@@ -14,8 +18,10 @@ SERVER_ROLE = (
 
 class DashboardSettings(models.Model):
     command_id = fields.IntegerField(primary_key=True, editable=False)
-    scraper_url = fields.CharField(max_length=255, blank=True, verbose_name="URL агента мониторинга")
-    scrape_interval = fields.IntegerField(default=15, verbose_name="Интервал снятия метрик:")
+    scraper_url = fields.CharField(max_length=255, blank=True, verbose_name="URL агента мониторинга:")
+    scraper_url_health_check = fields.CharField(
+        max_length=255, blank=True, verbose_name="Проверка состояния агента:")
+    scrape_interval = fields.SmallIntegerField(default=15, verbose_name="Интервал снятия метрик:")
 
     def __str__(self):
         return f"Settings(scraper_url={self.scraper_url}, scrape_interval={self.scrape_interval})"
@@ -51,19 +57,11 @@ class ScrapeCommand(models.Model):
 
 
 class Target(models.Model):
-    class ServerRole(models.TextChoices):
-        MEDIA = 'media', _('MEDIA')
-        HEAD = 'head', _('HEAD')
-
     id = fields.AutoField(primary_key=True)
     address = fields.GenericIPAddressField(null=False, verbose_name="IP-адрес целевого сервера:")
     port = fields.SmallIntegerField(null=False, verbose_name="Порт сервера:")
     username = fields.CharField(max_length=32, null=False, verbose_name="Логин сервера:")
     password = fields.CharField(max_length=255, null=False, verbose_name="Пароль сервера:")
-    server_role = fields.CharField(
-        max_length=6, choices=ServerRole.choices, default=ServerRole.MEDIA,
-        verbose_name="Роль сервера:"
-    )
     is_being_scan = fields.BooleanField(default=True, verbose_name="Сервер сканируется?")
 
     scrape_command = models.ForeignKey(
@@ -84,7 +82,7 @@ class Target(models.Model):
 
 class CPU(models.Model):
     uuid_record = fields.UUIDField(default=uuid.uuid4, primary_key=True, editable=False)
-    cpu_cores = fields.IntegerField(null=False, default=0, verbose_name="Количество ядер:")
+    cpu_cores = fields.SmallIntegerField(null=False, default=0, verbose_name="Количество ядер:")
     cpu_idle = fields.FloatField(null=False, default=0, verbose_name="Простой процессора, id %:")
     cpu_iowait = fields.FloatField(null=False, default=0, verbose_name="Ожидание ввода/вывода, wa %:")
     cpu_irq = fields.FloatField(null=False, default=0, verbose_name="Запросы на прерывание, hi %:")
@@ -111,11 +109,11 @@ class CPU(models.Model):
 class RAM(models.Model):
     uuid_record = fields.UUIDField(default=uuid.uuid4, primary_key=True, editable=False)
     total_ram = fields.FloatField(null=False, default=0, verbose_name="Всего RAM:")
-    ram_used = fields.FloatField(null=False, default=0, verbose_name="Занятой памяти:")
-    ram_free = fields.FloatField(null=False, default=0, verbose_name="Свободной памяти:")
-    ram_shared = fields.FloatField(null=False, default=0, verbose_name="Общей памяти:")
-    ram_buff_cache = fields.FloatField(null=False, default=0, verbose_name="Буферизованной/кэшированной памяти:")
-    ram_avail = fields.FloatField(null=False, default=0, verbose_name="Доступной памяти:")
+    ram_used = fields.BigIntegerField(null=False, default=0, verbose_name="Занятой памяти:")
+    ram_free = fields.BigIntegerField(null=False, default=0, verbose_name="Свободной памяти:")
+    ram_shared = fields.BigIntegerField(null=False, default=0, verbose_name="Общей памяти:")
+    ram_buff_cache = fields.BigIntegerField(null=False, default=0, verbose_name="Буферизованной/кэшированной памяти:")
+    ram_avail = fields.BigIntegerField(null=False, default=0, verbose_name="Доступной памяти:")
     ram_util = fields.FloatField(null=False, default=0, verbose_name="Загрузка памяти %:")
     record_date = fields.DateTimeField(default=timezone.now, null=False, verbose_name="Время сканирования:")
 
@@ -134,10 +132,10 @@ class RAM(models.Model):
 class DiskSpace(models.Model):
     uuid_record = fields.UUIDField(default=uuid.uuid4, primary_key=True, editable=False)
     file_system = fields.CharField(null=False, default="none", max_length=128, verbose_name="Файловая система:")
-    fs_size = fields.FloatField(null=False, max_length=10, default="none", verbose_name="Размер файловой системы:")
-    fs_used = fields.FloatField(null=False, max_length=10, default="none", verbose_name="Занято:")
+    fs_size = fields.BigIntegerField(null=False, default=0, verbose_name="Размер файловой системы:")
+    fs_used = fields.BigIntegerField(null=False, default=0, verbose_name="Занято:")
     fs_used_prc = fields.FloatField(null=False, default=0, verbose_name="Занято в %:")
-    fs_avail = fields.FloatField(null=False, max_length=10, default="none", verbose_name="Доступно:")
+    fs_avail = fields.BigIntegerField(null=False, default=0, verbose_name="Доступно:")
     mounted_on = fields.CharField(null=False, default="none", max_length=128, verbose_name="Подключено к:")
     record_date = fields.DateTimeField(default=timezone.now, null=False, verbose_name="Время сканирования:")
 
@@ -159,14 +157,14 @@ class DiskSpaceStatistics(models.Model):
     total_disk_size = fields.FloatField(null=False, default=0, verbose_name="Всего места на диске:")
     most_valuable_part_fs = fields.CharField(
         max_length=128, default="none", verbose_name="Самая 'лучший' раздел файловая система:")
-    most_valuable_part_size = fields.IntegerField(
+    most_valuable_part_size = fields.BigIntegerField(
         null=False, default=0, verbose_name="Размер 'лучшего' раздела файловой системы")
-    most_valuable_part_used = fields.IntegerField(
+    most_valuable_part_used = fields.BigIntegerField(
         null=False, default=0, verbose_name="Используемый размер 'лучшего' раздела файловой системы")
-    most_valuable_part_available = fields.IntegerField(
+    most_valuable_part_available = fields.BigIntegerField(
         null=False, default=0, verbose_name="Доступный размер 'лучшего' раздела файловой системы")
-    most_valuable_part_use_percent = fields.CharField(
-        max_length=4, default="none", verbose_name="Доступный размер 'лучшего' раздела файловой системы %"
+    most_valuable_part_use_percent = fields.FloatField(
+        null=False, default=0, verbose_name="Доступный размер 'лучшего' раздела файловой системы %"
     )
     record_date = fields.DateTimeField(default=timezone.now, null=False, verbose_name="Время сканирования:")
 
@@ -188,20 +186,21 @@ class NetInterface(models.Model):
     interface = fields.CharField(null=False, default="none", max_length=32, verbose_name="Интерфейс:")
     status = fields.CharField(null=False, default="none", max_length=4, verbose_name="Состояние:")
     ip_address = fields.GenericIPAddressField(null=False, default="0.0.0.0", verbose_name="IP-адрес интерфейса:")
-    rx_bytes = fields.FloatField(null=False, default=0, verbose_name="Получено байтов:")
-    rx_packets = fields.FloatField(null=False, default=0, verbose_name="Получено пакетов:")
-    rx_errors_errors = fields.IntegerField(null=False, default=0, verbose_name="Пакетов с ошибками:")
-    rx_errors_dropped = fields.IntegerField(null=False, default=0, verbose_name="Отброшено пакетов:")
-    rx_errors_overruns = fields.IntegerField(null=False, default=0, verbose_name='Перерасходованных пакетов:')
-    rx_errors_frame = fields.IntegerField(null=False, default=0, verbose_name='Неправильных кадров:')
-    tx_bytes = fields.FloatField(null=False, default=0, verbose_name="Отправлено байтов:")
-    tx_packets = fields.FloatField(null=False, default=0, verbose_name="Отправлено пакетов:")
-    tx_errors_errors = fields.IntegerField(null=False, default=0, verbose_name="Отправлено с ошибками:")
-    tx_errors_dropped = fields.IntegerField(null=False, default=0, verbose_name="Отброшено при отправке пакетов:")
-    tx_errors_overruns = fields.IntegerField(null=False, default=0,
-                                             verbose_name="Перерасходованных при отправке пакетов:")
-    tx_errors_carrier = fields.IntegerField(null=False, default=0, verbose_name='Пакетов с потерянными носителями :')
-    tx_errors_collisions = fields.IntegerField(null=False, default=0, verbose_name="Отправлено пакетов с коллизиями:")
+    rx_bytes = fields.BigIntegerField(null=False, default=0, verbose_name="Получено байтов:")
+    rx_packets = fields.BigIntegerField(null=False, default=0, verbose_name="Получено пакетов:")
+    rx_errors_errors = fields.BigIntegerField(null=False, default=0, verbose_name="Пакетов с ошибками:")
+    rx_errors_dropped = fields.BigIntegerField(null=False, default=0, verbose_name="Отброшено пакетов:")
+    rx_errors_overruns = fields.BigIntegerField(null=False, default=0, verbose_name='Перерасходованных пакетов:')
+    rx_errors_frame = fields.BigIntegerField(null=False, default=0, verbose_name='Неправильных кадров:')
+    tx_bytes = fields.BigIntegerField(null=False, default=0, verbose_name="Отправлено байтов:")
+    tx_packets = fields.BigIntegerField(null=False, default=0, verbose_name="Отправлено пакетов:")
+    tx_errors_errors = fields.BigIntegerField(null=False, default=0, verbose_name="Отправлено с ошибками:")
+    tx_errors_dropped = fields.BigIntegerField(null=False, default=0, verbose_name="Отброшено при отправке пакетов:")
+    tx_errors_overruns = fields.BigIntegerField(
+        null=False, default=0,verbose_name="Перерасходованных при отправке пакетов:")
+    tx_errors_carrier = fields.BigIntegerField(null=False, default=0, verbose_name='Пакетов с потерянными носителями :')
+    tx_errors_collisions = fields.BigIntegerField(null=False, default=0,
+                                                  verbose_name="Отправлено пакетов с коллизиями:")
     record_date = fields.DateTimeField(default=timezone.now, null=False, verbose_name="Время сканирования:")
 
     target = models.ForeignKey(Target, on_delete=models.CASCADE, verbose_name="Сервер:")
@@ -212,15 +211,23 @@ class NetInterface(models.Model):
 
     class Meta:
         verbose_name = "Данные сетевых интерфейсов"
-        verbose_name_plural = "6.Данные сетевых интерфейсов"
+        verbose_name_plural = "Данные сетевых интерфейсов"
         app_label = "dashboard"
 
 
 class ServerData(models.Model):
+    class ServerRole(models.TextChoices):
+        MEDIA = 'media', _('MEDIA')
+        HEAD = 'head', _('HEAD')
+
     uuid_record = fields.UUIDField(default=uuid.uuid4, primary_key=True, editable=False)
     hostname = fields.CharField(max_length=64, blank=True, verbose_name="Имя сервера:")
     os = fields.CharField(max_length=32, blank=True, verbose_name="Операционная система:")
     kernel = fields.CharField(max_length=64, blank=True, verbose_name="Ядро ОС:")
+    server_role = fields.CharField(
+        max_length=6, choices=ServerRole.choices, blank=True,
+        verbose_name="Роль сервера:"
+    )
     record_date = fields.DateTimeField(default=timezone.now, null=False, verbose_name="Время сканирования:")
 
     target = models.ForeignKey(Target, on_delete=models.CASCADE, verbose_name="Сервер:")

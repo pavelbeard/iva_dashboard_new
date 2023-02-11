@@ -2,7 +2,7 @@ from django.shortcuts import render
 
 # Create your views.py here.
 
-from logic import IvaMetricsHandler
+from core_logic import IvaMetricsHandler
 from . import mixins
 
 

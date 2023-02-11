@@ -40,7 +40,7 @@ class CustomUserAdmin(UserAdmin):
     save_on_top = True
 
     @admin.action(description="Пометить пользователя(-ей) как активированных.", permissions=['change'])
-    def make_is_active(self, modeladmin, request, queryset):
+    def make_is_active(self, request, queryset):
         queryset.update(is_active=True)
 
     @admin.display(description="Группы")

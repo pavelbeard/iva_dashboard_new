@@ -1,6 +1,7 @@
 import re
 from abc import ABC
 
+from monitor_agent import settings
 from monitor_agent.logic.base import ScraperDataAnalyserBase
 from monitor_agent.logic.extentions import DigitalDataConverters
 
@@ -43,6 +44,8 @@ class ScrapedDataParser(ScraperDataAnalyserBase, ABC):
             return {"err_message": "connection error."}
         elif "bad credentials." in data:
             return {"err_message": "bad credentials."}
+        elif "command not found." in data:
+            return {"err_message": "command not found."}
 
         other_data = data.split("\n")
         processes_list = []
@@ -70,6 +73,8 @@ class ScrapedDataParser(ScraperDataAnalyserBase, ABC):
             return {"err_message": "no data."}
         elif 'no connection with server.' in data:
             return {"err_message": "connection error."}
+        elif "command not found." in data:
+            return {"err_message": "command not found."}
 
         processor, *cores = data.split("\n")
         processor_data = {i[-2:]: i[:-2] for i in re.split(",\s+|,", processor.split(":")[1].strip()[:-1])}
@@ -93,6 +98,8 @@ class ScrapedDataParser(ScraperDataAnalyserBase, ABC):
             return {"err_message": "no_data."}
         elif "no connection with server." in data:
             return {"err_message": "connection error."}
+        elif "command not found." in data:
+            return {"err_message": "command not found."}
 
         ram_data = data.split("\n")
         # total used free shared buff/cache available
@@ -128,6 +135,8 @@ class ScrapedDataParser(ScraperDataAnalyserBase, ABC):
             return {"err_message": "no data."}
         elif "no connection with server." in data:
             return {"err_message": "connection error."}
+        elif "command not found." in data:
+            return {"err_message": "command not found."}
 
         fs_data = data.split("\n")
         part_fs_data = []
@@ -169,7 +178,7 @@ class ScrapedDataParser(ScraperDataAnalyserBase, ABC):
             return {"err_message": "no_data"}
         elif "no connection with server." in data:
             return {"err_message": "connection error."}
-        elif data == [''] or data == '':
+        elif "command not found." in data:
             return {"err_message": "command not found."}
 
         net_data = data.split("\n")
@@ -232,31 +241,39 @@ class ScrapedDataParser(ScraperDataAnalyserBase, ABC):
             return {"no_data": "no_data"}
         elif "no connection with server." in data:
             return {"connection_error": True}
+        elif "command not found." in data :
+            return {"err_message": "command not found."}
 
         uptime_data = data.split("\n")
 
         return {"uptime": uptime_data[0].split(',')[0]}
 
+    def _crm_status(self, data: str):
+        """Подфункция server_data"""
+        pass
+
     def server_data(self, data: str) -> {}:
         """
-        Основные данные сервера: hostname, os_version, os_kernel.
+        Основные данные сервера: hostname, os_version, os_kernel и crm status.
         :param data: данные команды hostnamectl
         :return: {}
         """
 
-        if type(data) == dict:
-            return {"no_data": "no_data"}
+        # костыль данных для замены команды crm status
+        data = data + settings.CRUTCH_DATA if settings.CRUTCH else ""
+
+        if data == '':
+            return {"err_message": "no_data"}
 
         splitted_data = data.split("\n")
-
-        if "no connection with server." in data:
-            return {"connection_error": True}
 
         hostname = splitted_data[0]
         os_version = re.search("PRETTY_NAME=\"(.*)\"", data)[1]
         os_kernel = splitted_data[1]
 
-        return {"hostname": hostname, "os": os_version, "kernel": os_kernel}
+        # костыль
+
+        return {"hostname": hostname, "os": os_version, "kernel": os_kernel, "server_role": "none"}
 
     def load_average(self, data: str) -> {}:
         """

@@ -1697,7 +1697,7 @@
 
   var beforeRead = 'beforeRead';
   var read = 'read';
-  var afterRead = 'afterRead'; // pure-logic modifiers
+  var afterRead = 'afterRead'; // pure-core_logic modifiers
 
   var beforeMain = 'beforeMain';
   var main = 'main';
@@ -3345,7 +3345,7 @@
         },
         // Sync update – it will always be executed, even if not necessary. This
         // is useful for low frequency updates where sync behavior simplifies the
-        // logic.
+        // core_logic.
         // For high frequency updates (e.g. `resize` and `scroll` events), always
         // prefer the async Popper#update method
         forceUpdate: function forceUpdate() {
@@ -3370,7 +3370,7 @@
           }; // Modifiers have the ability to reset the current update cycle. The
           // most common use case for this is the `flip` modifier changing the
           // placement, which then needs to re-run all the modifiers, because the
-          // logic was previously ran for the previous placement and is therefore
+          // core_logic was previously ran for the previous placement and is therefore
           // stale/incorrect
 
           state.reset = false;
@@ -5708,7 +5708,7 @@
       return new IntersectionObserver(entries => this._observerCallback(entries), options);
     }
 
-    // The logic of selection
+    // The core_logic of selection
     _observerCallback(entries) {
       const targetElement = entry => this._targetLinks.get(`#${entry.target.id}`);
       const activate = entry => {

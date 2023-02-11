@@ -1,5 +1,8 @@
+import ast
 import json
+from datetime import datetime
 
+import requests
 from django import http
 from django.conf import settings
 from django.contrib import messages
@@ -8,10 +11,13 @@ from django.contrib.messages import get_messages
 from django.http import HttpResponseRedirect
 from django.shortcuts import render
 from django.urls import reverse_lazy
+from django.utils import timezone
 from django.views.decorators.cache import cache_control
+from jsonview.views import JsonView
 
 from . import mixins
 from . import models
+from .handler import scraped_data_handler
 
 # Create your views.py here.
 
@@ -56,12 +62,12 @@ def dashboard_view(request):
     )
 
 
-def dashboard_monitor_unavailable(request):
-    return render(
-        request=request,
-        template_name="base/4_dashboard.html",
-        context={"app_version": app_version}
-    )
+class DataGetterFromAgent(JsonView):
+    def get_context_data(self, **kwargs):
+        settings_obj = models.DashboardSettings.objects.get(command_id=1)
+        response = requests.get(settings_obj.scraper_url, headers={"Content-Type": "application/json"})
+        json_data = json.loads(response.content)
+        return json_data
 
 
 class Processes(mixins.ServerAnalysisMixin):

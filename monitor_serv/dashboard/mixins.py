@@ -9,7 +9,7 @@ from django.conf import settings
 from django.db import utils
 from django.views import generic
 
-from logic import (
+from core_logic import (
     TargetsIsEmpty,
     pass_handler,
 )

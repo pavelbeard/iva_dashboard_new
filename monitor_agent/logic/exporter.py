@@ -33,7 +33,7 @@ class DatabaseExporter(Exporter, ABC):
         values |= self.uuid_record() | self.record_date() | self.t_id(target_id)
 
         insert_to_table(table=self.model, values=values)
-        logger.info(f"Data of {self.model.__table__.name} {values} was added to database.")
+        logger.info(f"Data of {self.model.__table__.name} data was added to database.")
 
 
 class AdvancedDatabaseExporter(DatabaseExporter):
@@ -46,7 +46,7 @@ class AdvancedDatabaseExporter(DatabaseExporter):
             value |= self.uuid_record() | self.record_date() | self.t_id(target_id)
 
         insert_all_to_table(self.model, values)
-        logger.info(f"Data of {self.model.__table__.name} {values} was added to database.")
+        logger.info(f"Data of {self.model.__table__.name} data was added to database.")
 
 
 class CPUDatabaseExporter(DatabaseExporter):
@@ -62,7 +62,7 @@ class CPUDatabaseExporter(DatabaseExporter):
         } | self.record_date() | self.t_id(target_id)
 
         insert_to_table(table=self.model, values=whole_processor_data)
-        logger.info(f"Data of {self.model.__table__.name} {whole_processor_data} was added to database.")
+        logger.info(f"Data of {self.model.__table__.name} data was added to database.")
 
 
 class DiskSpaceDatabaseExporter(DatabaseExporter):
@@ -75,11 +75,11 @@ class DiskSpaceDatabaseExporter(DatabaseExporter):
             value |= self.uuid_record() | self.record_date() | self.t_id(target_id)
 
         insert_all_to_table(table=self.model, values=values[:-1])
-        logger.info(f"Data of {self.model.__table__.name} {values} was added to database.")
+        logger.info(f"Data of {self.model.__table__.name} data was added to database.")
 
         # export to diskspacestatistics
         insert_to_table(self.model2, values[-1])
-        logger.info(f"Data of {self.model2.__table__.name} {values} was added to database.")
+        logger.info(f"Data of {self.model2.__table__.name} data was added to database.")
 
 
 class MonitoringServerExporter(Exporter, ABC):

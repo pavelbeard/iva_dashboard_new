@@ -16,5 +16,6 @@ urlpatterns = [
         urls.path('netanalysis/', views.Net.as_view(), name="net_info"),
         urls.path('uptime/', views.Uptime.as_view(), name="uptime"),
         urls.path('interval/', views.get_interval, name="interval"),
+        urls.path('all-metrics/', views.DataGetterFromAgent.as_view(), name="get_all_data_from_agent"),
     ])),
 ]
