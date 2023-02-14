@@ -1,14 +1,13 @@
 from sqlalchemy import select
 from monitor_agent.dashboard.models import (
     ScrapeCommand, Target,
-    DashboardSettings)
+    DashboardSettings, ServerData)
 from monitor_agent.db_connector.configuration import session
 
 
 # READ
 def get_scrape_commands(record_id: int):
-    statement = select(ScrapeCommand).where(ScrapeCommand.record_id == record_id)
-    scrape_commands = session.scalars(statement).one()
+    scrape_commands = session.query(ScrapeCommand).filter(ScrapeCommand.record_id == record_id).first()
     return scrape_commands
 
 
@@ -20,12 +19,15 @@ def get_targets():
 
 
 def get_target(target_id: int):
-    statement = select(Target).where(Target.id == target_id)
-    target = session.scalars(statement).one()
+    target = session.query(Target).filter(Target.id == target_id).first()
     return target
 
 
+def get_server_data(target_id: int):
+    server_data = session.query(ServerData).filter(ServerData.target_id == target_id).first()
+    return server_data
+
+
 def get_settings():
-    statement = select(DashboardSettings).where(DashboardSettings.command_id == 1)
-    settings = session.scalars(statement).one()
+    settings = session.query(DashboardSettings).filter(DashboardSettings.command_id == 1).first()
     return settings

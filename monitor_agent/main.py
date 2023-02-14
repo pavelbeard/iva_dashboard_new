@@ -2,51 +2,56 @@ import asyncio
 import json
 
 from fastapi import FastAPI
-from requests import Request
 from starlette.responses import JSONResponse
 
-from monitor_agent.agent import NoConnectionWithServer
 from monitor_agent.agent import get_logger
 from monitor_agent.dashboard import models
-from monitor_agent.logic import exporter
+from monitor_agent.logic import exporters, handle
 from monitor_agent.logic.scraper import ScrapeLogic
 
 logger = get_logger(__name__)
 
 app = FastAPI()
 
-exporters = [
-    exporter.CPUDatabaseExporter(models.CPU).export,
-    exporter.DatabaseExporter(models.RAM).export,
-    exporter.DiskSpaceDatabaseExporter(models.DiskSpace, models.DiskSpaceStatistics).export,
-    exporter.AdvancedDatabaseExporter(models.NetInterface).export,
-    exporter.AdvancedDatabaseExporter(models.Process).export,
-    exporter.DatabaseExporter(models.ServerData).export,
-    exporter.DatabaseExporter(models.Uptime).export,
-]
-
 scraper_task = {}
-
-
-@app.exception_handler(NoConnectionWithServer)
-async def timeout_error(request: Request, exc: NoConnectionWithServer):
-    return JSONResponse(
-        status_code=408,
-        content={"message": f"{exc.message}"}
-    )
 
 
 @app.on_event("startup")
 async def start_scraping():
-    sc = ScrapeLogic()
-    scraper_task['task'] = asyncio.create_task(
-        ScrapeLogic.scrape_forever(self=sc, exporters=exporters))
+    server_role = handle.CrmStatusOutputHandler()
+    cpu = handle.CpuTopOutputHandler()
+    ram = handle.RamFreeOutputHandler()
+    fs = handle.DiskDfLsblkOutputHandler()
+    net = handle.NetIfconfigOutputHandler()
+    apps = handle.AppServiceStatusAllOutputHandler()
+    server_data = handle.ServerDataHostnamectlOutputHandler()
+    uptime = handle.UptimeUptimeOutputHandler()
+    load_average = handle.LoadAverageUptimeOutputHandler()
+
+    _handlers_ = (server_role, cpu, ram, fs, net, apps, server_data, uptime, load_average)
+
+    _exporters_ = (
+        exporters.ServerDataDatabaseExporter(models.ServerData).export,
+        exporters.CPUDatabaseExporter(models.CPU).export,
+        exporters.DatabaseExporter(models.RAM).export,
+        exporters.DiskSpaceDatabaseExporter(models.DiskSpace, models.DiskSpaceStatistics).export,
+        exporters.AdvancedDatabaseExporter(models.NetInterface).export,
+        exporters.AdvancedDatabaseExporter(models.Process).export,
+        exporters.ServerDataDatabaseExporter(models.ServerData).export,
+        exporters.DatabaseExporter(models.Uptime).export,
+        exporters.DatabaseExporter(models.LoadAverage).export
+    )
+
+    sc = ScrapeLogic(exporters=_exporters_, handlers=_handlers_)
+    scraper_task['task'] = asyncio.create_task(sc.scrape_forever())
+    logger.info("Agent is run!")
 
 
 @app.on_event("shutdown")
 async def stop_scraping():
+    logger.info("Agent is down.")
     task = scraper_task['task']
-    task.cancel("stopping task...")
+    task.cancel()
 
 
 @app.get("/api/monitor/ping")
@@ -64,7 +69,10 @@ async def get_all_metrics() -> JSONResponse:
     """
     sc = ScrapeLogic()
     try:
-        scrape_data = await sc.scrape_once()
+        scrape_data = {}
+        async for result in sc.scrape_once():
+            scrape_data |= result
+
         return JSONResponse(content=json.dumps(scrape_data), status_code=200)
     except Exception as e:
         logger.error(f"Exception {e.args[0]}")

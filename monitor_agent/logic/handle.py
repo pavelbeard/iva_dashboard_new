@@ -2,11 +2,11 @@ import re
 from abc import ABC
 
 from monitor_agent import settings
-from monitor_agent.logic.base import ScraperDataAnalyserBase
+from monitor_agent.logic.base import CommandOutputHandlerBase
 from monitor_agent.logic.extentions import DigitalDataConverters
 
 
-class ScrapedDataParser(ScraperDataAnalyserBase, ABC):
+class CpuTopOutputHandler(CommandOutputHandlerBase):
     @staticmethod
     def _cpu_analysis(cpu_data, core_num: int = None):
         """Вспомогательный метод обработки данных с процессора"""
@@ -32,41 +32,11 @@ class ScrapedDataParser(ScraperDataAnalyserBase, ABC):
             "cpu_util": cpu_data.get('cpu_util'),
         }
 
-    def app_analyser(self, data: str) -> {}:
+    def handle(self, data: str):
         """
-        Парсит команду service --status-all.\n
-        :param data: Данные, выведенные командой
-        :return: {}
-        """
-        if type(data) == dict:
-            return {"err_message": "no data."}
-        elif "no connection with server." in data:
-            return {"err_message": "connection error."}
-        elif "bad credentials." in data:
-            return {"err_message": "bad credentials."}
-        elif "command not found." in data:
-            return {"err_message": "command not found."}
-
-        other_data = data.split("\n")
-        processes_list = []
-        for d in other_data[:-1]:
-            *status, process_name = d.split()
-            status = str().join(status)
-
-            process_status = "stopped" \
-                if status == "[-]" else "running" \
-                if status == "[+]" else "not determined"
-
-            processes_list.append({
-                "process_name": process_name, "process_status": process_status
-            })
-
-        return processes_list
-
-    def cpu_analyser(self, data: str):
-        """
-        Парсит информацию о загрузке процессора, количестве ядер и загрузку каждого ядра.\n
-        :param data: данные команды top 1 -kn
+        Обрабатывает вывод команды:
+        top -bn 1 -d.2 | grep "Cpu" && top 1 -w 70 -bn 1 | grep -P "^(%)"
+        :param data: данные команды.
         :return: {}
         """
         if type(data) == dict:
@@ -88,7 +58,9 @@ class ScrapedDataParser(ScraperDataAnalyserBase, ABC):
 
         return {"whole_processor_data": whole_processor_data, "processor_cores_data": cores_data}
 
-    def ram_analyser(self, data: str) -> {}:
+
+class RamFreeOutputHandler(CommandOutputHandlerBase):
+    def handle(self, data: str) -> {}:
         """
         Парсит информацию о загрузке RAM, всего RAM и свободной RAM на текущий момент.
         :param data: данные команды free -b.
@@ -125,7 +97,9 @@ class ScrapedDataParser(ScraperDataAnalyserBase, ABC):
             "ram_util": ram_util
         }
 
-    def filesystem_analyser(self, data: str) -> {}:
+
+class DiskDfLsblkOutputHandler(CommandOutputHandlerBase):
+    def handle(self, data: str) -> {}:
         """
         Парсинг данных файловой системы с сервера.
         :param data: данные команды df -b и lsblk.
@@ -168,21 +142,48 @@ class ScrapedDataParser(ScraperDataAnalyserBase, ABC):
 
         return part_fs_data
 
-    def net_analyser(self, data: str) -> {}:
+
+class AppServiceStatusAllOutputHandler(CommandOutputHandlerBase):
+    def handle(self, data: str) -> {}:
+        """
+        Парсит команду service --status-all.\n
+        :param data: Данные, выведенные командой
+        :return: {}
+        """
+        if type(data) == dict:
+            return {"err_message": "no data."}
+        elif "no connection with server." in data:
+            return {"err_message": "connection error."}
+        elif "bad credentials." in data:
+            return {"err_message": "bad credentials."}
+        elif "command not found." in data:
+            return {"err_message": "command not found."}
+
+        other_data = data.split("\n")
+        processes_list = []
+        for d in other_data[:-1]:
+            *status, process_name = d.split()
+            status = str().join(status)
+
+            process_status = "stopped" \
+                if status == "[-]" else "running" \
+                if status == "[+]" else "not determined"
+
+            processes_list.append({
+                "process_name": process_name, "process_status": process_status
+            })
+
+        return processes_list
+
+
+class NetIfconfigOutputHandler(CommandOutputHandlerBase):
+    def handle(self, data: str) -> {}:
         """
         Парсинг данных утилизации сетевых интерфейсов командой ifconfig.\n
         :param data: Данные команды ifconfig
         :return: {}
         """
-        if type(data) == dict:
-            return {"err_message": "no_data"}
-        elif "no connection with server." in data:
-            return {"err_message": "connection error."}
-        elif "command not found." in data:
-            return {"err_message": "command not found."}
-
-        net_data = data.split("\n")
-        text = "\n".join(net_data)
+        data = data.replace("\r", "")
 
         PATTERN = "(.*|.*:.*):\s.*<(\w{2,4}).*\n\s+inet\s(\d+.\d+.\d+.\d+)\s+netmask\s(\d+.\d+.\d+.\d+).*\n|" + \
                   ".*\n\s+RX\spackets\s(\d+)\s+bytes\s(\d+).*\n" + \
@@ -190,7 +191,7 @@ class ScrapedDataParser(ScraperDataAnalyserBase, ABC):
                   "\s+TX\spackets\s(\d+)\s+bytes\s(\d+)\s.*\n" + \
                   "\s+TX\serrors\s(\d+)\s+dropped\s(\d+)\s+overruns\s(\d+)\s+carrier\s(\d+)\s+collisions\s(\d+)"
 
-        IFACES_INFO = re.findall(PATTERN, text, flags=re.MULTILINE)
+        IFACES_INFO = re.findall(PATTERN, data, re.MULTILINE)
 
         FORMAT_IFACES_INFO = []
 
@@ -231,7 +232,9 @@ class ScrapedDataParser(ScraperDataAnalyserBase, ABC):
 
         return net_data
 
-    def server_uptime(self, data: str) -> {}:
+
+class UptimeUptimeOutputHandler(CommandOutputHandlerBase):
+    def handle(self, data: str) -> {}:
         """
         Показывает, сколько времени сервер находится в работе.
         :param data: данные команды uptime[uptime].
@@ -241,18 +244,16 @@ class ScrapedDataParser(ScraperDataAnalyserBase, ABC):
             return {"no_data": "no_data"}
         elif "no connection with server." in data:
             return {"connection_error": True}
-        elif "command not found." in data :
+        elif "command not found." in data:
             return {"err_message": "command not found."}
 
         uptime_data = data.split("\n")
 
         return {"uptime": uptime_data[0].split(',')[0]}
 
-    def _crm_status(self, data: str):
-        """Подфункция server_data"""
-        pass
 
-    def server_data(self, data: str) -> {}:
+class ServerDataHostnamectlOutputHandler(CommandOutputHandlerBase):
+    def handle(self, data: str) -> {}:
         """
         Основные данные сервера: hostname, os_version, os_kernel и crm status.
         :param data: данные команды hostnamectl
@@ -260,7 +261,7 @@ class ScrapedDataParser(ScraperDataAnalyserBase, ABC):
         """
 
         # костыль данных для замены команды crm status
-        data = data + settings.CRUTCH_DATA if settings.CRUTCH else ""
+        # data = data + settings.CRUTCH_DATA if settings.CRUTCH else ""
 
         if data == '':
             return {"err_message": "no_data"}
@@ -273,12 +274,27 @@ class ScrapedDataParser(ScraperDataAnalyserBase, ABC):
 
         # костыль
 
-        return {"hostname": hostname, "os": os_version, "kernel": os_kernel, "server_role": "none"}
+        return {"hostname": hostname, "os": os_version, "kernel": os_kernel, }
 
-    def load_average(self, data: str) -> {}:
+
+class CrmStatusOutputHandler(CommandOutputHandlerBase):
+    def handle(self, data: str):
+        try:
+            hostname = re.search(r"\n(.*)\r$", data).group(1)
+            current_dc = re.search(r"\s+Current\sDC:\s(.*)\s\(", data).group(1)
+            server_role = "master" if current_dc == hostname else "slave"
+        except AttributeError as e:
+            server_role = "media"
+
+        return {"server_role": server_role}
+
+
+class LoadAverageUptimeOutputHandler(CommandOutputHandlerBase):
+    def handle(self, data: str):
         """
         Парсинг данных о средней загрузки процессора за 1, 5 и 15 минут.
         :param data: данные команды uptime[load average].
         :return: {}
         """
-        pass
+        ONE_MIN, FIVE_MIN, FTEEN_MIN = re.findall("(\d+\.\d+)", data)
+        return {"one_min": ONE_MIN, "five_min": FIVE_MIN, "fteen_min": FTEEN_MIN}

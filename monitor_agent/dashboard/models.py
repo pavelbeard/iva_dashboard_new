@@ -44,3 +44,7 @@ class ServerData(Base):
 
 class Uptime(Base):
     __table__ = Table('dashboard_uptime', metadata)
+
+
+class LoadAverage(Base):
+    __table__ = Table('dashboard_loadaverage', metadata)

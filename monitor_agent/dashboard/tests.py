@@ -6,7 +6,7 @@ from unittest import TestCase
 from monitor_agent.dashboard.models import CPU, RAM, DiskSpace, NetInterface, Process, ServerData, Uptime, \
     DiskSpaceStatistics
 from monitor_agent.logic import reader, creator
-from monitor_agent.logic.exporter import (
+from monitor_agent.logic.exporters import (
     DatabaseExporter,
     AdvancedDatabaseExporter,
     CPUDatabaseExporter,

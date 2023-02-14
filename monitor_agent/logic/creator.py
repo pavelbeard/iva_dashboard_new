@@ -19,7 +19,7 @@ def insert_to_table(table: Callable, values: dict):
         session.add(relation)
         session.commit()
     except sqlalchemy.exc.DataError as de:
-        logger.error("DataError", msg=de.detail)
+        logger.error(f"DataError: msg{de.args[0]}")
 
 
 def insert_all_to_table(table: Callable, values: list[dict] | tuple[dict]):
@@ -34,5 +34,5 @@ def insert_all_to_table(table: Callable, values: list[dict] | tuple[dict]):
         session.add_all(relations)
         session.commit()
     except sqlalchemy.exc.DataError as de:
-        logger.error("DataError", msg=de.detail)
+        logger.error(f"DataError: msg{de.args[0]}")
 
