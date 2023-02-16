@@ -14,12 +14,11 @@ def dump(obj):
 
 
 def scraped_data_handler(scraped_data):
-    raw_json_data = ast.literal_eval(json.loads(scraped_data))
+    raw_json_data = ast.literal_eval(scraped_data)
 
     targets = {}
 
-    for target in raw_json_data:
-        target_id, data = target
+    for target_id, data in raw_json_data.items():
         target_obj = Target.objects.get(id=target_id)
         target_element_id = f"{target_obj.address.replace('.', '')}{target_obj.port}"
 

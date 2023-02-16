@@ -1,4 +1,3 @@
-from bootstrap_modal_forms.generic import BSModalLoginView
 from django import http
 from django.conf import settings
 from django.contrib import messages
@@ -6,25 +5,26 @@ from django.contrib.auth import views, logout, login, authenticate
 from django.contrib.auth.hashers import check_password
 from django.shortcuts import redirect, render
 from django.urls import reverse_lazy
-from . import mixins, forms, models
+
+from . import forms, models
 
 
 # Create your views here.
 
 # unused
-class SignupModalView(mixins.SignupLogicMixin):
-    form_class = forms.SignupForm
-    template_name = "auth/_signup.html"
-    success_message = "Вы успешно зарегистрированы. Ожидайте подтверждения администратором!"
-    success_url = reverse_lazy("dashboard:index")
+# class SignupModalView(mixins.SignupLogicMixin):
+#     form_class = forms.SignupForm
+#     template_name = "auth/_signup.html"
+#     success_message = "Вы успешно зарегистрированы. Ожидайте подтверждения администратором!"
+#     success_url = reverse_lazy("dashboard:index")
 
 
 # unused
-class LoginModalView(BSModalLoginView):
-    form_class = forms.LoginForm
-    template_name = "auth/_login_modal.html"
-    success_message = "Добро пожаловать!"
-    success_url = reverse_lazy("dashboard:dashboard")
+# class LoginModalView(BSModalLoginView):
+#     form_class = forms.LoginForm
+#     template_name = "auth/_login_modal.html"
+#     success_message = "Добро пожаловать!"
+#     success_url = reverse_lazy("dashboard:dashboard")
 
 
 class RegisterView(views.FormView):

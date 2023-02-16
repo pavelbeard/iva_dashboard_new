@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "monitor-agent"
-version = "0.8.2"
+version = "0.8.25"
 description = "iva_dashboard_agent"
 authors = ["pavelbeard <pavelborodin1995@gmail.com>"]
 readme = "README.md"
@@ -57,6 +57,7 @@ urllib3 = "1.26.13"
 uvicorn = "0.20.0"
 websocket-client = "1.4.2"
 yarl = "1.8.2"
+asyncssh = "^2.13.0"
 
 
 [build-system]

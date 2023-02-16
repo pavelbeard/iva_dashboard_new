@@ -1,19 +1,15 @@
-from typing import Callable
-from bootstrap_modal_forms.mixins import PopRequestMixin, CreateUpdateAjaxMixin
 from django.contrib.auth import forms, models
-from django.contrib.auth import password_validation
-from django.core.exceptions import ValidationError
 from django.forms import fields
+
 from . import models as du_models
-from . import validators
 
 
-class SignupForm(PopRequestMixin, CreateUpdateAjaxMixin, forms.UserCreationForm):
-    email = fields.EmailField(required=True)
-
-    class Meta:
-        model = du_models.CustomUser
-        fields = 'username first_name last_name email password1 password2'.split()
+# class SignupForm(PopRequestMixin, CreateUpdateAjaxMixin, forms.UserCreationForm):
+#     email = fields.EmailField(required=True)
+#
+#     class Meta:
+#         model = du_models.CustomUser
+#         fields = 'username first_name last_name email password1 password2'.split()
 
 
 class NewUserForm(forms.UserCreationForm):

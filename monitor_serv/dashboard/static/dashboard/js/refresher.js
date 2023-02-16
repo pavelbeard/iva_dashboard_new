@@ -1,22 +1,9 @@
-import {zip} from "./extensions.js";
 
 let imagesPath = "/static/dashboard/images";
 
 
 function dropdownTitle(hostElem, html, cardPart) {
-    $(function () {
-         hostElem.find(cardPart).hover(function () {
-             if (hostElem.attr('data-available') !== "false") {
-                 $(this).addClass('show');
-                 $(this).find('.dropdown-menu').addClass('show');
-                 $(this).find('.dropdown-menu').html(html);
-             }
-         }, function () {
-             $(this).removeClass('show');
-             $(this).find('.dropdown-menu').removeClass('show');
-             $(this).find('.dropdown-menu').empty()
-         });
-    });
+
 }
 
 function hostnamectl(data, hostElem) {

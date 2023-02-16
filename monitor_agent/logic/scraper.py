@@ -1,18 +1,15 @@
 import asyncio
-import re
-import socket
 from concurrent.futures import ProcessPoolExecutor
 from functools import partial
 from logging import DEBUG
 from typing import Type, AsyncGenerator
 
+import asyncssh
 import paramiko
-import time
 from binascii import hexlify
 from paramiko.ssh_exception import SSHException, AuthenticationException, NoValidConnectionsError
 
 from monitor_agent.agent import get_logger
-from monitor_agent.logic import handle
 from monitor_agent.logic.extentions import row_2_dict
 from monitor_agent.logic.pass_handler import decrypt_pass
 from monitor_agent.logic.reader import get_targets, get_settings, get_scrape_commands, get_target
@@ -71,6 +68,35 @@ class ScrapeLogic:
         return results
 
     @staticmethod
+    async def arun_cmd_on_target(
+            address: str, port: int, username: str,
+            password: str, commands: dict, timeout: int
+    ):
+        try:
+            host_key = await asyncssh.get_server_host_key(host=address, port=port)
+
+            options = asyncssh.SSHClientConnectionOptions()
+            options.key = host_key
+
+            password = decrypt_pass(ENCRYPTION_KEY, password)
+            
+            for key, command in commands.items():
+                async with asyncssh.connect(
+                        host=address, port=port, username=username, password=password,
+                        options=options, known_hosts=None
+                ) as conn:
+                    if "sudo" in command:
+                        result_sudo = await conn.run(f"echo {password} | sudo -S -l")
+                        yield result_sudo.stdout, result_sudo.stderr
+
+                    result = await conn.run(command)
+                    yield result.stdout, result.stderr
+        except asyncio.TimeoutError:
+            raise asyncio.TimeoutError
+        except ConnectionRefusedError:
+            raise ConnectionRefusedError
+
+    @staticmethod
     def run_cmd_on_target(
             address: str, port: int, username: str,
             password: str, commands: dict, timeout: int) -> dict | Type[SSHException]:
@@ -109,12 +135,14 @@ class ScrapeLogic:
 
                     result_dict[key] = _out_
             except TimeoutError as e:
-                result_dict[key] = e
+                raise TimeoutError
             except AuthenticationException:
                 raise AuthenticationException
             except NoValidConnectionsError as e:
                 raise OSError(e.errors)
             except OSError as e:
+                result_dict[key] = e
+            except EOFError as e:
                 result_dict[key] = e
             except Exception as e:
                 result_dict[key] = e
@@ -130,6 +158,10 @@ class ScrapeLogic:
 
             if isinstance(result, AuthenticationException):
                 message = f"bad credentials: <host={address}, port={port}>."
+                logger.error(message)
+                yield message
+            elif isinstance(result, TimeoutError):
+                message = f"timeout error: <host={address}, port={port}>."
                 logger.error(message)
                 yield message
             elif isinstance(result, OSError):

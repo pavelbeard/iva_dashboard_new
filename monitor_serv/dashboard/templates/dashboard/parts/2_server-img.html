@@ -5,7 +5,7 @@
          data-indicator-type="server"
          data-bs-toggle="dropdown"
          height="48"
-         {% if target.role == 'media' %}
+         {% if target.role == 'none' %}
             src="{% static "dashboard/images/bootstrap-svg/server.svg" %}"
          {% else %}
             src="{% static "dashboard/images/bootstrap-svg/server-head.svg" %}"

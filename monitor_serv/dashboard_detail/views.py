@@ -1,22 +1,24 @@
 from django.shortcuts import render
+from dashboard import models
+
 
 # Create your views.py here.
 
-from core_logic import IvaMetricsHandler
-from . import mixins
+# class CPUView()
 
+def cpu_view(request):
+    labels = [f.attname for f in models.CPU._meta.fields][2:-2]
+    data = []
 
-def index(request):
-    return render(request, template_name="dashboard_detail/index.html")
+    queryset = models.CPU.objects.order_by("-record_date")[:50]
 
+    for cpu_record in queryset:
+        data.append(cpu_record.cpu_idle)
 
-class NetDetail(mixins.ServerAnalysisDetailMixin):
-    # команды iftop может не быть на целевой машине, проверить перед
-    # развертыванием дашборда, установить в случае отсутствия
-    # UPD: дано разрешение выполнять команду iftop без прав админа: sudo chmod +s $(which /usr/sbin/iftop)
-    cmd = "uname -n && /usr/sbin/iftop -t -s 1 -P"
-    callback_iva_metrics_handler = IvaMetricsHandler.net_analysis_detail
-
+    return render(request, "dashboard_detail/index.html", {
+        "labels": labels,
+        "data": data
+    })
 
 # TODO: class LoadAverage
 # TODO: class CPUUsageDetail

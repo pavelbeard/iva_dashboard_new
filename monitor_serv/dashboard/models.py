@@ -1,20 +1,13 @@
-from django.db import models
-from django.db.models import fields
-from django.contrib.auth.models import AbstractUser
-from django.contrib.admin.templatetags.admin_urls import admin_urlname
-from django.shortcuts import resolve_url
-from django.utils.html import format_html
-from django.utils.safestring import SafeText
-from django.utils.translation import gettext_lazy as _
-from django.utils import timezone
 import uuid
 
-# Create your models here.
-SERVER_ROLE = (
-    ('media', "MEDIA"),
-    ('head', "HEAD"),
-)
+from django.contrib.auth.models import AbstractUser
+from django.db import models
+from django.db.models import fields
+from django.utils import timezone
+from django.utils.translation import gettext_lazy as _
 
+
+# Create your models here.
 
 class DashboardSettings(models.Model):
     command_id = fields.IntegerField(primary_key=True, editable=False)
@@ -27,33 +20,29 @@ class DashboardSettings(models.Model):
         return f"Settings(scraper_url={self.scraper_url}, scrape_interval={self.scrape_interval})"
 
     class Meta:
-        verbose_name = "Настройки сервера"
-        verbose_name_plural = "Настройки сервера"
+        verbose_name = "настройки сервера мониторинга"
+        verbose_name_plural = "настройки сервера мониторинга"
         app_label = "dashboard"
 
 
 class ScrapeCommand(models.Model):
     record_id = fields.IntegerField(primary_key=True, default=0, editable=False)
-    scrape_command = fields.CharField(max_length=512, blank=True, verbose_name="Команда мониторинга:")
-    scrape_command_cpu = fields.CharField(max_length=128, blank=True, verbose_name="Команда мониторинга CPU:")
-    scrape_command_ram = fields.CharField(max_length=128, blank=True, verbose_name="Команда мониторинга RAM:")
-    scrape_command_fs = fields.CharField(
-        max_length=128, blank=True, verbose_name="Команда мониторинга файловой системы:")
-    scrape_command_apps = fields.CharField(
-        max_length=128, blank=True, verbose_name="Команда мониторинга приложений:")
-    scrape_command_net = fields.CharField(
-        max_length=128, blank=True, verbose_name="Команда мониторинга сетевых интерфейсов:")
-    scrape_command_uptime = fields.CharField(
-        max_length=128, blank=True, verbose_name="Команда мониторинга времени работы:")
-    scrape_command_hostnamectl = fields.CharField(
-        max_length=128, blank=True, verbose_name="Мониторинг версии ОС, ядра и имени хоста:")
+    scrape_command = fields.TextField(blank=True, verbose_name="Команда мониторинга:")
+    scrape_command_cpu = fields.TextField(blank=True, verbose_name="Команда мониторинга CPU:")
+    scrape_command_ram = fields.TextField(blank=True, verbose_name="Команда мониторинга RAM:")
+    scrape_command_fs = fields.TextField(blank=True, verbose_name="Команда мониторинга файловой системы:")
+    scrape_command_apps = fields.TextField(blank=True, verbose_name="Команда мониторинга приложений:")
+    scrape_command_net = fields.TextField(blank=True, verbose_name="Команда мониторинга сетевых интерфейсов:")
+    scrape_command_uptime = fields.TextField(blank=True, verbose_name="Команда мониторинга времени работы:")
+    scrape_command_hostnamectl = fields.TextField(blank=True, verbose_name="Мониторинг версии ОС, ядра и имени хоста:")
+    scrape_command_load_average = fields.TextField(blank=True, verbose_name="Мониторинг средней загрузки хоста:")
 
     def __str__(self):
         return f"{self.__class__.__name__}(record_id={self.record_id})"
 
     class Meta:
-        verbose_name = "Набор команд мониторинга"
-        verbose_name_plural = "Набор команд мониторинга"
+        verbose_name = "команды мониторинга"
+        verbose_name_plural = "команды мониторинга"
 
 
 class Target(models.Model):
@@ -69,13 +58,12 @@ class Target(models.Model):
 
     def __str__(self):
         # scrape_command_rec_id = "Nothing" if self.scrape_command is None else self.scrape_command.record_id
-
-        return f"Target(id={self.id}, ip={self.address}, port={self.port}, )" \
+        return f"Target(id={self.id}, ip={self.address}, port={self.port})" \
             # f"{ScrapeCommand.__name__}={scrape_command_rec_id})"
 
     class Meta:
-        verbose_name = "Целевой хост"
-        verbose_name_plural = "Целевые хосты"
+        verbose_name = "целевой хост"
+        verbose_name_plural = "целевые хосты"
         app_label = "dashboard"
         unique_together = ("address", "port")
 
@@ -92,7 +80,7 @@ class CPU(models.Model):
     cpu_sys = fields.FloatField(null=False, default=0, verbose_name='Системное время, sy %:')
     cpu_user = fields.FloatField(null=False, default=0, verbose_name='Пользовательское время, us %:')
     cpu_util = fields.FloatField(null=False, default=0, verbose_name="Загрузка процессора %:")
-    record_date = fields.DateTimeField(default=timezone.now, null=False, verbose_name="Время сканирования:")
+    record_date = fields.DateTimeField(default=timezone.now, null=False, verbose_name="Время опроса:")
 
     target = models.ForeignKey(Target, on_delete=models.CASCADE, verbose_name="Сервер:")
 
@@ -101,8 +89,8 @@ class CPU(models.Model):
                f"cpu_cores={self.cpu_cores}, record_date={self.record_date})"
 
     class Meta:
-        verbose_name = "Данные процессора"
-        verbose_name_plural = "Данные процессоров"
+        verbose_name = "данные процессора"
+        verbose_name_plural = "данные процессоров"
         app_label = "dashboard"
 
 
@@ -115,7 +103,7 @@ class RAM(models.Model):
     ram_buff_cache = fields.BigIntegerField(null=False, default=0, verbose_name="Буферизованной/кэшированной памяти:")
     ram_avail = fields.BigIntegerField(null=False, default=0, verbose_name="Доступной памяти:")
     ram_util = fields.FloatField(null=False, default=0, verbose_name="Загрузка памяти %:")
-    record_date = fields.DateTimeField(default=timezone.now, null=False, verbose_name="Время сканирования:")
+    record_date = fields.DateTimeField(default=timezone.now, null=False, verbose_name="Время опроса:")
 
     target = models.ForeignKey(Target, on_delete=models.CASCADE, verbose_name="Сервер:")
 
@@ -124,8 +112,8 @@ class RAM(models.Model):
                f"ram_free={self.ram_free}, ram_util={self.ram_util}, record_date={self.record_date}, )"
 
     class Meta:
-        verbose_name = "Данные ОЗУ"
-        verbose_name_plural = "Данные ОЗУ"
+        verbose_name = "данные ОЗУ"
+        verbose_name_plural = "данные ОЗУ"
         app_label = "dashboard"
 
 
@@ -137,7 +125,7 @@ class DiskSpace(models.Model):
     fs_used_prc = fields.FloatField(null=False, default=0, verbose_name="Занято в %:")
     fs_avail = fields.BigIntegerField(null=False, default=0, verbose_name="Доступно:")
     mounted_on = fields.CharField(null=False, default="none", max_length=128, verbose_name="Подключено к:")
-    record_date = fields.DateTimeField(default=timezone.now, null=False, verbose_name="Время сканирования:")
+    record_date = fields.DateTimeField(default=timezone.now, null=False, verbose_name="Время опроса:")
 
     target = models.ForeignKey(Target, on_delete=models.CASCADE, verbose_name="Сервер:")
 
@@ -147,8 +135,8 @@ class DiskSpace(models.Model):
                f" record_date={self.record_date}, )"
 
     class Meta:
-        verbose_name = "Данные файлового накопителя"
-        verbose_name_plural = "Данные файловых накопителей"
+        verbose_name = "данные файлового накопителя"
+        verbose_name_plural = "данные файловых накопителей"
         app_label = "dashboard"
 
 
@@ -166,7 +154,7 @@ class DiskSpaceStatistics(models.Model):
     most_valuable_part_use_percent = fields.FloatField(
         null=False, default=0, verbose_name="Доступный размер 'лучшего' раздела файловой системы %"
     )
-    record_date = fields.DateTimeField(default=timezone.now, null=False, verbose_name="Время сканирования:")
+    record_date = fields.DateTimeField(default=timezone.now, null=False, verbose_name="Время опроса:")
 
     target = models.ForeignKey(Target, on_delete=models.CASCADE, verbose_name="Сервер:")
 
@@ -176,8 +164,8 @@ class DiskSpaceStatistics(models.Model):
                f"record_date={self.record_date}, )"
 
     class Meta:
-        verbose_name = "Статистика файловой системы"
-        verbose_name_plural = "Статистика файловой системы"
+        verbose_name = "статистика файловой системы"
+        verbose_name_plural = "статистика файловой системы"
         app_label = "dashboard"
 
 
@@ -197,11 +185,11 @@ class NetInterface(models.Model):
     tx_errors_errors = fields.BigIntegerField(null=False, default=0, verbose_name="Отправлено с ошибками:")
     tx_errors_dropped = fields.BigIntegerField(null=False, default=0, verbose_name="Отброшено при отправке пакетов:")
     tx_errors_overruns = fields.BigIntegerField(
-        null=False, default=0,verbose_name="Перерасходованных при отправке пакетов:")
+        null=False, default=0, verbose_name="Перерасходованных при отправке пакетов:")
     tx_errors_carrier = fields.BigIntegerField(null=False, default=0, verbose_name='Пакетов с потерянными носителями :')
     tx_errors_collisions = fields.BigIntegerField(null=False, default=0,
                                                   verbose_name="Отправлено пакетов с коллизиями:")
-    record_date = fields.DateTimeField(default=timezone.now, null=False, verbose_name="Время сканирования:")
+    record_date = fields.DateTimeField(default=timezone.now, null=False, verbose_name="Время опроса:")
 
     target = models.ForeignKey(Target, on_delete=models.CASCADE, verbose_name="Сервер:")
 
@@ -210,34 +198,33 @@ class NetInterface(models.Model):
                f"status={self.status}, record_date={self.record_date})"
 
     class Meta:
-        verbose_name = "Данные сетевых интерфейсов"
-        verbose_name_plural = "Данные сетевых интерфейсов"
+        verbose_name = "данные сетевых интерфейсов"
+        verbose_name_plural = "данные сетевых интерфейсов"
         app_label = "dashboard"
 
 
 class ServerData(models.Model):
     class ServerRole(models.TextChoices):
         MEDIA = 'media', _('MEDIA')
-        HEAD = 'head', _('HEAD')
+        MASTER = 'master', _('MASTER'),
+        SLAVE = 'slave', _('SLAVE'),
 
-    uuid_record = fields.UUIDField(default=uuid.uuid4, primary_key=True, editable=False)
-    hostname = fields.CharField(max_length=64, blank=True, verbose_name="Имя сервера:")
-    os = fields.CharField(max_length=32, blank=True, verbose_name="Операционная система:")
-    kernel = fields.CharField(max_length=64, blank=True, verbose_name="Ядро ОС:")
+    target = models.OneToOneField(Target, primary_key=True, on_delete=models.CASCADE, verbose_name="Сервер:")
+    hostname = fields.CharField(max_length=64, blank=True, null=True, verbose_name="Имя сервера:")
+    os = fields.CharField(max_length=32, blank=True, null=True, verbose_name="Операционная система:")
+    kernel = fields.CharField(max_length=64, blank=True, null=True, verbose_name="Ядро ОС:")
     server_role = fields.CharField(
         max_length=6, choices=ServerRole.choices, blank=True,
         verbose_name="Роль сервера:"
     )
-    record_date = fields.DateTimeField(default=timezone.now, null=False, verbose_name="Время сканирования:")
-
-    target = models.ForeignKey(Target, on_delete=models.CASCADE, verbose_name="Сервер:")
+    record_date = fields.DateTimeField(default=timezone.now, null=False, verbose_name="Время опроса:")
 
     def __str__(self):
         return f"ServerData(target={self.target}, record_date={self.record_date})"
 
     class Meta:
-        verbose_name = "Данные сервера"
-        verbose_name_plural = "Данные серверов"
+        verbose_name = "данные сервера"
+        verbose_name_plural = "данные серверов"
         app_label = "dashboard"
 
 
@@ -245,7 +232,7 @@ class Process(models.Model):
     uuid_record = fields.UUIDField(default=uuid.uuid4, primary_key=True, editable=False)
     process_name = fields.CharField(max_length=64, default="none", verbose_name="Имя процесса:")
     process_status = fields.CharField(max_length=16, default="none", verbose_name="Статус:")
-    record_date = fields.DateTimeField(default=timezone.now, null=False, verbose_name="Время сканирования:")
+    record_date = fields.DateTimeField(default=timezone.now, null=False, verbose_name="Время опроса:")
 
     target = models.ForeignKey(Target, on_delete=models.CASCADE, verbose_name="Сервер:")
 
@@ -254,15 +241,15 @@ class Process(models.Model):
                f"process_status={self.process_status}, record_date={self.record_date})"
 
     class Meta:
-        verbose_name = "Статистика файловой системы"
-        verbose_name_plural = "Статистика файловой системы"
+        verbose_name = "статистика файловой системы"
+        verbose_name_plural = "статистика файловой системы"
         app_label = "dashboard"
 
 
 class Uptime(models.Model):
     uuid_record = fields.UUIDField(default=uuid.uuid4, primary_key=True, editable=False)
     uptime = fields.CharField(max_length=32, default="none", verbose_name="Время работы сервера:")
-    record_date = fields.DateTimeField(default=timezone.now, null=False, verbose_name="Время сканирования:")
+    record_date = fields.DateTimeField(default=timezone.now, null=False, verbose_name="Время опроса:")
 
     target = models.ForeignKey(Target, on_delete=models.CASCADE, verbose_name="Сервер:")
 
@@ -270,6 +257,24 @@ class Uptime(models.Model):
         return f"{self.__class__.__name__}(uuid_record={self.uuid_record}, record_date={self.record_date})"
 
     class Meta:
-        verbose_name = "Время работы сервера"
-        verbose_name_plural = "Время работы серверов"
+        verbose_name = "время работы сервера"
+        verbose_name_plural = "время работы серверов"
+        app_label = "dashboard"
+
+
+class LoadAverage(models.Model):
+    uuid_record = fields.UUIDField(default=uuid.uuid4, primary_key=True, editable=False)
+    one_min = fields.FloatField(default=0, verbose_name="Средняя загрузка системы за 1 минуту:")
+    five_min = fields.FloatField(default=0, verbose_name="Средняя загрузка системы за 5 минут:")
+    fteen_min = fields.FloatField(default=0, verbose_name="Средняя загрузка системы за 15 минут:")
+    record_date = fields.DateTimeField(default=timezone.now, null=False, verbose_name="Время опроса:")
+
+    target = models.ForeignKey(Target, on_delete=models.CASCADE, verbose_name="Сервер:")
+
+    def __str__(self):
+        return f"{self.__class__.__name__}(uuid_record={self.uuid_record}, record_date={self.record_date})"
+
+    class Meta:
+        verbose_name = "средняя загрузка сервера"
+        verbose_name_plural = "средняя загрузка серверов"
         app_label = "dashboard"

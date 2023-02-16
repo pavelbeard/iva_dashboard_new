@@ -118,8 +118,8 @@ class TestAuth(TestCase):
             address="90.50.0.1",
             port=22,
             username="test",
-            password="test",
-            server_role=models.Target.ServerRole.MEDIA)
+            password="test"
+        )
         target.save()
         pass
 
@@ -134,28 +134,22 @@ def add_targets():
 
     query = [
         models.Target(
-            id=9, address="2.0.96.5", port=22, username="test", password=encrypted_passwd,
-            server_role=models.Target.ServerRole.MEDIA
+            id=17, address="192.168.248.5", port=9200, username="test", password=encrypted_passwd,
         ),
         models.Target(
-            id=8, address="2.0.96.6", port=22, username="test", password=encrypted_passwd,
-            server_role=models.Target.ServerRole.MEDIA
+            id=11, address="127.0.0.1", port=2000, username="test", password=encrypted_passwd,
         ),
         models.Target(
-            id=7, address="2.0.96.7", port=22, username="test", password=encrypted_passwd,
-            server_role=models.Target.ServerRole.MEDIA
+            id=12, address="127.0.0.1", port=2001, username="test", password=encrypted_passwd,
         ),
         models.Target(
-            id=6, address="2.0.96.8", port=22, username="test", password=encrypted_passwd,
-            server_role=models.Target.ServerRole.MEDIA
+            id=13, address="127.0.0.1", port=2002, username="test", password=encrypted_passwd,
         ),
         models.Target(
-            id=1, address="2.0.96.9", port=22, username="test", password=encrypted_passwd,
-            server_role=models.Target.ServerRole.MEDIA
+            id=18, address="192.168.248.5", port=9201, username="test", password=encrypted_passwd,
         ),
         models.Target(
-            id=10, address="2.0.96.10", port=22, username="test", password=encrypted_passwd,
-            server_role=models.Target.ServerRole.HEAD
+            id=14, address="127.0.0.1", port=2003, username="test", password=encrypted_passwd,
         ),
     ]
 
@@ -174,52 +168,6 @@ def add_settings():
 class DashboardTests(TestCase):
     databases = {'iva_dashboard', 'default'}
 
-    @classmethod
-    def add_targets(cls):
-        from core_logic import pass_handler
-        from django.conf import settings
-
-        key = settings.ENCRYPTION_KEY
-
-        encrypted_passwd = pass_handler.encrypt_pass(password="test", encryption_key=key)
-
-        query = [
-            models.Target(
-                id=9, address="2.0.96.5", port=22, username="test", password=encrypted_passwd,
-                server_role=models.Target.ServerRole.MEDIA
-            ),
-            models.Target(
-                id=8, address="2.0.96.6", port=22, username="test", password=encrypted_passwd,
-                server_role=models.Target.ServerRole.MEDIA
-            ),
-            models.Target(
-                id=7, address="2.0.96.7", port=22, username="test", password=encrypted_passwd,
-                server_role=models.Target.ServerRole.MEDIA
-            ),
-            models.Target(
-                id=6, address="2.0.96.8", port=22, username="test", password=encrypted_passwd,
-                server_role=models.Target.ServerRole.MEDIA
-            ),
-            models.Target(
-                id=1, address="2.0.96.9", port=22, username="test", password=encrypted_passwd,
-                server_role=models.Target.ServerRole.MEDIA
-            ),
-            models.Target(
-                id=10, address="2.0.96.10", port=22, username="test", password=encrypted_passwd,
-                server_role=models.Target.ServerRole.HEAD
-            ),
-            models.Target(
-                address="2.0.96.11", port=22, username="test", password=encrypted_passwd,
-                server_role=models.Target.ServerRole.HEAD
-            ),
-            # models.Target(
-            #     address="192.168.248.4", port=2249, username="info-admin", password="Rt3$YiOO",
-            #     server_role=models.Target.ServerRole.HEAD
-            # ),
-        ]
-
-        for q in query:
-            q.save()
 
     @classmethod
     def get_targets(cls):

@@ -222,4 +222,4 @@ SCRAPER_URL = os.getenv("SCRAPER_URL", "http://2.0.96.1:8000/api/monitor/metrics
 SCRAPER_HEALTH_CHECK = os.getenv("SCRAPER_URL", "http://2.0.96.1:8000/api/monitor/ping")
 SCRAPE_INTERVAL = os.getenv("SCRAPE_INTERVAL", 15)
 
-APP_VERSION = "v0.8.1"
+APP_VERSION = "v0.8.25"

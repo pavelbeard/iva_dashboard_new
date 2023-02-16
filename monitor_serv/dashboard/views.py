@@ -1,6 +1,4 @@
-import ast
 import json
-from datetime import datetime
 
 import requests
 from django import http
@@ -11,11 +9,9 @@ from django.contrib.messages import get_messages
 from django.http import HttpResponseRedirect
 from django.shortcuts import render
 from django.urls import reverse_lazy
-from django.utils import timezone
 from django.views.decorators.cache import cache_control
 from jsonview.views import JsonView
 
-from . import mixins
 from . import models
 from .handler import scraped_data_handler
 
@@ -47,14 +43,11 @@ def index_view(request):
 @cache_control(no_cache=True, must_revalidate=True, no_store=True)
 def dashboard_view(request):
     query = models.Target.objects.filter(is_being_scan=True)
-    targets = [
-        {
-            "address": f"{target.address}:{target.port}",
-            "id": f"{target.address.replace('.', '')}{target.port}",
-            "role": target.server_role
-        }
-        for target in query
-    ]
+    targets = [{
+        "address": f"{target.address}:{target.port}",
+        "id": f"{target.address.replace('.', '')}{target.port}",
+    } for target in query]
+
     return render(
         request=request,
         template_name="base/4_dashboard.html",
@@ -66,44 +59,8 @@ class DataGetterFromAgent(JsonView):
     def get_context_data(self, **kwargs):
         settings_obj = models.DashboardSettings.objects.get(command_id=1)
         response = requests.get(settings_obj.scraper_url, headers={"Content-Type": "application/json"})
-        json_data = json.loads(response.content)
+        json_data = scraped_data_handler(json.loads(response.content))
         return json_data
-
-
-class Processes(mixins.ServerAnalysisMixin):
-    cmd = "/usr/sbin/service --status-all"
-
-
-class CPUTop(mixins.ServerAnalysisMixin):
-    model = models.CPU
-    template_name = "dashboard/parts/1_server.html"
-    cmd = 'top -bn 1 -d.2 | grep "Cpu" && top 1 -w 70 -bn 1 | grep -P "^(%)"'
-
-
-class RAM(mixins.ServerAnalysisMixin):
-    model = models.RAM
-    cmd = "free -kh --si"
-
-
-class DiskSpace(mixins.ServerAnalysisMixin):
-    # на продакт сервере нужно заменить команду du sh на sudo du -sh.
-    # для других разработчиков на будущее: лучше давать права админа на выполнение команд мониторинга
-    # или перемещать эти утилиты в другие группы
-    #
-    # UPD: дано разрешение выполнять команду du без прав админа: sudo chmod +s $(which du)
-    # UPD: "du -sh --exclude=mnt --exclude=proc /" - не используется из-за огромной нагрузки на процессор
-    model = models.DiskSpace
-    cmd = 'df -h && lsblk | grep -E "^sda"'
-
-
-class Net(mixins.ServerAnalysisMixin):
-    model = models.NetInterface
-    cmd = "/usr/sbin/ifconfig"
-
-
-class Uptime(mixins.ServerAnalysisMixin):
-    cmd = "uname -n && uptime"
-
 
 def get_interval(request):
     """Возвращает интервал снятия метрик в секундах"""
@@ -114,7 +71,3 @@ def get_interval(request):
     except models.DashboardSettings.DoesNotExist:
         http.JsonResponse(json.dumps({"SettingsObjectNotFound": "no data."}), safe=False)
 
-
-class ServerData(mixins.ServerAnalysisMixin):
-    model = models.Target
-    cmd = "uname -n && uname -r && cat /etc/os-release"

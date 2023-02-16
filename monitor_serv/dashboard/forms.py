@@ -41,3 +41,7 @@ class ServerDataForm(forms.ModelForm):
     class Meta:
         model = dashboard_models.ServerData
         fields = "__all__"
+
+
+class ScrapeCommandForm(forms.ModelForm):
+    pass

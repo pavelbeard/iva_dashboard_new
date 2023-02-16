@@ -14,6 +14,8 @@ logger = get_logger(__name__)
 app = FastAPI()
 
 scraper_task = {}
+exporters_dict = {}
+handlers_dict = {}
 
 
 @app.on_event("startup")
@@ -44,6 +46,8 @@ async def start_scraping():
 
     sc = ScrapeLogic(exporters=_exporters_, handlers=_handlers_)
     scraper_task['task'] = asyncio.create_task(sc.scrape_forever())
+    exporters_dict['exporters'] = _exporters_
+    handlers_dict['handlers'] = _handlers_
     logger.info("Agent is run!")
 
 
@@ -67,7 +71,10 @@ async def get_all_metrics() -> JSONResponse:
     Возвращает список кортежей: (target_id, data)
     :return: list[str | BaseException]
     """
-    sc = ScrapeLogic()
+    sc = ScrapeLogic(
+        exporters=iter(exporters_dict.values()).__next__(),
+        handlers=iter(handlers_dict.values()).__next__()
+    )
     try:
         scrape_data = {}
         async for result in sc.scrape_once():
@@ -76,7 +83,7 @@ async def get_all_metrics() -> JSONResponse:
         return JSONResponse(content=json.dumps(scrape_data), status_code=200)
     except Exception as e:
         logger.error(f"Exception {e.args[0]}")
-        return JSONResponse(content={"message", "internal server error."}, status_code=500)
+        return JSONResponse(content=json.dumps({"message", "internal server error."}), status_code=500)
 
 
 # задаток

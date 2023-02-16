@@ -5,7 +5,7 @@
          data-indicator-type="cpu"
          height="48"
          src="{% static "dashboard/images/bootstrap-svg/cpu.svg" %}"
-         alt="server-cpu">
+         alt="server-cpu" href="{% url 'dashboard_detail:cpu' %}">
     <div class="server-cpu-text dropend">
         <p data-bs-toggle="dropdown">N/A</p>
         <ul class="dropdown-menu"></ul>

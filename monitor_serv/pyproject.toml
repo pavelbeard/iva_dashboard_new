@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "monitor-serv"
-version = "0.8.2"
+version = "0.8.25"
 description = "iva_dashboard_server"
 authors = ["pavelbeard <pavelborodin1995@gmail.com>"]
 readme = "README.md"

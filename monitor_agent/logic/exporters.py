@@ -1,6 +1,6 @@
 import datetime
 import uuid
-from abc import ABC
+from abc import ABC, abstractmethod
 
 from monitor_agent.agent import get_logger
 from monitor_agent.dashboard.models import ServerData, CPU, DiskSpace, DiskSpaceStatistics
@@ -131,8 +131,6 @@ class ServerDataDatabaseExporter(DatabaseExporter):
 
 
 class MonitoringServerExporter(Exporter, ABC):
-    def __init__(self, model):
-        super().__init__(model)
 
     def export(self, **kwargs):
         pass
