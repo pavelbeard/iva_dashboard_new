@@ -11,15 +11,17 @@
         <script src="{% static "bootstrap/js/bootstrap.js" %}"></script>
         <script src="{% static "sweetalert/dist/sweetalert2.all.js" %}"></script>
         <script src="{% static 'js/jquery.bootstrap.modal.forms.js' %}"></script>
-        <script src="{% static 'chartjs/chart.umd.min.js' %}"></script>
+        <script type="module" src="{% static 'chartjs/chart.js' %}"></script>
+        <script type="module" src="{% static 'chartjs/chart.umd.js' %}"></script>
+        <script type="module" src="{% static 'chartjs/helpers.js' %}"></script>
         <!-- CUSTOM SCRIPTS and STYLES-->
         <link rel="stylesheet" href="{% static "dashboard/css/dashboard.css" %}">
         <link rel="stylesheet" href="{% static "dashboard_users/css/dashboard_users.css" %}">
         <link rel="stylesheet" href="{% static "dashboard_ivcs/css/dashboard_ivcs.css" %}">
-    {% endblock %}
-
-    {% if user.is_authenticated and targets %}
         <script type="module" src="{% static 'dashboard/js/monitoring.js' %}"></script>
+
+    {% endblock %}
+    {% if user.is_authenticated and targets %}
     {% endif %}
     <title>{% block title %}Dashboard{% endblock %}</title>
 </head>

@@ -45,12 +45,13 @@ def dashboard_view(request):
     query = models.Target.objects.filter(is_being_scan=True)
     targets = [{
         "address": f"{target.address}:{target.port}",
-        "id": f"{target.address.replace('.', '')}{target.port}",
+        "element_id": f"{target.address.replace('.', '')}{target.port}",
+        "data_target_id": target.id,
     } for target in query]
 
     return render(
         request=request,
-        template_name="base/4_dashboard.html",
+        template_name="base/1_dashboard.html",
         context={"targets": targets, "app_version": app_version, "mon_agent_available": True}
     )
 
@@ -62,6 +63,7 @@ class DataGetterFromAgent(JsonView):
         json_data = scraped_data_handler(json.loads(response.content))
         return json_data
 
+
 def get_interval(request):
     """Возвращает интервал снятия метрик в секундах"""
     try:
@@ -70,4 +72,3 @@ def get_interval(request):
         return http.JsonResponse(json.dumps({"interval": interval}), safe=False)
     except models.DashboardSettings.DoesNotExist:
         http.JsonResponse(json.dumps({"SettingsObjectNotFound": "no data."}), safe=False)
-

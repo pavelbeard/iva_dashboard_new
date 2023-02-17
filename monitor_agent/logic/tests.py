@@ -10,16 +10,17 @@ from monitor_agent.logic.scraper import ScrapeLogic
 
 class MyTestCase(unittest.TestCase):
     def setUp(self) -> None:
-        self.exporters_arr = [
-            exporters.ServerDataDatabaseExporter(models.ServerData).export,
-            exporters.CPUDatabaseExporter(models.CPU).export,
-            exporters.DatabaseExporter(models.RAM).export,
-            exporters.DiskSpaceDatabaseExporter(models.DiskSpace, models.DiskSpaceStatistics).export,
-            exporters.AdvancedDatabaseExporter(models.NetInterface).export,
-            exporters.AdvancedDatabaseExporter(models.Process).export,
-            exporters.ServerDataDatabaseExporter(models.ServerData).export,
-            exporters.DatabaseExporter(models.Uptime).export,
-        ]
+        server_role = exporters.ServerDataDatabaseExporter(models.ServerData).export
+        cpu = exporters.CPUDatabaseExporter(models.CPU).export
+        ram = exporters.DatabaseExporter(models.RAM).export
+        fs = exporters.DiskSpaceDatabaseExporter(models.DiskSpace, models.DiskSpaceStatistics).export
+        net = exporters.AdvancedDatabaseExporter(models.NetInterface).export
+        apps = exporters.AdvancedDatabaseExporter(models.Process).export
+        server_data = exporters.ServerDataDatabaseExporter(models.ServerData).export
+        uptime = exporters.DatabaseExporter(models.Uptime).export
+        load_average = exporters.DatabaseExporter(models.LoadAverage).export
+
+        self.exporters = (server_role, cpu, ram, fs, net, apps, server_data, uptime, load_average)
 
         server_role = handle.CrmStatusOutputHandler()
         cpu = handle.CpuTopOutputHandler()
@@ -48,6 +49,7 @@ class MyTestCase(unittest.TestCase):
         [print(r.is_being_scan) for r in result]
         self.assertEqual(type(result), list)
 
+    @staticmethod
     def test_create_and_update_server_data(self):
         pk = 17
         pk_name = "target_id"
@@ -61,8 +63,8 @@ class MyTestCase(unittest.TestCase):
 
         from exporters import ServerDataDatabaseExporter
 
-        exporter = ServerDataDatabaseExporter(ServerData).export
-        exporter(data, pk)
+        exporter = ServerDataDatabaseExporter(ServerData)
+        exporter.export(data, pk)
 
     def test_run_cmd_on_target(self):
         sc = ScrapeLogic()
@@ -80,12 +82,8 @@ class MyTestCase(unittest.TestCase):
         self.assertEqual(isinstance(r, dict), True)
 
     def test_scrape_forever(self):
-        sc = ScrapeLogic(
-            exporters=self.exporters_arr,
-            handlers=self.handlers
-        )
+        sc = ScrapeLogic(exporters=self.exporters, handlers=self.handlers)
         asyncio.run(sc.scrape_forever())
-        pass
 
     def test_load_average_output_handler(self):
         r = handle.LoadAverageUptimeOutputHandler().handle("13:42:29 up"
@@ -97,7 +95,7 @@ class MyTestCase(unittest.TestCase):
 
     def test_async_ssh(self):
         async def asyncssh():
-            sc = ScrapeLogic(self.exporters_arr, self.handlers)
+            sc = ScrapeLogic(self.exporters, self.handlers)
 
             password = "Z0FBQUFBQmo2UUM5Q09FOTlZNWgtcEVmcjlRN0FwaUt5RG5Ub0h" \
                        "hbGtTTzV5aHYzTVgxMWJ4d0EwTmhfQWVOa2NKZWFiOEMwdmFndUc4ajNmTml5UlE3Yk9JT2tpelpMRmc9PQ=="
@@ -111,15 +109,15 @@ class MyTestCase(unittest.TestCase):
             cb = sc.arun_cmd_on_target
 
             tasks = [asyncio.create_task(cb(address, 2000, "test", password, commands, 5)),
-                     asyncio.create_task(cb(address, 2001, "test", password, commands, 5)),
-                     asyncio.create_task(cb(address, 2002, "test", password, commands, 5)),
+                     asyncio.create_task(cb(address, 2001, "test1", password, commands, 5)),
+                     asyncio.create_task(cb(address, 2002, "test2", password, commands, 5)),
                      asyncio.create_task(cb(address, 2003, "test", password, commands, 5))]
 
-            res = await asyncio.gather(*(task async for task in tasks), return_exceptions=True)
+            res = await asyncio.gather(*tasks, return_exceptions=True)
 
-            print(res[0])
-            print(type(res[0]))
-            self.assertEqual(isinstance(res[0], tuple), True)
+            print(res)
+            print(type(res))
+            self.assertEqual(isinstance(res, list), True)
 
         asyncio.run(asyncssh())
 

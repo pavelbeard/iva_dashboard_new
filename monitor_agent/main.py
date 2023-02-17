@@ -32,17 +32,17 @@ async def start_scraping():
 
     _handlers_ = (server_role, cpu, ram, fs, net, apps, server_data, uptime, load_average)
 
-    _exporters_ = (
-        exporters.ServerDataDatabaseExporter(models.ServerData).export,
-        exporters.CPUDatabaseExporter(models.CPU).export,
-        exporters.DatabaseExporter(models.RAM).export,
-        exporters.DiskSpaceDatabaseExporter(models.DiskSpace, models.DiskSpaceStatistics).export,
-        exporters.AdvancedDatabaseExporter(models.NetInterface).export,
-        exporters.AdvancedDatabaseExporter(models.Process).export,
-        exporters.ServerDataDatabaseExporter(models.ServerData).export,
-        exporters.DatabaseExporter(models.Uptime).export,
-        exporters.DatabaseExporter(models.LoadAverage).export
-    )
+    server_role = exporters.ServerDataDatabaseExporter(models.ServerData).export
+    cpu = exporters.CPUDatabaseExporter(models.CPU).export
+    ram = exporters.DatabaseExporter(models.RAM).export
+    fs = exporters.DiskSpaceDatabaseExporter(models.DiskSpace, models.DiskSpaceStatistics).export
+    net = exporters.AdvancedDatabaseExporter(models.NetInterface).export
+    apps = exporters.AdvancedDatabaseExporter(models.Process).export
+    server_data = exporters.ServerDataDatabaseExporter(models.ServerData).export
+    uptime = exporters.DatabaseExporter(models.Uptime).export
+    load_average = exporters.DatabaseExporter(models.LoadAverage).export
+
+    _exporters_ = (server_role, cpu, ram, fs, net, apps, server_data, uptime, load_average)
 
     sc = ScrapeLogic(exporters=_exporters_, handlers=_handlers_)
     scraper_task['task'] = asyncio.create_task(sc.scrape_forever())

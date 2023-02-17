@@ -33,6 +33,7 @@ class DatabaseExporter(Exporter, ABC):
 
     def __init__(self, model):
         super().__init__(model)
+        self.model = model
 
     def export(self, values, target_id):
         """
@@ -115,6 +116,10 @@ class ServerDataDatabaseExporter(DatabaseExporter):
             raise ModelIsNotMatch(ServerData)
 
     def export(self, values, target_id, **server_role):
+        if isinstance(values, str):
+            logger.error("values is not match a dict")
+            return
+
         values |= self.t_id(target_id) | self.record_date() | server_role
         server_data = get_server_data(target_id)
 

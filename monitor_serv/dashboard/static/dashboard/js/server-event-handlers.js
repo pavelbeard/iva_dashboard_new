@@ -23,7 +23,7 @@ function serverStatus(
     );
 
     // обнуляем все индикаторы
-    targetElem.find('div[class=*"-text"]').find('p').text("N/A");
+    // targetElem.find('div[class=*"-text"]').find('p').text("N/A");
 }
 
 function serverIsUp(targetId, reason= "") {

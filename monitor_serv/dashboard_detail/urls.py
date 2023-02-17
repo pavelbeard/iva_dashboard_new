@@ -6,5 +6,5 @@ app_name = "dashboard_detail"
 
 urlpatterns = [
     # urls.path('', views.index, name="index"),
-    urls.path('cpu-detail/', views.cpu_view, name="cpu"),
+    urls.path('cpu-detail/<int:target_id>/', views.cpu_view, name="cpu"),
 ]

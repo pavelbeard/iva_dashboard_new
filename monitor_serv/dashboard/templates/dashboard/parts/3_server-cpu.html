@@ -1,11 +1,11 @@
 {% load static %}
 
 <div class="server-indicator server-cpu">
-    <img class="server-info-icon"
+    <a href="{% url 'dashboard_detail:cpu' target.data_target_id %}"><img class="server-info-icon"
          data-indicator-type="cpu"
          height="48"
          src="{% static "dashboard/images/bootstrap-svg/cpu.svg" %}"
-         alt="server-cpu" href="{% url 'dashboard_detail:cpu' %}">
+         alt="server-cpu"></a>
     <div class="server-cpu-text dropend">
         <p data-bs-toggle="dropdown">N/A</p>
         <ul class="dropdown-menu"></ul>

@@ -1,7 +1,7 @@
 {% load static %}
 
 {% for target in targets %}
-    <div class="server" id="{{ target.id }}">
+    <div class="server" id="{{ target.element_id }}" data-target-id="{{ target.data_target_id }}">
         <div class="server-left-part">
             {% include "dashboard/parts/2_server-img.html" %}
             <div class="server-empty justify-content-center" data-add-info="server-add-info-indicator">

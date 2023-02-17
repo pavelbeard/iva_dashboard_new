@@ -7,12 +7,14 @@
 {% block content %}
     <!-- BODY -->
     <!-- header -->
-    {% include "dashboard/base/3_header.html" %}
-    {% include "dashboard/base/_messages.html" %}
+    {% include "base/3_header.html" %}
+    {% include "base/_messages.html" %}
     <!-- /header -->
     <!-- dashboard -->
     {% if user.is_authenticated %}
         {% block dashboard %}
+        {% endblock %}
+        {% block dashboard_detail %}
         {% endblock %}
     {% elif not index %}
         {% block register %}
@@ -68,7 +70,7 @@
     {% endif %}
     <!-- /dashboard -->
     <!-- footer -->
-    {% include "dashboard/base/5_footer.html" %}
+    {% include "base/4_footer.html" %}
     <!-- /footer -->
     <!-- /BODY -->
 {% endblock %}

@@ -85,7 +85,7 @@ class CPUAdmin(admin.ModelAdmin):
 
     @admin.display(description="Сервер:", ordering='target')
     def get_targets(self, obj):
-        return admin_url_resolver(obj.target, "id", "Целевой хост\t")
+        return admin_url_resolver(obj.target, "id", f"{obj.target.address}:{obj.target.port}\t")
 
 
 @admin.register(models.RAM)

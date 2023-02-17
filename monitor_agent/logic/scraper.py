@@ -6,6 +6,7 @@ from typing import Type, AsyncGenerator
 
 import asyncssh
 import paramiko
+from asyncssh import PermissionDenied
 from binascii import hexlify
 from paramiko.ssh_exception import SSHException, AuthenticationException, NoValidConnectionsError
 
@@ -49,6 +50,13 @@ class ScrapeLogic:
         self.handlers = handlers
 
     @staticmethod
+    def _check_command_output_data(data):
+        if data == '':
+            return "command not found."
+
+        return data
+
+    @staticmethod
     def get_data_from_targets() -> list:
         """Вытягивает данные целевых хостов из БД"""
         targets = [row_2_dict(target) | {"commands": row_2_dict(get_scrape_commands(target.scrape_command_id))}
@@ -67,11 +75,11 @@ class ScrapeLogic:
         results = [instance.handle(values) for values, instance in zip(list(target_data.values()), self.handlers)]
         return results
 
-    @staticmethod
     async def arun_cmd_on_target(
-            address: str, port: int, username: str,
+            self, address: str, port: int, username: str,
             password: str, commands: dict, timeout: int
     ):
+        del commands['record_id']
         try:
             host_key = await asyncssh.get_server_host_key(host=address, port=port)
 
@@ -79,22 +87,29 @@ class ScrapeLogic:
             options.key = host_key
 
             password = decrypt_pass(ENCRYPTION_KEY, password)
-            
+
+            result_dict = {}
             for key, command in commands.items():
                 async with asyncssh.connect(
                         host=address, port=port, username=username, password=password,
                         options=options, known_hosts=None
                 ) as conn:
                     if "sudo" in command:
-                        result_sudo = await conn.run(f"echo {password} | sudo -S -l")
-                        yield result_sudo.stdout, result_sudo.stderr
+                        result_sudo = await conn.run(f"echo {password} | sudo -S {command}")
+                        result_dict[key] = self._check_command_output_data(result_sudo.stdout)
+                    else:
+                        result = await conn.run(command)
+                        result_dict[key] = self._check_command_output_data(result.stdout)
 
-                    result = await conn.run(command)
-                    yield result.stdout, result.stderr
+            return result_dict
         except asyncio.TimeoutError:
             raise asyncio.TimeoutError
         except ConnectionRefusedError:
             raise ConnectionRefusedError
+        except PermissionDenied as e:
+            raise PermissionDenied(e.reason)
+        except Exception as e:
+            raise Exception(e)
 
     @staticmethod
     def run_cmd_on_target(
@@ -156,7 +171,7 @@ class ScrapeLogic:
             address = target.get('address')
             port = target.get('port')
 
-            if isinstance(result, AuthenticationException):
+            if isinstance(result, (AuthenticationException, PermissionDenied)):
                 message = f"bad credentials: <host={address}, port={port}>."
                 logger.error(message)
                 yield message
@@ -164,17 +179,32 @@ class ScrapeLogic:
                 message = f"timeout error: <host={address}, port={port}>."
                 logger.error(message)
                 yield message
-            elif isinstance(result, OSError):
+            elif isinstance(result, (OSError, ConnectionRefusedError)):
                 message = f"unable to connect: <host={address}, port={port}>."
                 logger.error(message)
                 yield message
             elif isinstance(result, Exception):
-                message = f"unexpected exception: <host={address}, port={port}>."
+                message = f"unexpected exception: {result}  <host={address}, port={port}>."
                 logger.error(message)
                 yield message
             else:
                 logger.info(f"Target host {address}:{port} is scanned.")
                 yield result
+
+    async def arun_scraping(self, targets) -> ():
+        callback = self.arun_cmd_on_target
+        tasks = [asyncio.create_task(callback(
+            target['address'],  # address
+            target['port'],  # port
+            target['username'],  # username
+            target['password'],  # password
+            target['commands'],  # commands
+            5  # timeout
+        )) for target in targets]
+
+        tasks_results = await asyncio.gather(*tasks, return_exceptions=True)
+        results = (result for result in self._wrap_scraping_results(tasks_results, targets))
+        return results
 
     async def run_scraping(self, targets) -> ():
         """Запускает сбор метрик с целевых хостов в параллельном режиме."""
@@ -216,7 +246,7 @@ class ScrapeLogic:
         if set_interval:
             interval['value'] = int(get_settings().scrape_interval)
 
-        results = await self.run_scraping(targets)
+        results = await self.arun_scraping(targets)
 
         for target, result in zip(targets, results):
             if isinstance(result, dict):

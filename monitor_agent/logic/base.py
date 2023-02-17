@@ -10,8 +10,8 @@ class Exporter(ABC):
     model = None
 
     @abstractmethod
-    def __init__(self, *args, **kwargs):
-        pass
+    def __init__(self, model=None, *args, **kwargs):
+        self.model = model
 
     @abstractmethod
     def export(self, *args, **kwargs):
