@@ -71,7 +71,9 @@ services:
       iva_dashboard_net:
         ipv4_address: 2.0.96.1
     depends_on:
+      - monitor-postgres
       - monitor-server
+      - monitor-nginx
     restart: on-failure
     deploy:
       restart_policy:
