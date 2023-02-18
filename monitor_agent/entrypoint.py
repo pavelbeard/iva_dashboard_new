@@ -30,5 +30,5 @@ if __name__ == '__main__':
 
     if result:
         process = subprocess.Popen(["uvicorn", "monitor_agent.main:app",
-                                    "--host", "0.0.0.0.", "--port", "8000"])
+                                    "--host", "2.0.96.1", "--port", "8000"])
         process.communicate()

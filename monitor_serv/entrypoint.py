@@ -41,6 +41,8 @@ if __name__ == '__main__':
 
     if result1 and result2:
         call_django_command(pre_args, ["migrate", "dashboard", "--database", "iva_dashboard"])
+        call_django_command(pre_args, ["migrate", "dashboard_users", "--database", "iva_dashboard"])
+        call_django_command(pre_args, ["migrate", "admin", "--database", "iva_dashboard"])
         call_django_command(pre_args, ["addscrapecommands"])
         call_django_command(pre_args, ["setupdashboard"])
         call_django_command(pre_args, ["createsuperuser", "--username", os.getenv('DJANGO_SUPERUSER_USERNAME', 'admin'),

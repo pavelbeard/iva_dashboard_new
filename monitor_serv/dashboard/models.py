@@ -57,9 +57,7 @@ class Target(models.Model):
         ScrapeCommand, on_delete=models.CASCADE, verbose_name="Набор команд мониторинга:", null=True)
 
     def __str__(self):
-        # scrape_command_rec_id = "Nothing" if self.scrape_command is None else self.scrape_command.record_id
-        return f"Target(id={self.id}, ip={self.address}, port={self.port})" \
-            # f"{ScrapeCommand.__name__}={scrape_command_rec_id})"
+        return f"Target(id={self.id}, ip={self.address}, port={self.port})"
 
     class Meta:
         verbose_name = "целевой хост"
