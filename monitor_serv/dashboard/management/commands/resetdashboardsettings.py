@@ -10,8 +10,8 @@ class Command(BaseCommand):
         try:
             query = Settings.objects.get(command_id=1)
             query.delete()
-            self.stdout.write(self.style.SUCCESS("Настройки сервера мониторинга успешно сброшены."))
+            self.stdout.write(self.style.SUCCESS("The monitor server settings are reseted."))
         except Settings.DoesNotExist:
             raise CommandError(
-                "Сервер мониторинга уже сброшен, чтобы настроить сервер введите: setupdashboard."
+                "The monitoring server has been reseted, if you want to add commands type 'setupdashboard'."
             )

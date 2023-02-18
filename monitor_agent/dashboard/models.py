@@ -1,4 +1,4 @@
-from sqlalchemy import Table
+from sqlalchemy import Table, PrimaryKeyConstraint
 from monitor_agent.db_connector.configuration import Base, metadata
 
 

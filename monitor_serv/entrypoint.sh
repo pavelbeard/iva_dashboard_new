@@ -12,10 +12,19 @@ then
 
 fi
 
-python3.11 manage.py migrate --database iva_dashboard --noinput
-python3.11 manage.py collectstatic --noinput --clear
-python3.11 manage.py createsuperuser --database iva_dashboard --noinput
-python3.11 manage.py setupdashboard
+IVA_DASHBOARD_CHECK=$(python3.11 manage.py checkdb --iva_dashboard)
+IVCS_CHECK=$(python3.11 manage.py checkdb --ivcs)
+
+if [ $(python3.11 -c "print($IVA_DASHBOARD_CHECK + $IVCS_CHECK)") -eq 0 ];
+then
+  python3.11 manage.py migrate --database iva_dashboard --noinput
+  python3.11 manage.py collectstatic --noinput --clear
+  python3.11 manage.py createsuperuser --database iva_dashboard --noinput
+  python3.11 manage.py setupdashboard
+else
+  echo "Приложение заве"
+fi
+
 
 #export ENCRYPTION_KEY=$(python3.11 manage.py genencryptionkey)
 

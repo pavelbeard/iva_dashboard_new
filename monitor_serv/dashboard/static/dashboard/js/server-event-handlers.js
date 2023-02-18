@@ -1,3 +1,14 @@
+import {
+    appPics,
+    cpuPics,
+    ethernetPics,
+    hardwareAttrs,
+    hardwareDropdownLocate,
+    ramPics,
+    serverPics,
+    ssdPics
+} from "./base.js";
+
 function serverStatus(
     targetElem, status, availability,
     reason, availabilityColor,
@@ -46,8 +57,42 @@ function noAccessToServer(targetId, reason) {
         text, "#ff9900aa", "none");
 }
 
-function agentIsDown() {
+function agentIsDown(response) {
+    let isAvailable = !(response.ping === "false");
+    let status = isAvailable ? "агент доступен." : "агент недоступен.";
 
+    let agentStatus = $("#agent-status");
+    agentStatus.css({color: isAvailable ?  '#00ff00aa' : '#ff0000AA', wordBreak: "break-all"});
+    agentStatus.text(status);
+
+    let monitoringStatusBar = $("#monitoring-status-bar");
+    monitoringStatusBar.text(isAvailable ? "" : response.reason !== undefined ? response.reason : "");
+
+    if (!isAvailable) {
+        let servers = $('.server');
+        monitoringStatusBar.css({color: "#ff0000AA", fontWeight: 700});
+
+        servers.find('.server-status').text("N/A");
+        servers.find('.server-hostname').text("N/A");
+        servers.find('.server-role').text("N/A");
+
+        servers.find(hardwareAttrs.server).attr('src', serverPics.serverMedia);
+
+        servers.find(hardwareDropdownLocate.cpu).find('p').text('N/A');
+        servers.find(hardwareAttrs.cpu).attr('src', cpuPics.cpu);
+
+        servers.find(hardwareDropdownLocate.ram).find('p').text('N/A');
+        servers.find(hardwareAttrs.ram).attr('src', ramPics.ram);
+
+        servers.find(hardwareDropdownLocate.disk).find('p').text('N/A');
+        servers.find(hardwareAttrs.disk).attr('src', ssdPics.deviceSsd);
+
+        servers.find(hardwareDropdownLocate.apps).find('p').text('N/A');
+        servers.find(hardwareAttrs.apps).attr('src', appPics.appIndicator);
+
+        servers.find(hardwareDropdownLocate.net).find('p').text('N/A');
+        servers.find(hardwareAttrs.net).attr('src', ethernetPics.ethernet);
+    }
 }
 
 function thresholdUtilEventListener(utilization, picsObj) {

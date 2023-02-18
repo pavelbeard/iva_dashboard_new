@@ -266,3 +266,16 @@ class DashboardTests(TestCase):
         self.assertEqual(res.status_code, 200)
         self.assertEqual(isinstance(res.content, bytes), True)
 
+    def test_check_agent_health(self):
+        add_targets()
+        models.DashboardSettings(
+            command_id=1,
+            scraper_url="http://localhost:8001/api/monitor/metrics/targets/all",
+            scraper_url_health_check="http://localhost:8001/api/monitor/ping",
+            scrape_interval=15
+        ).save()
+
+        res = self.client.get(urls.reverse("dashboard:check_agent_health"))
+        print(res.content)
+        self.assertEqual(res.status_code, 200)
+

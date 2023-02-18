@@ -5,7 +5,7 @@ import {
     appPics, ethernetPics,
     hardwareAttrs,
     hardwareDropdownLocate,
-    hardwarePrimePics,
+    hardwarePrimePics, headers,
     ramPics,
     serverDownPics,
     serverPics,
@@ -13,7 +13,7 @@ import {
 } from "./base.js";
 import {convertBytesToMetric as cbtm} from "./converters.js";
 import {dropdownTitle} from "./tweaks.js";
-import {thresholdUtilEventListener} from "./server-event-handlers.js";
+import {agentIsDown, thresholdUtilEventListener} from "./server-event-handlers.js";
 
 function serverRoleDataHandler(targetId, value) {
     let targetElem = $(`#${targetId}`);
@@ -196,9 +196,6 @@ function dataDistributor(responseData) {
         averageLoadDataHandler
     ];
 
-
-    let hard
-
     for (let key in responseData) {
         let scrapedData = responseData[key];
 
@@ -208,7 +205,7 @@ function dataDistributor(responseData) {
                 events.serverIsDown(key, scrapedData,
                     Object.values(hardwareAttrs), Object.values(serverDownPics));
             else
-                events.agentIsDown()
+               return;
 
         } else if (scrapedData.length === handlers.length) {
             for (let i = 0; i < scrapedData.length; i++) {
@@ -217,6 +214,16 @@ function dataDistributor(responseData) {
             }
         }
     }
+}
+
+async function checkAgentHealth (url, method) {
+    const response = await fetch(url, {
+        method: method, headers: headers
+    }).then(async r => {
+        return JSON.parse(await r.json());
+    });
+
+    agentIsDown(response);
 }
 
 /**
@@ -229,8 +236,8 @@ async function getMetricsFromBackend(url, method) {
         method: method, headers: base.headers
     }).then(async r => {
         return JSON.parse(await r.json());
-    }).catch(e => {
-        console.log(e);
+    }).catch(err_response => {
+        return err_response;
     });
 
     dataDistributor(response);
@@ -252,4 +259,6 @@ async function getInterval(url, method) {
 setTimeout(async function() {
     let interval = await getInterval("interval/", "GET");
     setInterval(getMetricsFromBackend, interval, "all-metrics/", "GET")
+    setTimeout(checkAgentHealth,0, "check-agent-health/", "GET")
+    setInterval(checkAgentHealth, interval, "check-agent-health/", "GET")
 });

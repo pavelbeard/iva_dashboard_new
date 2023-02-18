@@ -19,9 +19,10 @@ class Command(BaseCommand):
                 scrape_interval=int(settings.SCRAPE_INTERVAL)
             )
             query.save()
-            self.stdout.write(self.style.SUCCESS("Сервер мониторинга успешно настроен"))
+            self.stdout.write(self.style.SUCCESS("The monitoring server has been successful configured"))
         except IntegrityError:
             raise CommandError(
-                "Сервер мониторинга уже настроен, чтобы сбросить настройки введите: resetdashboardsettings."
+                "The monitoring server has been configured, if you want to reset configuration"
+                "type 'resetdashboardsettings'."
             )
 

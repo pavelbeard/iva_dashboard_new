@@ -6,9 +6,12 @@ from django.utils.safestring import SafeText
 
 
 def admin_url_resolver(obj: Model, column: str, name: str = "", hide_column: bool = False):
-    col = obj.__getattribute__(column)
-    url = resolve_url(admin_urlname(obj._meta, SafeText("change")), col)
+    try:
+        col = obj.__getattribute__(column)
+        url = resolve_url(admin_urlname(obj._meta, SafeText("change")), col)
 
-    pretty_url = f"{name}" if hide_column else f"{name}{col}"
+        pretty_url = f"{name}" if hide_column else f"{name}{col}"
 
-    return format_html(f"<a href='{url}'>{pretty_url}</a>")
+        return format_html(f"<a href='{url}'>{pretty_url}</a>")
+    except AttributeError:
+        return "-"

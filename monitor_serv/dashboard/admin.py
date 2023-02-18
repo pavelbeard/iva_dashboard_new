@@ -85,7 +85,7 @@ class CPUAdmin(admin.ModelAdmin):
 
     @admin.display(description="Сервер:", ordering='target')
     def get_targets(self, obj):
-        return admin_url_resolver(obj.target, "id", f"{obj.target.address}:{obj.target.port}\t")
+        return admin_url_resolver(obj.target, "id", f"{obj.target.address}", hide_column=True)
 
 
 @admin.register(models.RAM)
@@ -99,7 +99,7 @@ class RAMAdmin(admin.ModelAdmin):
 
     @admin.display(description="Сервер:", ordering='target')
     def get_targets(self, obj):
-        return admin_url_resolver(obj.target, "id", "Целевой хост\t")
+        return admin_url_resolver(obj.target, "id", f"{obj.target.address}", hide_column=True)
 
 
 @admin.register(models.DiskSpace)
@@ -117,7 +117,7 @@ class DiskSpaceAdmin(admin.ModelAdmin):
 
     @admin.display(description="Сервер:", ordering='target')
     def get_targets(self, obj):
-        return admin_url_resolver(obj.target, "id", "Целевой хост\t")
+        return admin_url_resolver(obj.target, "id", f"{obj.target.address}", hide_column=True)
 
 
 @admin.register(models.NetInterface)
@@ -131,7 +131,7 @@ class NetInterfaceAdmin(admin.ModelAdmin):
 
     @admin.display(description="Сервер:", ordering='target')
     def get_targets(self, obj):
-        return admin_url_resolver(obj.target, "id", "Целевой хост\t")
+        return admin_url_resolver(obj.target, "id", f"{obj.target.address}", hide_column=True)
 
 
 @admin.register(models.DashboardSettings)

@@ -54,7 +54,7 @@ class Target(models.Model):
     is_being_scan = fields.BooleanField(default=True, verbose_name="Сервер сканируется?")
 
     scrape_command = models.ForeignKey(
-        ScrapeCommand, on_delete=models.DO_NOTHING, verbose_name="Набор команд мониторинга:", null=True)
+        ScrapeCommand, on_delete=models.CASCADE, verbose_name="Набор команд мониторинга:", null=True)
 
     def __str__(self):
         # scrape_command_rec_id = "Nothing" if self.scrape_command is None else self.scrape_command.record_id

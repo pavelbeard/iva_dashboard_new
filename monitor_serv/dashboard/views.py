@@ -1,5 +1,7 @@
+import asyncio
 import json
 
+import aiohttp
 import requests
 from django import http
 from django.conf import settings
@@ -9,7 +11,9 @@ from django.contrib.messages import get_messages
 from django.http import HttpResponseRedirect
 from django.shortcuts import render
 from django.urls import reverse_lazy
+from django.views import View
 from django.views.decorators.cache import cache_control
+from django.views.generic import DetailView
 from jsonview.views import JsonView
 
 from . import models
@@ -57,11 +61,24 @@ def dashboard_view(request):
 
 
 class DataGetterFromAgent(JsonView):
-    def get_context_data(self, **kwargs):
+    def get(self, request, *args, **kwargs):
         settings_obj = models.DashboardSettings.objects.get(command_id=1)
-        response = requests.get(settings_obj.scraper_url, headers={"Content-Type": "application/json"})
-        json_data = scraped_data_handler(json.loads(response.content))
-        return json_data
+        try:
+            response = requests.get(settings_obj.scraper_url, headers={"Content-Type": "application/json"})
+            json_data = scraped_data_handler(json.loads(response.content))
+            return json_data
+        except requests.exceptions.ConnectionError:
+            return json.dumps({"available": "false"})
+
+
+class CheckAgentHealth(JsonView):
+    def get(self, request, *args, **kwargs):
+        settings_obj = models.DashboardSettings.objects.get(command_id=1)
+        try:
+            response = requests.get(url=settings_obj.scraper_url_health_check)
+            return json.dumps({"ping": "true"})
+        except requests.exceptions.ConnectionError as e:
+            return json.dumps({"ping": "false", "reason": "нет соединения с агентом."})
 
 
 def get_interval(request):
