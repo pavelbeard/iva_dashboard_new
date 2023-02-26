@@ -7,7 +7,7 @@ from starlette.responses import JSONResponse
 from monitor_agent.agent import get_logger
 from monitor_agent.dashboard import models
 from monitor_agent.logic import exporters, handle
-from monitor_agent.logic.scraper import ScrapeLogic
+from monitor_agent.logic.scraper import ScrapeLogic, ScraperSetter, arun_scraping, get_data_from_targets
 from monitor_agent.ssh.session import SSHSession
 
 logger = get_logger(__name__)
@@ -46,9 +46,17 @@ async def start_scraping():
     _exporters_ = (server_role, cpu, ram, fs, net, apps, server_data, uptime, load_average)
 
     ssh_session = SSHSession()
+    scraper_builder = ScraperSetter()
+    scraper = scraper_builder.allow_to_set_interval()\
+        .set_exporters(_exporters_)\
+        .set_handlers(_handlers_)\
+        .set_importer(ssh_session.arun_cmd_on_target)\
+        .set_scraper_cb(arun_scraping)\
+        .get_data_from_targets(get_data_from_targets)\
+        .build()
 
-    sc = ScrapeLogic(exporters=_exporters_, handlers=_handlers_, data_importer=ssh_session.arun_cmd_on_target)
-    scraper_task['task'] = asyncio.create_task(sc.scrape_forever())
+    scraper_task['task'] = asyncio.create_task(scraper.scrape_forever())
+
     exporters_dict['exporters'] = _exporters_
     handlers_dict['handlers'] = _handlers_
     logger.info("Agent is run!")

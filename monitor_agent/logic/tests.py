@@ -6,7 +6,7 @@ from monitor_agent.dashboard import models
 from monitor_agent.dashboard.models import LoadAverage, ServerData
 from monitor_agent.logic import exporters, handle
 from monitor_agent.database import reader
-from monitor_agent.logic.scraper import ScrapeLogic
+from monitor_agent.logic.scraper import ScrapeLogic, ScraperSetter, get_data_from_targets, arun_scraping
 from monitor_agent.ssh.session import SSHSession
 
 
@@ -16,7 +16,7 @@ class MyTestCase(unittest.TestCase):
         cpu = exporters.CPUDatabaseExporter(models.CPU).export
         ram = exporters.DatabaseExporter(models.RAM).export
         fs = exporters.DiskSpaceDatabaseExporter(models.DiskSpace, models.DiskSpaceStatistics).export
-        net = exporters.AdvancedDatabaseExporter(models.NetInterface).export
+        net = exporters.NetDataDatabaseExporter(models.NetInterface).export
         apps = exporters.AdvancedDatabaseExporter(models.Process).export
         server_data = exporters.ServerDataDatabaseExporter(models.ServerData).export
         uptime = exporters.DatabaseExporter(models.Uptime).export
@@ -85,9 +85,19 @@ class MyTestCase(unittest.TestCase):
 
     def test_scrape_forever(self):
         ssh_session = SSHSession()
-        sc = ScrapeLogic(
-            exporters=self.exporters, handlers=self.handlers, data_importer=ssh_session.arun_cmd_on_target)
-        asyncio.run(sc.scrape_forever())
+        # sc = ScrapeLogic(
+        #     exporters=self.exporters, handlers=self.handlers, data_importer=ssh_session.arun_cmd_on_target)
+        # asyncio.run(sc.scrape_forever())
+        builder = ScraperSetter()
+        scraper = builder.allow_to_set_interval() \
+            .set_exporters(self.exporters) \
+            .set_handlers(self.handlers) \
+            .set_importer(ssh_session.arun_cmd_on_target)\
+            .set_scraper_cb(arun_scraping)\
+            .get_data_from_targets(get_data_from_targets)\
+            .build()
+
+        asyncio.run(scraper.scrape_forever())
 
     def test_load_average_output_handler(self):
         r = handle.LoadAverageUptimeOutputHandler().handle("13:42:29 up"

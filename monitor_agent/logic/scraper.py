@@ -21,40 +21,74 @@ class ValidationException(Exception):
         self.message = message
 
 
-class ScrapeLogic:
-    def __init__(self, exporters, handlers, data_importer):
-        """
-        :param exporters: экспортеры данных. Любые.
-            Главное, чтобы реализовывали интерфейс Exporter.
-        :param handlers: обработчики данных с хостов.
-        :param data_importer: поставщик данных с хостов.
-        """
-        self.exporters = exporters
-        self.handlers = handlers
-        self.data_importer = data_importer
+def get_data_from_targets():
+    return [
+        row_2_dict(target) | {
+            "commands": row_2_dict(get_scrape_commands(target.scrape_command_id))
+        } for target in get_targets()
+    ]
+
+
+def get_data_from_target(target_id: int):
+    """Вытягивает данные с конкретного целевого хоста"""
+    target = get_target(target_id=target_id)
+    return row_2_dict(target) | {
+        "commands": row_2_dict(get_scrape_commands(target.scrape_command_id))
+    }
+
+
+async def arun_scraping(targets_data, data_scraper) -> ():
+    """Асинхронная версия метода run_pool_scraping."""
+    tasks = [asyncio.create_task(data_scraper(
+        target['address'],  # address
+        target['port'],  # port
+        target['username'],  # username
+        target['password'],  # password
+        target['commands'],  # commands
+        5  # timeout
+    )) for target in targets_data]
+
+    tasks_results = await asyncio.gather(*tasks, return_exceptions=True)
+    return (result for result in ScrapedDataHandler.wrap_scraping_results(tasks_results, targets_data))
+
+
+async def run_pool_scraping(targets_data, data_scraper) -> ():
+    """Запускает сбор метрик с целевых хостов в параллельном режиме."""
+    try:
+        with ProcessPoolExecutor(max_workers=3) as process_pool:
+            loop = asyncio.get_running_loop()
+            calls = [partial(  # args:
+                data_scraper,  # func
+                target['address'],  # address
+                target['port'],  # port
+                target['username'],  # username
+                target['password'],  # password
+                target['commands'],  # commands
+                5  # timeout
+            ) for target in targets_data]
+
+            call_coros = (loop.run_in_executor(process_pool, call) for call in calls)
+            task_results = await asyncio.gather(*call_coros, return_exceptions=True)
+            return (result for result in ScrapedDataHandler.wrap_scraping_results(task_results, targets_data))
+    except KeyboardInterrupt:
+        raise KeyboardInterrupt
+
+
+class ScrapedDataHandler:
+    """Вспомогательный класс для Scrapers"""
 
     @staticmethod
-    def get_data_from_targets() -> list:
-        """Вытягивает данные целевых хостов из БД"""
-        targets = [row_2_dict(target) | {"commands": row_2_dict(get_scrape_commands(target.scrape_command_id))}
-                   for target in get_targets()]
-        return targets
-
-    @staticmethod
-    def get_data_from_target(target_id: int):
-        """Вытягивает данные с конкретного целевого хоста"""
-        target = get_target(target_id=target_id)
-        handle_target = row_2_dict(target) | {"commands": row_2_dict(get_scrape_commands(target.scrape_command_id))}
-        return handle_target
-
-    def send_data_to_scrape_handler(self, target_data: dict) -> list:
+    def send_data_to_scrape_handler(target_data: dict, handlers) -> list:
         """Соединяет данные с целевых хостов вместе и возвращает массив данных"""
-        results = [instance.handle(values) for values, instance in zip(list(target_data.values()), self.handlers)]
+        results = []
+        for values, instance in zip(list(target_data.values()), handlers):
+            results.append(instance.handle(values))
+
         return results
 
     @staticmethod
-    def _wrap_scraping_results(task_results, targets):
-        """Генераторн"""
+    def wrap_scraping_results(task_results, targets):
+        """Оборачивает результаты опроса в удобную форму для отсылки в коллектор данных"""
         for result, target in zip(task_results, targets):
             address = target.get('address')
             port = target.get('port')
@@ -79,70 +113,49 @@ class ScrapeLogic:
                 logger.info(f"Target host {address}:{port} is scanned.")
                 yield result
 
-    async def arun_scraping(self, targets) -> ():
-        """Асинхронная версия метода run_scraping."""
-        callback = self.data_importer
-        tasks = [asyncio.create_task(callback(
-            target['address'],  # address
-            target['port'],  # port
-            target['username'],  # username
-            target['password'],  # password
-            target['commands'],  # commands
-            5  # timeout
-        )) for target in targets]
 
-        tasks_results = await asyncio.gather(*tasks, return_exceptions=True)
-        results = (result for result in self._wrap_scraping_results(tasks_results, targets))
-        return results
+class ScraperLogic:
+    def __init__(self):
+        self.exporters = None
+        self.handlers = None
+        self.data_scraper_callback = None
 
-    async def run_scraping(self, targets) -> ():
-        """Запускает сбор метрик с целевых хостов в параллельном режиме."""
-        try:
-            with ProcessPoolExecutor(max_workers=3) as process_pool:
-                loop = asyncio.get_running_loop()
-                calls = [partial(  # args:
-                    self.data_importer,  # func
-                    target['address'],  # address
-                    target['port'],  # port
-                    target['username'],  # username
-                    target['password'],  # password
-                    target['commands'],  # commands
-                    5  # timeout
-                ) for target in targets]
+        self.targets_data_callback = None
+        self.target_data = None  # не реализован метод scrape_once_for_one_target
 
-                call_coros = (loop.run_in_executor(process_pool, call) for call in calls)
-                task_results = await asyncio.gather(*call_coros, return_exceptions=True)
-                results = (result for result in self._wrap_scraping_results(task_results, targets))
+        self.allow_to_set_interval = None
+        self.interval = 5
 
-                return results
-        except KeyboardInterrupt:
-            raise KeyboardInterrupt
+        self.run_scraping_cb = None
 
-    async def scrape_once(self, set_interval: bool = False, interval=None, *args, **kwargs) -> AsyncGenerator:
+        self.scraping_results = None
+
+    @staticmethod
+    def new():
+        return ScraperLogicBuilder()
+
+    async def scrape_once(self) -> AsyncGenerator:
         """
-        Метод, берущий метрики при каждом вызове метода.
-        :param set_interval: устанавливается в True в том случае,
-            если этот метод нужно вызвать несколько раз.
-        :param interval: периодичность сбора метрик.
-            используется вне метода, если его нужно вызывать несколько или бесконечное количество раз.
+        Метод, опрашивающий хосты при каждом вызове метода.
         """
         print()
 
-        targets = self.get_data_from_targets()
+        targets = self.targets_data_callback()
 
         # так как словарь изменяемый объект, то при каждом
         # вытягивании значения интервала из БД словарь изменится.
-        if set_interval:
+        if self.allow_to_set_interval:
             try:
-                interval['value'] = int(get_settings().scrape_interval)
+                self.interval = int(get_settings().scrape_interval)
             except AttributeError:
-                interval['value'] = 15
+                self.interval = 15
 
-        results = await self.arun_scraping(targets)
+        results = await self.run_scraping_cb(targets, self.data_scraper_callback)
 
         for target, result in zip(targets, results):
             if isinstance(result, dict):
-                yield {target.get('id'): self.send_data_to_scrape_handler(result)}
+                yield {target.get('id'): ScrapedDataHandler.send_data_to_scrape_handler(
+                    target_data=result, handlers=self.handlers)}
             else:
                 yield {target.get('id'): result}
 
@@ -151,12 +164,11 @@ class ScrapeLogic:
         Бесконечный мониторинг серверов раз в interval.
         Интервал меняется в методе scrape_once.
         """
-        interval: dict = {"value": 5}  # интервал по умолчанию
 
         while True:
             try:
                 # get data from hosts
-                targets_data = self.scrape_once(interval=interval, set_interval=True)
+                targets_data = self.scrape_once()
 
                 # export to db
                 async for target_data in targets_data:
@@ -169,4 +181,63 @@ class ScrapeLogic:
             except Exception as e:
                 logger.error(f"Exception: {e.args[0]}", exc_info=True)
             finally:
-                await asyncio.sleep(interval.get('value'))
+                await asyncio.sleep(self.interval)
+
+
+class ScraperLogicBuilder:
+    """Строитель класса ScraperLogic"""
+    def __init__(self):
+        self.scrape_logic = ScraperLogic()
+
+    def build(self):
+        return self.scrape_logic
+
+
+class ScraperLogicExportersSetter(ScraperLogicBuilder):
+    """1. Устанавливаем экспортеры данных"""
+    def set_exporters(self, exporters):
+        self.scrape_logic.exporters = exporters
+        return self
+
+
+class ScraperLogicHandlersSetter(ScraperLogicExportersSetter):
+    """2. Устанавливаем обработчики данных с целевых хостов"""
+    def set_handlers(self, handlers):
+        self.scrape_logic.handlers = handlers
+        return self
+
+
+class ScraperLogicImporterSetter(ScraperLogicHandlersSetter):
+    """3. Устанавливаем источник данных: ssh-scraper, victoria-metrics и тд."""
+    def set_importer(self, data_scraper_callback):
+        self.scrape_logic.data_scraper_callback = data_scraper_callback
+        return self
+
+
+class TargetsDataImport(ScraperLogicImporterSetter):
+    """4. Данные для подключения к хостам - реализовывается в случае реализации ssh-клиента"""
+    def get_data_from_targets(self, targets_data_callback):
+        self.scrape_logic.targets_data_callback = targets_data_callback
+        return self
+
+
+class TargetDataImport(ScraperLogicBuilder):
+    """4. Данные для подключения к хосту - реализовывается в случае реализации ssh-клиента"""
+    def get_data_from_target(self, target_data_callback):
+        """Вытягивает данные с конкретного целевого хоста"""
+        self.scrape_logic.targets_data_callback = target_data_callback
+        return self
+
+
+class ScraperSettings(TargetsDataImport, TargetDataImport):
+    """5. Если собираемся опросить хост 1 раз - не трогаем это."""
+    def allow_to_set_interval(self):
+        self.scrape_logic.allow_to_set_interval = True
+        return self
+
+
+class ScraperSetter(ScraperSettings):
+    """6. Метод опроса хостов"""
+    def set_scraper_cb(self, scraping_callback):
+        self.scrape_logic.run_scraping_cb = scraping_callback
+        return self
