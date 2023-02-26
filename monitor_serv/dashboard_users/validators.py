@@ -30,9 +30,9 @@ class FirstLastNameValidator(MyBaseValidator, auth_validators.UnicodeUsernameVal
     def __init__(self):
         super().__init__()
 
-    regex = "^[A-ZА-Я][a-zа-я]{1,64}$"
+    regex = "^[A-ZА-Яa-zа-я]{1,64}$"
     message = _(
-        "Фамилия/имя могут быть написаны только с большой буквы!"
+        "Фамилия/имя могут быть написаны только буквами!"
         # "TEST"
     )
 

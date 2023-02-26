@@ -3,9 +3,8 @@ from django.http import HttpRequest
 from django.test import TestCase
 from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
-from . import validators
-from . import forms
 
+from . import forms, validators
 
 # Create your tests here.
 

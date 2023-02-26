@@ -1,7 +1,6 @@
-from sqlalchemy import URL
-from sqlalchemy import create_engine, MetaData
-from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker
-from sqlalchemy.orm import declarative_base, sessionmaker, scoped_session
+from sqlalchemy import URL, MetaData, create_engine
+from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
+from sqlalchemy.orm import declarative_base, scoped_session, sessionmaker
 
 from monitor_agent import settings
 from monitor_agent.agent import get_logger

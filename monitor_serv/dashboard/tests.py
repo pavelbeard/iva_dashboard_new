@@ -4,15 +4,12 @@ import random
 import unittest
 from pprint import pprint
 
-from django import http
-from django import urls
+import core_logic.dbrouters
+from django import http, urls
 from django.test import TestCase
 from django.test.runner import DiscoverRunner
 
-import core_logic.database_routers
-from . import forms
-from . import models
-
+from . import forms, models
 
 # Create your tests here.
 

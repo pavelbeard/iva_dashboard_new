@@ -1,11 +1,13 @@
+import random
 import uuid
 
+from core_logic.importers import (CPUDataImporter, DiskDataImporter,
+                                  NetDataImporter, RAMDataImporter)
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 from django.db.models import fields
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
-
 
 # Create your models here.
 
@@ -17,7 +19,7 @@ class DashboardSettings(models.Model):
     scrape_interval = fields.SmallIntegerField(default=15, verbose_name="Интервал снятия метрик:")
 
     def __str__(self):
-        return f"Settings(scraper_url={self.scraper_url}, scrape_interval={self.scrape_interval})"
+        return f"Settings {self.command_id}"
 
     class Meta:
         verbose_name = "настройки сервера мониторинга"
@@ -38,7 +40,7 @@ class ScrapeCommand(models.Model):
     scrape_command_load_average = fields.TextField(blank=True, verbose_name="Мониторинг средней загрузки хоста:")
 
     def __str__(self):
-        return f"{self.__class__.__name__}(record_id={self.record_id})"
+        return f"Scrape commands {self.record_id}."
 
     class Meta:
         verbose_name = "команды мониторинга"
@@ -57,7 +59,7 @@ class Target(models.Model):
         ScrapeCommand, on_delete=models.CASCADE, verbose_name="Набор команд мониторинга:", null=True)
 
     def __str__(self):
-        return f"Target(id={self.id}, ip={self.address}, port={self.port})"
+        return f"Target host {self.address}"
 
     class Meta:
         verbose_name = "целевой хост"
@@ -78,13 +80,17 @@ class CPU(models.Model):
     cpu_sys = fields.FloatField(null=False, default=0, verbose_name='Системное время, sy %:')
     cpu_user = fields.FloatField(null=False, default=0, verbose_name='Пользовательское время, us %:')
     cpu_util = fields.FloatField(null=False, default=0, verbose_name="Загрузка процессора %:")
-    record_date = fields.DateTimeField(default=timezone.now, null=False, verbose_name="Время опроса:")
+    record_date = fields.DateTimeField(default=timezone.now, null=False,
+                                       verbose_name="Время опроса:")
 
     target = models.ForeignKey(Target, on_delete=models.CASCADE, verbose_name="Сервер:")
 
+    @classmethod
+    def import_data_from_psql(cls, target_id):
+        return CPUDataImporter(cls).import_data(target_id=target_id)
+
     def __str__(self):
-        return f"CPU(target={self.target}, cpu_util={self.cpu_util}, " \
-               f"cpu_cores={self.cpu_cores}, record_date={self.record_date})"
+        return f"CPU Data from target host {self.target.address}"
 
     class Meta:
         verbose_name = "данные процессора"
@@ -105,9 +111,12 @@ class RAM(models.Model):
 
     target = models.ForeignKey(Target, on_delete=models.CASCADE, verbose_name="Сервер:")
 
+    @classmethod
+    def import_data_from_psql(cls, target_id):
+        return RAMDataImporter(cls).import_data(target_id=target_id)
+
     def __str__(self):
-        return f"RAMData(target={self.target}, total_ram={self.total_ram},  " \
-               f"ram_free={self.ram_free}, ram_util={self.ram_util}, record_date={self.record_date}, )"
+        return f"RAM Data from target host {self.target.address}."
 
     class Meta:
         verbose_name = "данные ОЗУ"
@@ -117,6 +126,7 @@ class RAM(models.Model):
 
 class DiskSpace(models.Model):
     uuid_record = fields.UUIDField(default=uuid.uuid4, primary_key=True, editable=False)
+    cluster_id = fields.IntegerField(editable=False)
     file_system = fields.CharField(null=False, default="none", max_length=128, verbose_name="Файловая система:")
     fs_size = fields.BigIntegerField(null=False, default=0, verbose_name="Размер файловой системы:")
     fs_used = fields.BigIntegerField(null=False, default=0, verbose_name="Занято:")
@@ -127,10 +137,12 @@ class DiskSpace(models.Model):
 
     target = models.ForeignKey(Target, on_delete=models.CASCADE, verbose_name="Сервер:")
 
+    @classmethod
+    def import_data_from_psql(cls, target_id):
+        return DiskDataImporter(cls).import_data(target_id=target_id)
+
     def __str__(self):
-        return f"FileSystemData(target={self.target}, fs={self.file_system}, " \
-               f"fs_size={self.fs_size}, fs_used={self.fs_used}, fs_used%={self.fs_used_prc}," \
-               f" record_date={self.record_date}, )"
+        return f"Disk space data from target host {self.target.address}."
 
     class Meta:
         verbose_name = "данные файлового накопителя"
@@ -156,10 +168,11 @@ class DiskSpaceStatistics(models.Model):
 
     target = models.ForeignKey(Target, on_delete=models.CASCADE, verbose_name="Сервер:")
 
+    # def import_data_from_psql(self, target_id):
+    #     return NetDataImporter(self).import_data(target_id=target_id)
+
     def __str__(self):
-        return f"FileSystemStatistics(target={self.target}, total_disk_size={self.total_disk_size}, " \
-               f"mvp_fs={self.most_valuable_part_fs}, mvp_fs_size={self.most_valuable_part_size}, " \
-               f"record_date={self.record_date}, )"
+        return f"Disk space statistics data from target host {self.target.address}."
 
     class Meta:
         verbose_name = "статистика файловой системы"
@@ -187,13 +200,17 @@ class NetInterface(models.Model):
     tx_errors_carrier = fields.BigIntegerField(null=False, default=0, verbose_name='Пакетов с потерянными носителями :')
     tx_errors_collisions = fields.BigIntegerField(null=False, default=0,
                                                   verbose_name="Отправлено пакетов с коллизиями:")
+    interface_id = fields.IntegerField(default=0, editable=False)
     record_date = fields.DateTimeField(default=timezone.now, null=False, verbose_name="Время опроса:")
 
     target = models.ForeignKey(Target, on_delete=models.CASCADE, verbose_name="Сервер:")
 
+    @classmethod
+    def import_data_from_psql(cls, target_id):
+        return NetDataImporter(cls).import_data(target_id=target_id)
+
     def __str__(self):
-        return f"NetInterface(target={self.target}, iface={self.interface}, ip={self.ip_address}, " \
-               f"status={self.status}, record_date={self.record_date})"
+        return f"Net interface data from target host {self.target.address}."
 
     class Meta:
         verbose_name = "данные сетевых интерфейсов"
@@ -218,7 +235,7 @@ class ServerData(models.Model):
     record_date = fields.DateTimeField(default=timezone.now, null=False, verbose_name="Время опроса:")
 
     def __str__(self):
-        return f"ServerData(target={self.target}, record_date={self.record_date})"
+        return f"Server data from target host {self.target.address}."
 
     class Meta:
         verbose_name = "данные сервера"
@@ -234,9 +251,8 @@ class Process(models.Model):
 
     target = models.ForeignKey(Target, on_delete=models.CASCADE, verbose_name="Сервер:")
 
-    def _x_str__(self):
-        return f"{self.__class__.__name__}(target={self.target}, process_name={self.process_name}, " \
-               f"process_status={self.process_status}, record_date={self.record_date})"
+    def __str__(self):
+        return f"Process (app) data from target host {self.target.address}."
 
     class Meta:
         verbose_name = "статистика файловой системы"
@@ -270,7 +286,7 @@ class LoadAverage(models.Model):
     target = models.ForeignKey(Target, on_delete=models.CASCADE, verbose_name="Сервер:")
 
     def __str__(self):
-        return f"{self.__class__.__name__}(uuid_record={self.uuid_record}, record_date={self.record_date})"
+        return f"Load average data from target host {self.target.address}."
 
     class Meta:
         verbose_name = "средняя загрузка сервера"

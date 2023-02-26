@@ -1,4 +1,4 @@
-let headers = {
+const headers = {
     'X-Requested-With': 'XMLHttpRequest',
     'Content-Type': 'application/json',
 };

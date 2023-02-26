@@ -1,6 +1,6 @@
 from django import urls
-from . import views
 
+from . import views
 
 app_name = "dashboard_ivcs"
 

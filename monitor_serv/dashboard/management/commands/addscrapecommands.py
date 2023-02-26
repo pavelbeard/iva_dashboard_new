@@ -1,7 +1,6 @@
+from dashboard import models
 from django.core.management import BaseCommand, CommandError
 from django.db import IntegrityError
-
-from dashboard import models
 
 
 class Command(BaseCommand):

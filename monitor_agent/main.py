@@ -8,6 +8,7 @@ from monitor_agent.agent import get_logger
 from monitor_agent.dashboard import models
 from monitor_agent.logic import exporters, handle
 from monitor_agent.logic.scraper import ScrapeLogic
+from monitor_agent.ssh.session import SSHSession
 
 logger = get_logger(__name__)
 
@@ -36,7 +37,7 @@ async def start_scraping():
     cpu = exporters.CPUDatabaseExporter(models.CPU).export
     ram = exporters.DatabaseExporter(models.RAM).export
     fs = exporters.DiskSpaceDatabaseExporter(models.DiskSpace, models.DiskSpaceStatistics).export
-    net = exporters.AdvancedDatabaseExporter(models.NetInterface).export
+    net = exporters.NetDataDatabaseExporter(models.NetInterface).export
     apps = exporters.AdvancedDatabaseExporter(models.Process).export
     server_data = exporters.ServerDataDatabaseExporter(models.ServerData).export
     uptime = exporters.DatabaseExporter(models.Uptime).export
@@ -44,7 +45,9 @@ async def start_scraping():
 
     _exporters_ = (server_role, cpu, ram, fs, net, apps, server_data, uptime, load_average)
 
-    sc = ScrapeLogic(exporters=_exporters_, handlers=_handlers_)
+    ssh_session = SSHSession()
+
+    sc = ScrapeLogic(exporters=_exporters_, handlers=_handlers_, data_importer=ssh_session.arun_cmd_on_target)
     scraper_task['task'] = asyncio.create_task(sc.scrape_forever())
     exporters_dict['exporters'] = _exporters_
     handlers_dict['handlers'] = _handlers_

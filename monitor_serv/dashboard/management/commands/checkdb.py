@@ -2,9 +2,10 @@ import os
 import subprocess
 import sys
 import time
+
+from django.core.management import BaseCommand
 from django.db import connections
 from django.db.utils import OperationalError
-from django.core.management import BaseCommand
 
 help_string = "Проверяет подключение к базе данных."
 

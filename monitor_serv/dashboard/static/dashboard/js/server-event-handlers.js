@@ -58,7 +58,7 @@ function noAccessToServer(targetId, reason) {
 }
 
 function agentIsDown(response) {
-    let isAvailable = !(response.ping === "false");
+    let isAvailable = !(response.ping === "false") && !(response["DashboardSettingsNotFound"] === "no data.");
     let status = isAvailable ? "агент доступен." : "агент недоступен.";
 
     let agentStatus = $("#agent-status");

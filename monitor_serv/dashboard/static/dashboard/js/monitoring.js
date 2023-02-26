@@ -140,10 +140,6 @@ function netDataHandler(targetId, values) {
     let targetElem = $(`#${targetId}`);
     let netPic = ethernetPics.ethernetUp;
     let netMarkup = "";
-    // let netMarkup = `<li><a class="dropdown-item">
-    // interface | status | ipv4 | rx bytes | rx packets | rx errors + dropped + overruns + frame |
-    // tx bytes | tx packets | tx errors + dropped + overruns + carrier + collisions
-    // </a></li>`.replace(/[,\n]/, "");
 
     targetElem.find(hardwareDropdownLocate.net).find('p').text("UP");
     targetElem.find(hardwareAttrs.net).attr('src', netPic);
@@ -250,7 +246,7 @@ async function getInterval(url, method) {
 
     let interval = JSON.parse(await response.json());
 
-    if (interval['DoesNotExist'] === undefined)
+    if (interval['DashboardSettingsNotFound'] === undefined)
         return  parseInt(interval.interval) * 1000;
     else
         return 5000;
@@ -258,7 +254,8 @@ async function getInterval(url, method) {
 
 setTimeout(async function() {
     let interval = await getInterval("interval/", "GET");
-    setInterval(getMetricsFromBackend, interval, "all-metrics/", "GET")
+    setTimeout(getMetricsFromBackend,0, "all-metrics/", "GET")
+    setInterval(getMetricsFromBackend, 5000, "all-metrics/", "GET")
     setTimeout(checkAgentHealth,0, "check-agent-health/", "GET")
-    setInterval(checkAgentHealth, interval, "check-agent-health/", "GET")
+    setInterval(checkAgentHealth, 5000, "check-agent-health/", "GET")
 });

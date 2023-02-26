@@ -10,7 +10,7 @@
         <h5>Войти</h5>
         <form method="post" action="">
             {% csrf_token %}
-            {{ login_form|crispy }}
+            {{ form|crispy }}
             <button class="btn btn-primary" type="submit">Войти</button>
             <p class="text-center auth-refs">
                 Вы еще не зарегистрированы? <a href="{% url 'dashboard_users:register' %}">

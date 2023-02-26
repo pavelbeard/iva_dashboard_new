@@ -1,14 +1,16 @@
 import datetime
 import uuid
-from abc import ABC, abstractmethod
+from abc import ABC
 
 from monitor_agent.agent import get_logger
-from monitor_agent.dashboard.models import ServerData, CPU, DiskSpace, DiskSpaceStatistics
+from monitor_agent.dashboard.models import (CPU, DiskSpace,
+                                            DiskSpaceStatistics, NetInterface,
+                                            ServerData)
 from monitor_agent.logic.base import Exporter
-from monitor_agent.logic.creator import insert_to_table, insert_all_to_table
+from monitor_agent.database.creator import insert_all_to_table, insert_to_table
 from monitor_agent.logic.exceptions import ModelIsNotMatch
-from monitor_agent.logic.reader import get_target, get_server_data
-from monitor_agent.logic.updater import update_server_data
+from monitor_agent.database.reader import get_server_data, get_target
+from monitor_agent.database.updater import update_server_data
 
 logger = get_logger(__name__)
 
@@ -26,6 +28,7 @@ class DatabaseExporter(Exporter, ABC):
     @staticmethod
     def record_date() -> {}:
         return {"record_date": datetime.datetime.now()}
+
 
     @staticmethod
     def t_id(target_id) -> {}:
@@ -93,19 +96,38 @@ class DiskSpaceDatabaseExporter(DatabaseExporter):
             raise ModelIsNotMatch(DiskSpace, DiskSpaceStatistics)
 
     def export(self, values, target_id):
-        for value in values:
-            value |= self.uuid_record() | self.record_date() | self.t_id(target_id)
+        values1 = []
+        for cluster_id, value in enumerate(values[:-1]):
+            value |= self.uuid_record() | {"cluster_id": cluster_id} | self.record_date() | self.t_id(target_id)
+            values1.append(value)
 
-        insert_all_to_table(table=self.model, values=values[:-1])
+        values2 = {}
+        for value in values[-1:]:
+            values2 |= value | self.uuid_record() | self.record_date() | self.t_id(target_id)
+
+        insert_all_to_table(table=self.model, values=values1)
         logger.info(f"Target data {self.get_address_port(target_id)} "
                     f"by model {self.model.__table__.name} has "
                     f"been added.")
 
         # export to diskspacestatistics
-        insert_to_table(self.model2, values[-1])
+        insert_to_table(table=self.model2, values=values2)
         logger.info(f"Target data {self.get_address_port(target_id)} "
                     f"by model {self.model.__table__.name} has "
                     f"been added.")
+
+
+class NetDataDatabaseExporter(AdvancedDatabaseExporter):
+    def __init__(self, model):
+        if model is NetInterface:
+            super().__init__(model)
+        else:
+            raise ModelIsNotMatch(NetInterface)
+
+    def export(self, values, target_id):
+        for interface_id, value in enumerate(values):
+            value |= {"interface_id": interface_id}
+        super(NetDataDatabaseExporter, self).export(values=values, target_id=target_id)
 
 
 class ServerDataDatabaseExporter(DatabaseExporter):
@@ -116,10 +138,6 @@ class ServerDataDatabaseExporter(DatabaseExporter):
             raise ModelIsNotMatch(ServerData)
 
     def export(self, values, target_id, **server_role):
-        if isinstance(values, str):
-            logger.error("values is not match a dict")
-            return
-
         values |= self.t_id(target_id) | self.record_date() | server_role
         server_data = get_server_data(target_id)
 

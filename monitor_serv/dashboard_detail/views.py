@@ -1,59 +1,33 @@
-import json
+from core_logic.views import AppVersionMixin, ContextDataFromImporterMixin
+from dashboard.models import CPU, RAM, DiskSpace, NetInterface
+from django.views.generic import TemplateView
 
-from django import http
-from django.shortcuts import render
-from dashboard import models
 from monitor_serv import settings
 
 # Create your views.py here.
 
-app_version = settings.APP_VERSION
+APP_VERSION = settings.APP_VERSION
 
 
-def cpu_view(request, target_id):
-    labels = [f.attname for f in models.CPU._meta.fields][2:-2]
-    cpu_idle_data = []
-    cpu_iowait_data = []
-    cpu_irq_data = []
-    cpu_nice_data = []
-    cpu_softirq_data = []
-    cpu_steal_data = []
-    cpu_sys_data = []
-    cpu_user_data = []
-    record_dates = []
+class CPUDetailView(AppVersionMixin, ContextDataFromImporterMixin, TemplateView):
+    model = CPU
+    template_name = "dashboard_detail/2_cpu.html"
+    app_version = APP_VERSION
 
-    queryset = models.CPU.objects.filter(target_id=target_id).order_by("-record_date")[:50]
 
-    for cpu_record in queryset:
-        cpu_idle_data.append(cpu_record.cpu_idle)
-        cpu_iowait_data.append(cpu_record.cpu_iowait)
-        cpu_irq_data.append(cpu_record.cpu_irq)
-        cpu_nice_data.append(cpu_record.cpu_nice)
-        cpu_softirq_data.append(cpu_record.cpu_softirq)
-        cpu_steal_data.append(cpu_record.cpu_steal)
-        cpu_sys_data.append(cpu_record.cpu_sys)
-        cpu_user_data.append(cpu_record.cpu_user)
-        record_dates.append(cpu_record.record_date.__format__("%d/%m/%y %H:%M:%S"))
+class RAMDetailView(AppVersionMixin, ContextDataFromImporterMixin, TemplateView):
+    model = RAM
+    template_name = "dashboard_detail/3_ram.html"
+    app_version = APP_VERSION
 
-    context = {
-        "labels": labels,
-        "cpu_idle_data": cpu_idle_data,
-        "cpu_iowait_data": cpu_iowait_data,
-        "cpu_irq_data": cpu_irq_data,
-        "cpu_nice_data": cpu_nice_data,
-        "cpu_softirq_data": cpu_softirq_data,
-        "cpu_steal_data": cpu_steal_data,
-        "cpu_sys_data": cpu_sys_data,
-        "cpu_user_data": cpu_user_data,
-        "record_dates": record_dates,
-        "target_id": target_id
-    }
 
-    if not request.headers.get('Content-Type') == "application/json":
-        context |= {"app_version": app_version}
-        return render(request, "dashboard_detail/1_cpu.html", context)
-    else:
-        return http.JsonResponse(context, safe=False)
+class DiskSpaceDetailView(AppVersionMixin, ContextDataFromImporterMixin, TemplateView):
+    model = DiskSpace
+    template_name = "dashboard_detail/4_disk.html"
+    app_version = APP_VERSION
 
-# TODO: class LoadAverage
-# TODO: class CPUUsageDetail
+
+class NetInterfaceView(AppVersionMixin, ContextDataFromImporterMixin, TemplateView):
+    model = NetInterface
+    template_name = "dashboard_detail/5_net.html"
+    app_version = APP_VERSION

@@ -1,5 +1,6 @@
-from sqlalchemy import Table, PrimaryKeyConstraint
-from monitor_agent.db_connector.configuration import Base, metadata
+from sqlalchemy import PrimaryKeyConstraint, Table
+
+from monitor_agent.database.configuration import Base, metadata
 
 
 class ScrapeCommand(Base):

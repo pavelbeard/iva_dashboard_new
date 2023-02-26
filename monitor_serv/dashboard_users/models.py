@@ -1,5 +1,4 @@
-from django.contrib.auth.models import AbstractUser
-from django.contrib.auth.models import Group
+from django.contrib.auth.models import AbstractUser, Group
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 
@@ -16,8 +15,6 @@ email_validator = validators.EmailValidator()
 class CustomUser(AbstractUser):
     username = models.CharField(
         max_length=32, unique=True,
-        help_text=_("Обязательное и уникальное. Длина имени пользователя максимум 32 символа."
-                    "Только буквы, цифры и символы: [@_]"),
         error_messages={
             "unique": _("Пользователь с данным именем уже существует."),
         },
@@ -26,8 +23,6 @@ class CustomUser(AbstractUser):
     )
     first_name = models.CharField(
         max_length=64,
-        help_text=_("Обязательное. Длина имени максимум 64 символа."
-                    "Только с большой буквы"),
         validators=[first_last_name_validator],
         error_messages={
             "required": _("Обязательное поле."),
@@ -35,8 +30,6 @@ class CustomUser(AbstractUser):
         verbose_name="Имя:")
     last_name = models.CharField(
         max_length=64,
-        help_text=_("Обязательное. Длина фамилии максимум 64 символа."
-                    "Только с большой буквы"),
         validators=[first_last_name_validator],
         error_messages={
             "required": _("Обязательное поле."),
@@ -46,8 +39,6 @@ class CustomUser(AbstractUser):
     email = models.EmailField(
         max_length=64,
         unique=True,
-        help_text=_("Обязательное и уникальное. Длина почты максимум 64 символа."
-                    "Формат: username@example.com"),
         validators=[email_validator],
         verbose_name="Email:",
     )

@@ -91,8 +91,8 @@ WSGI_APPLICATION = 'monitor_serv.wsgi.application'
 # https://docs.djangoproject.com/en/4.1/ref/settings/#databases
 
 DATABASE_ROUTERS = (
-    'core_logic.database_routers.IvaDashboardRouter',
-    'core_logic.database_routers.IvcsRouter',
+    'core_logic.dbrouters.IvaDashboardRouter',
+    'core_logic.dbrouters.IvcsRouter',
 )
 
 DEFAULT_IVCS_SCHEMAS = "search_path=auth,billing,instantmessaging,smpp,statistic,storage,updates,videoconference"
@@ -222,4 +222,6 @@ SCRAPER_URL = os.getenv("SCRAPER_URL", "http://2.0.96.1:8000/api/monitor/metrics
 SCRAPER_HEALTH_CHECK = os.getenv("SCRAPER_URL", "http://2.0.96.1:8000/api/monitor/ping")
 SCRAPE_INTERVAL = os.getenv("SCRAPE_INTERVAL", 15)
 
-APP_VERSION = "v0.9.1"
+DATETIME_FORMAT = "%d/%m/%y %H:%M:%S"
+
+APP_VERSION = "v0.9.15"

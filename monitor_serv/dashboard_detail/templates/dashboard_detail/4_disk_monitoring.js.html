@@ -1,0 +1,159 @@
+{% load static %}
+
+<script type="module">
+    import {headers} from "{% static 'dashboard/js/base.js' %}";
+    import {convertBytesToMetric} from "{% static 'dashboard/js/converters.js' %}";
+
+    let m = (i) => convertBytesToMetric(i);
+    let random = () => {
+        return Math.random() * (256 - 0) + 0;
+    };
+
+    function setData(fsSizeData, fsUsedData, fsAvailData, recordDates) {
+        return  {
+            labels: recordDates,
+            datasets: [{
+                label: 'Размер файловой системы',
+                backgroundColor: "#9900ff",
+                borderColor: "#99AAff",
+                data: fsSizeData
+            },{
+                label: 'Использовано места',
+                backgroundColor: "#9944ff",
+                borderColor: "#99BBff",
+                data: fsUsedData
+            },{
+                label: 'Доступного места',
+                backgroundColor: "#9988ff",
+                borderColor: "#99CCff",
+                data: fsAvailData
+            }]
+        }
+    }
+
+    function chartConfig (title, data) {
+        return  {
+        type: 'line',
+        data: data,
+        options: {
+            responsive: true,
+            plugins: {
+                legend: {
+                    position: 'top',
+                    labels: {
+                        font: {
+                            size: 14,
+                        }
+                    }
+                },
+                title: {
+                    display: true,
+                    text: title,
+                    font: {
+                        size: 14
+                }
+            },
+        },
+        scales: {
+            yAxes: [{
+                display: true,
+                    gridLines: {
+                        color: "rgb(210,210,211)"
+                    },
+                    ticks: {
+                        max: 100,
+                        min: 0,
+                        padding: 20
+                    }
+                }],
+                xAxes: [{
+                    type: 'time',
+                    time: {
+                        displayFormats: {
+                            hour: 'HH:mm',
+                            minute: 'HH:mm',
+                            second: 'HH:mm:ss',
+                            millisecond: 'HH:mm:ss.SS',
+                            quarter: 'MMM YYYY',
+                        }
+                    },
+                }]
+            }
+        }
+    };
+    }
+
+    const zip = (a, b) => a.map((k, i) => [k, b[i]]);
+
+    async function chartUpdate(charts) {
+        const response = await fetch('{% url 'dashboard_detail:disk' target_id %}', {
+            method: "GET", headers: headers
+        }).then(async resp => {
+            return await resp.json();
+        });
+
+        let distributedData = response['distributed_data'];
+        let chartNumData = response['chart_num_data'];
+
+        for (let [chart, newData] of zip(charts, distributedData)) {
+            chart.config.data.datasets.forEach(dataset => {
+                dataset.data = [];
+            });
+            chart.config.data.labels = [];
+
+
+            for (let [chartTitle, chartData] of Object.entries(newData)) {
+                chartData['fs_size_data'].forEach(el => {
+                    chart.config.data.datasets[0].data.push(el);
+                });
+                chartData['fs_used_data'].forEach(el => {
+                    chart.config.data.datasets[1].data.push(el);
+                });
+                chartData['fs_avail_data'].forEach(el => {
+                    chart.config.data.datasets[2].data.push(el);
+                });
+
+                chartData['record_dates'].forEach(el => {
+                    chart.config.data.labels.push(el);
+                });
+            }
+
+            chart.update();
+        }
+    }
+
+    window.onload = async function () {
+        let charts = [];
+        let ctxs = [{% for chart_num in chart_num_data %}
+            document.getElementById("lineChart{{chart_num}}").getContext('2d'),
+        {% endfor %}];
+
+        let chartData = [{% for dd in distributed_data %}
+                            {% for key, value in dd.items %}
+                                {
+                                    "{{ key }}": {
+                                        fsSizeData: {{ value.fs_size_data }},
+                                        fsUsedData: {{ value.fs_used_data }},
+                                        fsAvailData: {{ value.fs_avail_data }},
+                                        recordDates: [{% for record_date in value.record_dates %}
+                                            '{{ record_date }}',
+                                        {% endfor %}]
+                                    }
+                                },
+                            {% endfor %}
+                        {% endfor %}];
+
+        for (let [obj, ctx] of zip(chartData, ctxs)) {
+            let [cd]= Object.entries(obj);
+            charts.push(new Chart(ctx, chartConfig(cd[0], setData(
+                cd[1].fsSizeData,
+                cd[1].fsUsedData,
+                cd[1].fsAvailData,
+                cd[1].recordDates
+            ))));
+        }
+
+        setTimeout(chartUpdate, 0, charts);
+        setInterval(chartUpdate, 5000, charts);
+    }
+</script>

@@ -1,0 +1,147 @@
+{% load static %}
+
+<script type="module">
+    import {headers} from "{% static 'dashboard/js/base.js' %}";
+    import {convertBytesToMetric} from "{% static 'dashboard/js/converters.js' %}";
+
+    const labels = [{% for record_date in record_dates %}'{{ record_date }}',{% endfor %}];
+    let m = (i) => convertBytesToMetric(i);
+
+    const data1 = {
+        labels: labels,
+        datasets: [{
+            label: 'Всего ОЗУ',
+            backgroundColor: 'rgb(255, 99, 132)',
+            borderColor: 'rgb(255, 99, 132)',
+            data: [{% for i in total_ram_data %} parseInt("{{i}}"), {% endfor %}]
+        }]
+    }
+
+    const data2 = {
+        labels: labels,
+        datasets: [
+            {
+                label: 'Использовано ОЗУ',
+                backgroundColor: 'rgb(255, 99, 132)',
+                borderColor: 'rgb(255, 99, 132)',
+                data: [{% for i in ram_used_data %} parseInt("{{i}}"), {% endfor %}]
+            },
+            {
+                label: 'Свободной ОЗУ',
+                backgroundColor: 'rgb(128, 99, 132)',
+                borderColor: 'rgb(128, 99, 132)',
+                data: [{% for i in ram_free_data %} parseInt("{{i}}"), {% endfor %}]
+            },
+            {
+                label: 'Расшаренной ОЗУ',
+                backgroundColor: 'rgb(64, 99, 132)',
+                borderColor: 'rgb(64, 99, 132)',
+                data: [{% for i in ram_shared_data %} parseInt("{{i}}"), {% endfor %}]
+            },
+            {
+                label: 'Буферизованной ОЗУ',
+                backgroundColor: 'rgb(192, 99, 132)',
+                borderColor: 'rgb(192, 99, 132)',
+                data: [{% for i in ram_buff_cache %} parseInt("{{i}}"), {% endfor %}]
+            },
+            {
+                label: 'Доступной ОЗУ',
+                backgroundColor: 'rgb(255, 0, 132)',
+                borderColor: 'rgb(255, 0, 132)',
+                data: [{% for i in ram_avail %} parseInt("{{i}}"), {% endfor %}]
+            }
+        ]
+    }
+
+    function chartConfig (title, data) {
+        return  {
+        type: 'line',
+        data: data,
+        options: {
+            responsive: true,
+            plugins: {
+                legend: {
+                    position: 'top',
+                    labels: {
+                        font: {
+                            size: 14,
+                        }
+                    }
+                },
+                title: {
+                    display: true,
+                    text: title,
+                    font: {
+                        size: 14
+                }
+            },
+        },
+        scales: {
+            yAxes: [{
+                display: true,
+                    gridLines: {
+                        color: "rgb(210,210,211)"
+                    },
+                    ticks: {
+                        max: 100,
+                        min: 0,
+                        padding: 20
+                    }
+                }],
+                xAxes: [{
+                    type: 'time',
+                    time: {
+                        displayFormats: {
+                            hour: 'HH:mm',
+                            minute: 'HH:mm',
+                            second: 'HH:mm:ss',
+                            millisecond: 'HH:mm:ss.SS',
+                            quarter: 'MMM YYYY',
+                        }
+                    },
+                }]
+            }
+        }
+    };
+    }
+
+
+    async function chartUpdate(chart, keys) {
+        const response = await fetch('{% url 'dashboard_detail:ram' target_id %}', {
+            method: "GET", headers: headers
+        }).then(async resp => {
+            return await resp.json();
+        });
+
+        keys.forEach((key, i=0) => {
+            chart.config.data.datasets[i].data = [];
+            response[key].forEach(el => {
+                chart.config.data.datasets[i].data.push(el);
+            });
+           i++;
+        });
+
+        chart.config.data.labels = []
+        response['record_dates'].forEach(el => {
+            chart.config.data.labels.push(el)
+        });
+
+        chart.update();
+    }
+
+    window.onload = async function () {
+        let ctx1 = document.getElementById('lineChart1').getContext('2d');
+        let chart1 = new Chart(ctx1, chartConfig('Мониторинг количества оперативной памяти', data1));
+        let ctx2 = document.getElementById('lineChart2').getContext('2d');
+        let chart2 = new Chart(ctx2, chartConfig('Мониторинг оперативной памяти', data2));
+
+        let chart1DatasetsKeys = ['total_ram_data'];
+        let chart2DatasetsKeys = [
+            'ram_used_data', 'ram_free_data', 'ram_shared_data', 'ram_buff_cache_data',
+            'ram_avail_data'
+        ];
+
+        setInterval(chartUpdate, 5000, chart1, chart1DatasetsKeys);
+        setInterval(chartUpdate, 5000, chart2, chart2DatasetsKeys);
+    }
+</script>

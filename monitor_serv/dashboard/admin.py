@@ -1,8 +1,7 @@
+from core_logic.admin import admin_url_resolver
 from django.contrib import admin
 
-from core_logic.extentions import admin_url_resolver
-from . import forms
-from . import models
+from . import forms, models
 
 
 # Register your models here.
@@ -15,6 +14,7 @@ class ServerDataStackInline(admin.StackedInline):
     model = models.ServerData
     list_display = ('hostname', 'os', 'kernel', 'server_role', 'get_record_date')
     ordering = ('-record_date',)
+    readonly_fields = ("hostname", "os", "kernel", "server_role", "record_date", 'target')
 
     @admin.display(description="Время опроса:", ordering='record_date')
     def get_record_date(self, obj):
@@ -61,9 +61,12 @@ class TargetAdmin(admin.ModelAdmin):
 @admin.register(models.ServerData)
 class ServerDataAdmin(admin.ModelAdmin):
     form = forms.ServerDataForm
-    fields = ("hostname", "os", "kernel", "server_role", "record_date", 'get_targets')
-    list_display = ('get_targets', 'hostname', 'os', 'kernel', 'server_role', 'get_record_date')
+    fields = ("hostname", "os", "kernel", "server_role", "record_date")
+    list_display = ('hostname', 'os', 'kernel',
+                    'server_role', 'get_record_date', 'get_targets')
     ordering = ('-record_date',)
+    readonly_fields = ("hostname", "os", "kernel",
+                       "server_role", "record_date", 'target')
 
     @admin.display(description="Время опроса:", ordering='record_date')
     def get_record_date(self, obj):
@@ -76,8 +79,13 @@ class ServerDataAdmin(admin.ModelAdmin):
 
 @admin.register(models.CPU)
 class CPUAdmin(admin.ModelAdmin):
-    list_display = ('uuid_record', 'cpu_cores', 'cpu_util', 'cpu_idle', 'get_record_date', 'get_targets')
+    list_display = ('uuid_record', 'cpu_cores', 'cpu_util',
+                    'cpu_idle', 'get_record_date', 'get_targets')
     ordering = ('-record_date',)
+    readonly_fields = ("cpu_cores", "cpu_idle", "cpu_iowait",
+                       "cpu_irq", "cpu_nice", "cpu_softirq",
+                       "cpu_steal", "cpu_sys", "cpu_user",
+                       "cpu_util", "record_date", "target")
 
     @admin.display(description="Время опроса:", ordering='record_date')
     def get_record_date(self, obj):
@@ -90,8 +98,13 @@ class CPUAdmin(admin.ModelAdmin):
 
 @admin.register(models.RAM)
 class RAMAdmin(admin.ModelAdmin):
-    list_display = ('uuid_record', 'total_ram', 'ram_used', 'ram_free', 'ram_util', 'get_record_date', 'get_targets')
+    list_display = ('uuid_record', 'total_ram', 'ram_used',
+                    'ram_free', 'ram_util', 'get_record_date',
+                    'get_targets')
     ordering = ('-record_date',)
+    readonly_fields = ("total_ram", "ram_used", "ram_free",
+                       "ram_shared", "ram_buff_cache", "ram_avail",
+                       "ram_util", "record_date", "target")
 
     @admin.display(description="Время опроса:", ordering='record_date')
     def get_record_date(self, obj):
@@ -106,6 +119,10 @@ class RAMAdmin(admin.ModelAdmin):
 class DiskSpaceAdmin(admin.ModelAdmin):
     list_display = ('uuid_record', 'file_system', 'fs_size', 'mounted_on', 'get_record_date', 'get_targets')
     ordering = ('-record_date',)
+    readonly_fields = ("record_date", "cluster_id", "file_system",
+                       "fs_size", "fs_used", "fs_used_prc",
+                       "fs_avail", "mounted_on", "record_date",
+                       "target", )
 
     @admin.action(description="Очистить таблицу DiskSpace.", permissions=["change"])
     def truncate_disk_space(self, request, queryset):
@@ -124,6 +141,15 @@ class DiskSpaceAdmin(admin.ModelAdmin):
 class NetInterfaceAdmin(admin.ModelAdmin):
     list_display = ('uuid_record', 'interface', 'ip_address', 'status', 'get_record_date', 'get_targets')
     ordering = ('-record_date',)
+    readonly_fields = (
+        "interface", "status", "ip_address",
+        "rx_bytes", "rx_packets", "rx_errors_errors",
+        "rx_errors_dropped", "rx_errors_overruns", "rx_errors_frame",
+        "tx_bytes", "tx_packets", "tx_errors_errors",
+        "tx_errors_dropped", "tx_errors_overruns", "tx_errors_carrier",
+        "tx_errors_collisions", "interface_id", "record_date",
+        "target",
+    )
 
     @admin.display(description="Время опроса:", ordering='record_date')
     def get_record_date(self, obj):

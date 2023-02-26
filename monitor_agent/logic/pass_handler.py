@@ -1,6 +1,7 @@
 import base64
 
 from cryptography.fernet import Fernet
+
 from monitor_agent.agent.agent_logger import get_logger
 
 logger = get_logger(__name__)

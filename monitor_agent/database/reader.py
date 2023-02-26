@@ -1,8 +1,8 @@
 from sqlalchemy import select
-from monitor_agent.dashboard.models import (
-    ScrapeCommand, Target,
-    DashboardSettings, ServerData)
-from monitor_agent.db_connector.configuration import session
+
+from monitor_agent.dashboard.models import (DashboardSettings, ScrapeCommand,
+                                            ServerData, Target)
+from monitor_agent.database.configuration import session
 
 
 # READ

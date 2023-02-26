@@ -2,8 +2,10 @@ import os
 import subprocess
 import time
 
-from psycopg2 import connect, OperationalError, DatabaseError
+from psycopg2 import DatabaseError, OperationalError, connect
 
+MONITOR_AGENT_ADDRESS = os.getenv('MONITOR_AGENT_ADDRESS', "2.0.96.1")
+MONITOR_AGENT_PORT = os.getenv('MONITOR_AGENT_PORT', 8000)
 
 def check_db():
     for attempt in range(3):
@@ -30,5 +32,5 @@ if __name__ == '__main__':
 
     if result:
         process = subprocess.Popen(["uvicorn", "monitor_agent.main:app",
-                                    "--host", "2.0.96.1", "--port", "8000"])
+                                    "--host", MONITOR_AGENT_ADDRESS, "--port", MONITOR_AGENT_PORT])
         process.communicate()

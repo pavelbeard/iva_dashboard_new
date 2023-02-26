@@ -44,12 +44,6 @@ Object.defineProperty(String.prototype, 'safeParseInt', {
     enumerable: false
 })
 
-// Object.defineProperty(Object.prototype, 'mapObject', {
-//     value: function (object) {
-//         return this.args;
-//     },
-//     enumerable: true
-// })
 
 /**
  * Метод, добавляющий всплывающую информацию об опрошенных частях сервера.
@@ -91,3 +85,5 @@ function* zip(...iterables) {
         return arr.some(v => v !== undefined);
     }
 }
+
+export {zip}

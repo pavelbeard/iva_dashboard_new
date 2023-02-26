@@ -1,6 +1,7 @@
+from core_logic import pass_handler
 from django import forms
 from django.conf import settings
-from core_logic import pass_handler
+
 from . import models as dashboard_models
 
 ENCRYPTION_KEY = settings.ENCRYPTION_KEY

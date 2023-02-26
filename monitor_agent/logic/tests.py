@@ -3,9 +3,11 @@ import datetime
 import unittest
 
 from monitor_agent.dashboard import models
-from monitor_agent.dashboard.models import ServerData, LoadAverage
-from monitor_agent.logic import creator, reader, updater, exporters, handle
+from monitor_agent.dashboard.models import LoadAverage, ServerData
+from monitor_agent.logic import exporters, handle
+from monitor_agent.database import reader
 from monitor_agent.logic.scraper import ScrapeLogic
+from monitor_agent.ssh.session import SSHSession
 
 
 class MyTestCase(unittest.TestCase):
@@ -82,7 +84,9 @@ class MyTestCase(unittest.TestCase):
         self.assertEqual(isinstance(r, dict), True)
 
     def test_scrape_forever(self):
-        sc = ScrapeLogic(exporters=self.exporters, handlers=self.handlers)
+        ssh_session = SSHSession()
+        sc = ScrapeLogic(
+            exporters=self.exporters, handlers=self.handlers, data_importer=ssh_session.arun_cmd_on_target)
         asyncio.run(sc.scrape_forever())
 
     def test_load_average_output_handler(self):

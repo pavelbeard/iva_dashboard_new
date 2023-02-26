@@ -1,20 +1,15 @@
 import asyncio
 from concurrent.futures import ProcessPoolExecutor
 from functools import partial
-from logging import DEBUG
-from typing import Type, AsyncGenerator
+from typing import AsyncGenerator
 
-import asyncssh
-import paramiko
 from asyncssh import PermissionDenied
-from binascii import hexlify
-from paramiko.ssh_exception import SSHException, AuthenticationException, NoValidConnectionsError
+from paramiko.ssh_exception import (AuthenticationException)
 
 from monitor_agent.agent import get_logger
+from monitor_agent.database.reader import (get_scrape_commands, get_settings,
+                                           get_target, get_targets)
 from monitor_agent.logic.extentions import row_2_dict
-from monitor_agent.logic.pass_handler import decrypt_pass
-from monitor_agent.logic.reader import get_targets, get_settings, get_scrape_commands, get_target
-from monitor_agent.settings import ENCRYPTION_KEY
 
 # TODO: отделить экспортер в БД от scraper'a
 
@@ -26,35 +21,17 @@ class ValidationException(Exception):
         self.message = message
 
 
-class AutoAddPolicy(paramiko.MissingHostKeyPolicy):
-    """Класс, реализующий автодобавление открытых ключей с целевых хостов"""
-
-    def missing_host_key(self, client, hostname, key):
-        client._host_keys.add(hostname, key.get_name(), key)
-
-        if client._host_keys_filename is not None:
-            client.save_host_keys(client._host_keys_filename)
-
-        client._log(DEBUG, f"Adding {key.get_name()} host key for {hostname}: "
-                           f"{hexlify(key.get_fingerprint())}")
-
-
 class ScrapeLogic:
-    def __init__(self, exporters, handlers):
+    def __init__(self, exporters, handlers, data_importer):
         """
         :param exporters: экспортеры данных. Любые.
             Главное, чтобы реализовывали интерфейс Exporter.
         :param handlers: обработчики данных с хостов.
+        :param data_importer: поставщик данных с хостов.
         """
         self.exporters = exporters
         self.handlers = handlers
-
-    @staticmethod
-    def _check_command_output_data(data):
-        if data == '':
-            return "command not found."
-
-        return data
+        self.data_importer = data_importer
 
     @staticmethod
     def get_data_from_targets() -> list:
@@ -74,95 +51,6 @@ class ScrapeLogic:
         """Соединяет данные с целевых хостов вместе и возвращает массив данных"""
         results = [instance.handle(values) for values, instance in zip(list(target_data.values()), self.handlers)]
         return results
-
-    async def arun_cmd_on_target(
-            self, address: str, port: int, username: str,
-            password: str, commands: dict, timeout: int
-    ):
-        del commands['record_id']
-        try:
-            host_key = await asyncssh.get_server_host_key(host=address, port=port)
-
-            options = asyncssh.SSHClientConnectionOptions()
-            options.key = host_key
-
-            password = decrypt_pass(ENCRYPTION_KEY, password)
-
-            result_dict = {}
-            for key, command in commands.items():
-                async with asyncssh.connect(
-                        host=address, port=port, username=username, password=password,
-                        options=options, known_hosts=None
-                ) as conn:
-                    if "sudo" in command:
-                        result_sudo = await conn.run(f"echo {password} | sudo -S {command}")
-                        result_dict[key] = self._check_command_output_data(result_sudo.stdout)
-                    else:
-                        result = await conn.run(command)
-                        result_dict[key] = self._check_command_output_data(result.stdout)
-
-            return result_dict
-        except asyncio.TimeoutError:
-            raise asyncio.TimeoutError
-        except ConnectionRefusedError:
-            raise ConnectionRefusedError
-        except PermissionDenied as e:
-            raise PermissionDenied(e.reason)
-        except Exception as e:
-            raise Exception(e)
-
-    @staticmethod
-    def run_cmd_on_target(
-            address: str, port: int, username: str,
-            password: str, commands: dict, timeout: int) -> dict | Type[SSHException]:
-        """
-        Запускает ssh-клиент, который в свою очередь, выполняет команды на целевом хосте.\n
-        :param address: адрес целевого хоста.
-        :param port: порт.
-        :param username: имя пользователя для входа в систему.
-        :param password: пароль.
-        :param commands: команды для выполения на целевом хосте.
-        :param timeout: Время ожидания соединения с сервером.
-        :return: В случае успеха str, в случае, если учетные данные неправильные
-        или нет связи с сервером - SSHException.
-        """
-        result_dict = {}
-        commands.pop('record_id')
-
-        for key, command in commands.items():
-            try:
-                with paramiko.SSHClient() as client:
-                    client.set_missing_host_key_policy(AutoAddPolicy)
-                    decrypted_password = decrypt_pass(ENCRYPTION_KEY, password)
-
-                    client.connect(address, port, username, decrypted_password, timeout=timeout)
-                    stdin, stdout, stderr = client.exec_command(command, get_pty=True, timeout=timeout)
-
-                    if "sudo" in command:
-                        stdin.write(decrypted_password + "\n")
-                        stdin.flush()
-
-                    _out_ = stdout.read().decode('utf-8').replace(decrypted_password + "\r", "")
-                    _err_ = stderr.read().decode('utf-8')
-
-                    if len(_err_) > 0:
-                        logger.warning(_err_)
-
-                    result_dict[key] = _out_
-            except TimeoutError as e:
-                raise TimeoutError
-            except AuthenticationException:
-                raise AuthenticationException
-            except NoValidConnectionsError as e:
-                raise OSError(e.errors)
-            except OSError as e:
-                result_dict[key] = e
-            except EOFError as e:
-                result_dict[key] = e
-            except Exception as e:
-                result_dict[key] = e
-
-        return result_dict
 
     @staticmethod
     def _wrap_scraping_results(task_results, targets):
@@ -192,7 +80,8 @@ class ScrapeLogic:
                 yield result
 
     async def arun_scraping(self, targets) -> ():
-        callback = self.arun_cmd_on_target
+        """Асинхронная версия метода run_scraping."""
+        callback = self.data_importer
         tasks = [asyncio.create_task(callback(
             target['address'],  # address
             target['port'],  # port
@@ -212,7 +101,7 @@ class ScrapeLogic:
             with ProcessPoolExecutor(max_workers=3) as process_pool:
                 loop = asyncio.get_running_loop()
                 calls = [partial(  # args:
-                    self.run_cmd_on_target,  # func
+                    self.data_importer,  # func
                     target['address'],  # address
                     target['port'],  # port
                     target['username'],  # username
@@ -244,7 +133,10 @@ class ScrapeLogic:
         # так как словарь изменяемый объект, то при каждом
         # вытягивании значения интервала из БД словарь изменится.
         if set_interval:
-            interval['value'] = int(get_settings().scrape_interval)
+            try:
+                interval['value'] = int(get_settings().scrape_interval)
+            except AttributeError:
+                interval['value'] = 15
 
         results = await self.arun_scraping(targets)
 

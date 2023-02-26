@@ -1,17 +1,8 @@
-import asyncio
-import concurrent.futures
-import subprocess
 import unittest
-
-import sqlalchemy.engine
 from binascii import hexlify
-from functools import partial
 from logging import DEBUG
-from typing import List
 
 import paramiko
-
-import monitor_agent.dashboard.models
 
 
 class AutoAddPolicy(paramiko.MissingHostKeyPolicy):
@@ -59,14 +50,14 @@ class MonitorTests(unittest.TestCase):
         pass
 
     def test_get_targets(self):
-        from monitor_agent.logic.reader import get_targets
+        from monitor_agent.database.reader import get_targets
 
         t = get_targets()
         print(t[0].scrape_commands_id)
         self.assertEqual(type(t), list)
 
     def test_get_settings(self):
-        from monitor_agent.logic.reader import get_settings
+        from monitor_agent.database.reader import get_settings
 
         t = get_settings()
         print(t)

@@ -3,6 +3,8 @@ import subprocess
 
 PYTHON_NAME = "python3.11" if os.name == "posix" else "python"
 WIN_APP_HOME = os.path.join("D:\\", "Pycharm", "work-projects", "iva_dashboard", "monitor_serv")
+MONITOR_SERVER_ADDRESS = os.getenv('MONITOR_SERVER_ADDRESS', "2.0.96.3")
+MONITOR_SERVER_PORT = os.getenv('MONITOR_SERVER_PORT', 8000)
 
 
 def call_django_command(args, post_args: list | tuple):
@@ -52,7 +54,7 @@ if __name__ == '__main__':
 
         run_server = subprocess.Popen(
             ("uvicorn", "monitor_serv.asgi:application",
-             "--host", "0.0.0.0", "--port", "8000")
+             "--host", MONITOR_SERVER_ADDRESS, "--port", MONITOR_SERVER_PORT)
         )
         run_server.communicate()
 

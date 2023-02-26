@@ -1,8 +1,8 @@
 from django import http
 from django.core import paginator
 from django.views import generic
-from . import models
 
+from . import models
 
 # Create your views here.
 

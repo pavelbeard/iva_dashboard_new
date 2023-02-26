@@ -1,6 +1,7 @@
 import base64
-from cryptography.fernet import Fernet
+
 from app_logging import app_logger
+from cryptography.fernet import Fernet
 
 logger = app_logger.get_logger(__name__)
 

@@ -2,7 +2,6 @@ import ast
 import json
 
 import requests
-
 from dashboard.models import Target
 
 

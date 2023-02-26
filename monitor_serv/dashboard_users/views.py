@@ -1,12 +1,17 @@
-from django import http
+from core_logic.views import AppVersionMixin, ErrorMessageMixin
+from dashboard_users.forms import LoginForm, NewUserForm
+from dashboard_users.models import CustomUser
 from django.conf import settings
 from django.contrib import messages
-from django.contrib.auth import views, logout, login, authenticate
+from django.contrib.auth import logout
 from django.contrib.auth.hashers import check_password
-from django.shortcuts import redirect, render
+from django.contrib.auth.views import LoginView
+from django.contrib.messages.views import SuccessMessageMixin
+from django.shortcuts import redirect
 from django.urls import reverse_lazy
+from django.views.generic import CreateView
 
-from . import forms, models
+APP_VERSION = settings.APP_VERSION
 
 
 # Create your views here.
@@ -27,77 +32,44 @@ from . import forms, models
 #     success_url = reverse_lazy("dashboard:dashboard")
 
 
-class RegisterView(views.FormView):
+class RegisterView(SuccessMessageMixin, ErrorMessageMixin, CreateView):
+    model = CustomUser
+    form_class = NewUserForm
     template_name = "dashboard_users/auth/_register.html"
-    form_class = forms.NewUserForm
+    success_message = "Регистрация завершена. Ожидайте активации аккаунта администратором."
+    success_url = reverse_lazy("dashboard_users:login")
+    error_message = "Регистрация завершилась неудачно. Некорректная информация."
 
-    def get(self, request, *args, **kwargs):
-        form = self.form_class()
-        return render(request=request, template_name=self.template_name, context={
-            "register_form": form,
-            "app_version": settings.APP_VERSION
-        })
-
-    def post(self, request, *args, **kwargs):
-        form = self.form_class(request.POST)
-
-        if form.is_valid():
-            user = form.save()
-            login(request, user)
-            messages.success(request, "Регистрация завершена. Ожидайте активации аккаунта администратором.")
-
-            return http.HttpResponseRedirect(redirect_to=reverse_lazy("dashboard:dashboard"))
-        else:
-            messages.error(request, "Регистрация завершилась неудачно. Некорректная информация.")
-            return render(request, self.template_name, context={
-                "register_form": form,
-            })
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data()
+        context["app_version"] = APP_VERSION
+        return context
 
 
-class LoginView(views.LoginView):
+class UserLoginView(AppVersionMixin, LoginView):
+    form_class = LoginForm
     template_name = "dashboard_users/auth/_login.html"
-    form_class = forms.LoginForm
+    success_url = reverse_lazy("dashboard:dashboard")
+    app_version = APP_VERSION
 
-    def get(self, request, *args, **kwargs):
-        form = self.form_class()
-        return render(request, self.template_name, context={
-            "login_form": form,
-            "app_version": settings.APP_VERSION
-        })
+    def form_valid(self, form):
+        messages.info(self.request, f"Вы вошли как {form.cleaned_data.get('username')}.")
+        return super().form_valid(form)
 
-    def post(self, request, *args, **kwargs):
-        form = self.form_class(request, data=request.POST)
+    def form_invalid(self, form):
+        try:
+            user = CustomUser.objects.get(username=form.cleaned_data.get('username').lower())
 
-        if form.is_valid():
-            username = form.cleaned_data['username']
-            password = form.cleaned_data['password']
-
-            user = authenticate(username=username, password=password)
-
-            if user is not None:
-                login(request, user)
-                messages.info(request, f"Вы вошли как {username}.")
-                return http.HttpResponseRedirect(redirect_to=reverse_lazy("dashboard:dashboard"))
-            else:
-                messages.error(request, 'Неправильный логин, либо пароль.')
-        else:
-            username = form.cleaned_data['username']
-            password = form.cleaned_data['password']
-
-            try:
-                user = models.CustomUser.objects.get(username=username)
-
-                if not user.is_active and check_password(password, user.password):
-                    messages.error(request, 'Ваш аккаунт еще не активирован.')
-                else:
-                    messages.error(request, 'Неправильный логин, либо пароль.')
-            except models.CustomUser.DoesNotExist:
-                messages.error(request, 'Пользователь не найден.')
-
-        return render(request, self.template_name, context={
-            "login_form": self.form_class(),
-            "app_version": settings.APP_VERSION
-        })
+            if user is None:
+                raise CustomUser.DoesNotExist
+            elif not user.is_active:
+                messages.error(self.request, 'Ваш аккаунт еще не активирован.')
+            elif not check_password(form.cleaned_data.get('password'), user.password):
+                messages.error(self.request, 'Неправильный логин, либо пароль.')
+        except CustomUser.DoesNotExist:
+            messages.error(self.request, 'Пользователь не найден.')
+        finally:
+            return super().form_invalid(form)
 
 
 def logout_view(request):

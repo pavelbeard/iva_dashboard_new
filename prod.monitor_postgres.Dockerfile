@@ -1,1 +1,0 @@
-FROM pavelbeard/monitor-postgres:v1.0

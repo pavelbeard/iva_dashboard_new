@@ -1,11 +1,11 @@
 {% load static %}
 
 <div class="server-indicator server-ram">
-    <img class="server-info-icon"
-         data-indicator-type="ram"
-         height="48"
-         src="{% static "dashboard/images/bootstrap-svg/memory.svg" %}"
-         alt="server-ram">
+    <a href="{% url 'dashboard_detail:ram' target.data_target_id %}"><img class="server-info-icon"
+            data-indicator-type="ram"
+            height="48"
+            src="{% static "dashboard/images/bootstrap-svg/memory.svg" %}"
+            alt="server-ram"></a>
     <div class="server-ram-text dropend">
         <p data-bs-toggle="dropdown">N/A</p>
         <ul class="dropdown-menu"></ul>

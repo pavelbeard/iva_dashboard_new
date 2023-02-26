@@ -1,8 +1,9 @@
 from typing import Callable
+
 import sqlalchemy.exc
 
 from monitor_agent.agent import get_logger
-from monitor_agent.db_connector.configuration import session
+from monitor_agent.database.configuration import session
 
 logger = get_logger(__name__)
 

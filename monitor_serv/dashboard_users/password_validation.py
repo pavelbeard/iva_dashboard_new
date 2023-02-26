@@ -1,11 +1,10 @@
 import os
 import re
 
+from dashboard_users import models
 from django.contrib.auth.hashers import make_password
 from django.contrib.auth.password_validation import ValidationError
 from django.utils.translation import gettext as _
-
-from dashboard_users import models
 
 SALT = os.getenv("SALT", "lKzLscyp8+/Ni?P8Bw@#*DD0")
 
@@ -22,7 +21,7 @@ class SymbolsPasswordValidator(Validator):
     list_of_symbols = "`!@#$%^&*\_+~[]{}\\\';\":,.;?/"
 
     def validate(self, password, user=None):
-        if not re.findall("[`!@#\$%\^&\*\(\)_\+~\[\]\{\}\\\';\":,\.;\?/]", password):
+        if not re.findall(r"[`!@#\$%\^&\*\(\)_\+~\[\]\{\}\\\';\":,\.;\?/]", password):
             raise ValidationError(
                 _(f"Пароль должен содержать хотя бы один символ из этого списка: [ {self.list_of_symbols} ]"),
                 code="password_no_symbol"
