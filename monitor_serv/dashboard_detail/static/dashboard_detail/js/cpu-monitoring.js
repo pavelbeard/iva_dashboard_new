@@ -58,6 +58,7 @@ const data = {
 
 
 async function chartUpdate() {
+
     const response = await fetch($("#cpu-url").attr("data-url"), {
         method: "GET", headers: headers
     }).then(async resp => {

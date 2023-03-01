@@ -74,6 +74,7 @@ let serverDownPics = {
 }
 
 let hardwareDropdownLocate = {
+    "server": '.server-text.dropend',
     "cpu": '.server-cpu-text.dropend',
     "ram": '.server-ram-text.dropend',
     "disk": '.server-disk-text.dropend',

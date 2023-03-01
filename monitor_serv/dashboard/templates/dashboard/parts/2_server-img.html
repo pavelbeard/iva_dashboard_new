@@ -1,9 +1,8 @@
 {% load static %}
 
-<div class="server-img dropend">
+<div class="server-img">
     <img class="img"
          data-indicator-type="server"
-         data-bs-toggle="dropdown"
          height="48"
          {% if target.role == 'none' %}
             src="{% static "dashboard/images/bootstrap-svg/server.svg" %}"
@@ -11,8 +10,11 @@
             src="{% static "dashboard/images/bootstrap-svg/server-head.svg" %}"
          {% endif %}
          alt="server-image">
-    <ul class="dropdown-menu"></ul>
-    <div class="server-status text-center">no data</div>
+    <div class="server-text dropend" style="display: flex; flex-direction: column; align-items: center; margin-left: 0">
+        <p data-bs-toggle="dropdown">N/A</p>
+        <ul class="dropdown-menu"></ul>
+    </div>
+{#    <div class="server-status text-center">no data</div>#}
     <div class="server-hostname text-center">Host undefined</div>
     <div class="server-address text-center">{{ target.address }}</div>
     <div class="server-role text-center">{{ target.role|upper }}</div>

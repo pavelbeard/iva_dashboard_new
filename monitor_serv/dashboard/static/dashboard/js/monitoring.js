@@ -1,11 +1,8 @@
-import * as events from "./server-event-handlers.js";
-import * as base from "./base.js"
-import * as ext from "./tweaks.js";
 import {
-    appPics, ethernetPics,
+    appPics, cpuPics, ethernetPics,
     hardwareAttrs,
     hardwareDropdownLocate,
-    hardwarePrimePics, headers,
+    headers,
     ramPics,
     serverDownPics,
     serverPics,
@@ -13,7 +10,13 @@ import {
 } from "./base.js";
 import {convertBytesToMetric as cbtm} from "./converters.js";
 import {dropdownTitle} from "./tweaks.js";
-import {agentIsDown, thresholdUtilEventListener} from "./server-event-handlers.js";
+import {
+    agentIsDown,
+    noAccessToServer,
+    serverIsDown,
+    serverIsUp,
+    thresholdUtilEventListener
+} from "./server-event-handlers.js";
 
 function serverRoleDataHandler(targetId, value) {
     let targetElem = $(`#${targetId}`);
@@ -31,9 +34,8 @@ function cpuDataHandler(targetId, values) {
     let targetElem = $(`#${targetId}`);
     let wholeProcessorData = values['whole_processor_data'];
     let processorCoresData = values['processor_cores_data'];
-    let cpuIdle = wholeProcessorData['cpu_idle'];
     let cpuUtil = wholeProcessorData['cpu_util'];
-    let cpuPic = events.thresholdUtilEventListener(cpuUtil, base.cpuPics);
+    let cpuPic = thresholdUtilEventListener(cpuUtil, cpuPics);
 
     targetElem.find(hardwareAttrs.cpu).attr('src', cpuPic);
     targetElem.find(hardwareDropdownLocate.cpu).find('p').text(`${cpuUtil}%`);
@@ -53,13 +55,13 @@ function cpuDataHandler(targetId, values) {
 
     let htmlMarkup = "".concat(wholeProcessorDataMarkup + processorCoresDataMarkup)
         .replace(/,/g, "");
-    ext.dropdownTitle(targetElem, htmlMarkup, hardwareDropdownLocate.cpu);
+    dropdownTitle(targetElem, htmlMarkup, hardwareDropdownLocate.cpu);
 }
 
 function ramDataHandler(targetId, values) {
     let targetElem = $(`#${targetId}`);
     let ramUtil = values['ram_util'];
-    let ramPic = events.thresholdUtilEventListener(ramUtil, ramPics);
+    let ramPic = thresholdUtilEventListener(ramUtil, ramPics);
 
     targetElem.find(hardwareAttrs.ram).attr('src', ramPic)
     targetElem.find(hardwareDropdownLocate.ram).find('p').text(`${ramUtil}%`);
@@ -94,7 +96,7 @@ function diskDataHandler(targetId, values) {
 
     mvPartMarkup += `<li><hr class="dropdown-divider"></li>`;
     let mvPartUsePercent = mvPart['most_valuable_part_use_percent'] + `%`;
-    let diskPic = events.thresholdUtilEventListener(mvPartUsePercent.slice(0, -1), ssdPics);
+    let diskPic = thresholdUtilEventListener(mvPartUsePercent.slice(0, -1), ssdPics);
 
     targetElem.find(hardwareDropdownLocate.disk).find('p').text(mvPartUsePercent);
     targetElem.find(hardwareAttrs.disk).attr('src', diskPic);
@@ -167,7 +169,7 @@ function uptimeDataHandler(targetId, values) {
     let targetElem = $(`#${targetId}`);
     let html = `<li><a class="dropdown-item">${values['uptime']}</a></li>`
 
-    dropdownTitle(targetElem, html, '.server-img.dropend');
+    dropdownTitle(targetElem, html, hardwareDropdownLocate.server);
 }
 
 function averageLoadDataHandler(targetId, values) {
@@ -185,8 +187,8 @@ function dataDistributor(responseData) {
         cpuDataHandler,
         ramDataHandler,
         diskDataHandler,
-        netDataHandler,
         appDataHandler,
+        netDataHandler,
         serverDataHandler,
         uptimeDataHandler,
         averageLoadDataHandler
@@ -197,15 +199,18 @@ function dataDistributor(responseData) {
 
         // проверяются данные каждого id на соответствие типу данных
         if (!(typeof (scrapedData) === typeof({}) || typeof (scrapedData) === typeof([]))) {
-            if (scrapedData.includes('unable to connect'))
-                events.serverIsDown(key, scrapedData,
+            if (scrapedData.includes('unable to connect') || scrapedData.includes('unexpected exception'))
+                serverIsDown(key, scrapedData,
+                    Object.values(hardwareAttrs), Object.values(serverDownPics));
+            else if (scrapedData.includes('unable to connect'))
+                noAccessToServer(key, scrapedData,
                     Object.values(hardwareAttrs), Object.values(serverDownPics));
             else
                return;
 
         } else if (scrapedData.length === handlers.length) {
             for (let i = 0; i < scrapedData.length; i++) {
-                events.serverIsUp(key);
+                serverIsUp(key);
                 setTimeout(handlers[i], 0, key, scrapedData[i])
             }
         }
@@ -229,7 +234,7 @@ async function checkAgentHealth (url, method) {
      */
 async function getMetricsFromBackend(url, method) {
     const response = await fetch(url, {
-        method: method, headers: base.headers
+        method: method, headers: headers
     }).then(async r => {
         return JSON.parse(await r.json());
     }).catch(err_response => {
@@ -241,7 +246,7 @@ async function getMetricsFromBackend(url, method) {
 
 async function getInterval(url, method) {
     let response = await fetch(url, {
-        method: method, headers: base.headers
+        method: method, headers: headers
     });
 
     let interval = JSON.parse(await response.json());
