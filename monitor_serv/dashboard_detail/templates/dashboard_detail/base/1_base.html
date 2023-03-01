@@ -17,9 +17,9 @@
         {% endblock %}
     </div>
     {% if ram %}
-        {% include "3_ram_monitoring.js.html" %}
+        {% include "dashboard_detail/parts/3_ram_monitoring.js.html" %}
     {% elif disk %}
-        {% include "4_disk_monitoring.js.html" %}
+        {% include "dashboard_detail/parts/4_disk_monitoring.js.html" %}
     {% elif net %}
     {% elif load_average %}
     {% endif %}

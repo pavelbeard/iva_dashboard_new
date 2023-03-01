@@ -1,4 +1,4 @@
-{% extends "dashboard_detail/1_base.html" %}
+{% extends "dashboard_detail/base/1_base.html" %}
 {% block ram_graph%}
     {% for chart_num in chart_num_data %}
         <canvas id="lineChart{{ chart_num }}" width="300" height="100"

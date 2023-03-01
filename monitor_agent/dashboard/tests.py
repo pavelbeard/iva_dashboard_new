@@ -7,10 +7,10 @@ from monitor_agent.dashboard.models import (CPU, RAM, DiskSpace,
                                             DiskSpaceStatistics, NetInterface,
                                             Process, ServerData, Uptime)
 from monitor_agent.database import reader, creator
-from monitor_agent.logic.exporters import (AdvancedDatabaseExporter,
-                                           CPUDatabaseExporter,
-                                           DatabaseExporter,
-                                           DiskSpaceDatabaseExporter)
+from monitor_agent.ioh.exporters import (AdvancedDatabaseExporter,
+                                         CPUDatabaseExporter,
+                                         DatabaseExporter,
+                                         DiskSpaceDatabaseExporter)
 from monitor_agent.logic.extentions import row_2_dict
 from monitor_agent.logic.scraper import ScrapeLogic
 

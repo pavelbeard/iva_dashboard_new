@@ -1,3 +1,4 @@
+import ast
 import asyncio
 from concurrent.futures import ProcessPoolExecutor
 from functools import partial
@@ -24,7 +25,9 @@ class ValidationException(Exception):
 def get_data_from_targets():
     return [
         row_2_dict(target) | {
-            "commands": row_2_dict(get_scrape_commands(target.scrape_command_id))
+            "commands": ast \
+                .literal_eval(get_scrape_commands(target.scrape_command_id) \
+                              .scrape_command.replace('\r', ''))
         } for target in get_targets()
     ]
 
@@ -186,6 +189,7 @@ class ScraperLogic:
 
 class ScraperLogicBuilder:
     """Строитель класса ScraperLogic"""
+
     def __init__(self):
         self.scrape_logic = ScraperLogic()
 
@@ -195,6 +199,7 @@ class ScraperLogicBuilder:
 
 class ScraperLogicExportersSetter(ScraperLogicBuilder):
     """1. Устанавливаем экспортеры данных"""
+
     def set_exporters(self, exporters):
         self.scrape_logic.exporters = exporters
         return self
@@ -202,6 +207,7 @@ class ScraperLogicExportersSetter(ScraperLogicBuilder):
 
 class ScraperLogicHandlersSetter(ScraperLogicExportersSetter):
     """2. Устанавливаем обработчики данных с целевых хостов"""
+
     def set_handlers(self, handlers):
         self.scrape_logic.handlers = handlers
         return self
@@ -209,13 +215,15 @@ class ScraperLogicHandlersSetter(ScraperLogicExportersSetter):
 
 class ScraperLogicImporterSetter(ScraperLogicHandlersSetter):
     """3. Устанавливаем источник данных: ssh-scraper, victoria-metrics и тд."""
-    def set_importer(self, data_scraper_callback):
+
+    def set_data_scraper_callback(self, data_scraper_callback):
         self.scrape_logic.data_scraper_callback = data_scraper_callback
         return self
 
 
 class TargetsDataImport(ScraperLogicImporterSetter):
     """4. Данные для подключения к хостам - реализовывается в случае реализации ssh-клиента"""
+
     def get_data_from_targets(self, targets_data_callback):
         self.scrape_logic.targets_data_callback = targets_data_callback
         return self
@@ -223,6 +231,7 @@ class TargetsDataImport(ScraperLogicImporterSetter):
 
 class TargetDataImport(ScraperLogicBuilder):
     """4. Данные для подключения к хосту - реализовывается в случае реализации ssh-клиента"""
+
     def get_data_from_target(self, target_data_callback):
         """Вытягивает данные с конкретного целевого хоста"""
         self.scrape_logic.targets_data_callback = target_data_callback
@@ -231,6 +240,7 @@ class TargetDataImport(ScraperLogicBuilder):
 
 class ScraperSettings(TargetsDataImport, TargetDataImport):
     """5. Если собираемся опросить хост 1 раз - не трогаем это."""
+
     def allow_to_set_interval(self):
         self.scrape_logic.allow_to_set_interval = True
         return self
@@ -238,6 +248,7 @@ class ScraperSettings(TargetsDataImport, TargetDataImport):
 
 class ScraperSetter(ScraperSettings):
     """6. Метод опроса хостов"""
+
     def set_scraper_cb(self, scraping_callback):
         self.scrape_logic.run_scraping_cb = scraping_callback
         return self

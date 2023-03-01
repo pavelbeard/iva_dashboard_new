@@ -4,68 +4,43 @@ import json
 from fastapi import FastAPI
 from starlette.responses import JSONResponse
 
+from monitor_agent import ioh
 from monitor_agent.agent import get_logger
-from monitor_agent.dashboard import models
-from monitor_agent.logic import exporters, handle
-from monitor_agent.logic.scraper import ScrapeLogic, ScraperSetter, arun_scraping, get_data_from_targets
+from http import HTTPStatus
+from monitor_agent.logic.scraper import ScraperSetter, arun_scraping, get_data_from_targets
 from monitor_agent.ssh.session import SSHSession
 
 logger = get_logger(__name__)
 
 app = FastAPI()
 
-scraper_task = {}
-exporters_dict = {}
-handlers_dict = {}
+cache = {}
 
 
 @app.on_event("startup")
 async def start_scraping():
-    server_role = handle.CrmStatusOutputHandler()
-    cpu = handle.CpuTopOutputHandler()
-    ram = handle.RamFreeOutputHandler()
-    fs = handle.DiskDfLsblkOutputHandler()
-    net = handle.NetIfconfigOutputHandler()
-    apps = handle.AppServiceStatusAllOutputHandler()
-    server_data = handle.ServerDataHostnamectlOutputHandler()
-    uptime = handle.UptimeUptimeOutputHandler()
-    load_average = handle.LoadAverageUptimeOutputHandler()
-
-    _handlers_ = (server_role, cpu, ram, fs, net, apps, server_data, uptime, load_average)
-
-    server_role = exporters.ServerDataDatabaseExporter(models.ServerData).export
-    cpu = exporters.CPUDatabaseExporter(models.CPU).export
-    ram = exporters.DatabaseExporter(models.RAM).export
-    fs = exporters.DiskSpaceDatabaseExporter(models.DiskSpace, models.DiskSpaceStatistics).export
-    net = exporters.NetDataDatabaseExporter(models.NetInterface).export
-    apps = exporters.AdvancedDatabaseExporter(models.Process).export
-    server_data = exporters.ServerDataDatabaseExporter(models.ServerData).export
-    uptime = exporters.DatabaseExporter(models.Uptime).export
-    load_average = exporters.DatabaseExporter(models.LoadAverage).export
-
-    _exporters_ = (server_role, cpu, ram, fs, net, apps, server_data, uptime, load_average)
+    _exporters_ = ioh.exporters_dict
+    _handlers_ = ioh.handlers_dict
 
     ssh_session = SSHSession()
     scraper_builder = ScraperSetter()
     scraper = scraper_builder.allow_to_set_interval()\
-        .set_exporters(_exporters_)\
-        .set_handlers(_handlers_)\
-        .set_importer(ssh_session.arun_cmd_on_target)\
+        .set_exporters(tuple(_exporters_.values()))\
+        .set_handlers(tuple(_handlers_.values()))\
+        .set_data_scraper_callback(ssh_session.arun_cmd_on_target)\
         .set_scraper_cb(arun_scraping)\
         .get_data_from_targets(get_data_from_targets)\
         .build()
 
-    scraper_task['task'] = asyncio.create_task(scraper.scrape_forever())
+    cache['task'] = asyncio.create_task(scraper.scrape_forever())
 
-    exporters_dict['exporters'] = _exporters_
-    handlers_dict['handlers'] = _handlers_
     logger.info("Agent is run!")
 
 
 @app.on_event("shutdown")
 async def stop_scraping():
     logger.info("Agent is down.")
-    task = scraper_task['task']
+    task = cache['task']
     task.cancel()
 
 
@@ -82,23 +57,27 @@ async def get_all_metrics() -> JSONResponse:
     Возвращает список кортежей: (target_id, data)
     :return: list[str | BaseException]
     """
-    sc = ScrapeLogic(
-        exporters=iter(exporters_dict.values()).__next__(),
-        handlers=iter(handlers_dict.values()).__next__()
-    )
+    _exporters_ = tuple(ioh.exporters_dict.values())
+    _handlers_ = tuple(ioh.handlers_dict.values())
+
+    ssh_session = SSHSession()
+    scraper_builder = ScraperSetter()
+    scraper = scraper_builder.set_exporters(_exporters_)\
+        .set_handlers(_handlers_)\
+        .set_data_scraper_callback(ssh_session.arun_cmd_on_target)\
+        .set_scraper_cb(arun_scraping)\
+        .get_data_from_targets(get_data_from_targets)\
+        .build()
+
     try:
         scrape_data = {}
-        async for result in sc.scrape_once():
+        async for result in scraper.scrape_once():
             scrape_data |= result
 
-        return JSONResponse(content=json.dumps(scrape_data), status_code=200)
+        return JSONResponse(content=json.dumps(scrape_data), status_code=HTTPStatus.OK)
     except Exception as e:
         logger.error(f"Exception {e.args[0]}")
-        return JSONResponse(content=json.dumps({"message", "internal server error."}), status_code=500)
-
-
-# задаток
-@app.get("/api/monitor/metrics/target/{target_id: int}/cpu")
-async def get_cpu_metrics(target_id: int) -> JSONResponse:
-    pass
-    # result = ScrapeLogic.get_data_from_target(target_id=target_id)
+        return JSONResponse(
+            content=json.dumps({"message", "internal server error."}),
+            status_code=HTTPStatus.INTERNAL_SERVER_ERROR
+        )

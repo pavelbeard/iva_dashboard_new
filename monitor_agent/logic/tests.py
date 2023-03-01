@@ -1,40 +1,23 @@
+import ast
 import asyncio
 import datetime
 import unittest
 
+from monitor_agent import ioh
 from monitor_agent.dashboard import models
 from monitor_agent.dashboard.models import LoadAverage, ServerData
-from monitor_agent.logic import exporters, handle
+from monitor_agent.ioh import exporters
 from monitor_agent.database import reader
-from monitor_agent.logic.scraper import ScrapeLogic, ScraperSetter, get_data_from_targets, arun_scraping
+from monitor_agent.ioh.exporters import ServerDataDatabaseExporter, CPUDatabaseExporter, DatabaseExporter, \
+    DiskSpaceDatabaseExporter, NetDataDatabaseExporter, AdvancedDatabaseExporter
+from monitor_agent.logic.scraper import ScraperSetter, get_data_from_targets, arun_scraping, ScraperLogic
 from monitor_agent.ssh.session import SSHSession
 
 
 class MyTestCase(unittest.TestCase):
     def setUp(self) -> None:
-        server_role = exporters.ServerDataDatabaseExporter(models.ServerData).export
-        cpu = exporters.CPUDatabaseExporter(models.CPU).export
-        ram = exporters.DatabaseExporter(models.RAM).export
-        fs = exporters.DiskSpaceDatabaseExporter(models.DiskSpace, models.DiskSpaceStatistics).export
-        net = exporters.NetDataDatabaseExporter(models.NetInterface).export
-        apps = exporters.AdvancedDatabaseExporter(models.Process).export
-        server_data = exporters.ServerDataDatabaseExporter(models.ServerData).export
-        uptime = exporters.DatabaseExporter(models.Uptime).export
-        load_average = exporters.DatabaseExporter(models.LoadAverage).export
-
-        self.exporters = (server_role, cpu, ram, fs, net, apps, server_data, uptime, load_average)
-
-        server_role = handle.CrmStatusOutputHandler()
-        cpu = handle.CpuTopOutputHandler()
-        ram = handle.RamFreeOutputHandler()
-        fs = handle.DiskDfLsblkOutputHandler()
-        net = handle.NetIfconfigOutputHandler()
-        apps = handle.AppServiceStatusAllOutputHandler()
-        server_data = handle.ServerDataHostnamectlOutputHandler()
-        uptime = handle.UptimeUptimeOutputHandler()
-        load_average = handle.LoadAverageUptimeOutputHandler()
-
-        self.handlers = (server_role, cpu, ram, fs, net, apps, server_data, uptime, load_average)
+        self.exporters = tuple(list(ioh.exporters_dict.values()))
+        self.handlers = tuple(list(ioh.handlers_dict.values()))
 
     def test_something(self):
         self.assertEqual(True, False)  # add assertion here
@@ -63,7 +46,7 @@ class MyTestCase(unittest.TestCase):
             "record_date": datetime.datetime.now()
         }
 
-        from exporters import ServerDataDatabaseExporter
+        from monitor_agent.ioh.exporters import ServerDataDatabaseExporter
 
         exporter = ServerDataDatabaseExporter(ServerData)
         exporter.export(data, pk)
@@ -84,17 +67,17 @@ class MyTestCase(unittest.TestCase):
         self.assertEqual(isinstance(r, dict), True)
 
     def test_scrape_forever(self):
+        # handlers_instances = [class_() for class_ in base.CommandOutputHandlerBase.__subclasses__()]
+        # handlers_instances.sort(key=lambda class_: class_.__class__.__name__)
+        # [print(h, sep="\n") for h in handlers_instances]
         ssh_session = SSHSession()
-        # sc = ScrapeLogic(
-        #     exporters=self.exporters, handlers=self.handlers, data_importer=ssh_session.arun_cmd_on_target)
-        # asyncio.run(sc.scrape_forever())
         builder = ScraperSetter()
         scraper = builder.allow_to_set_interval() \
             .set_exporters(self.exporters) \
             .set_handlers(self.handlers) \
-            .set_importer(ssh_session.arun_cmd_on_target)\
-            .set_scraper_cb(arun_scraping)\
-            .get_data_from_targets(get_data_from_targets)\
+            .set_data_scraper_callback(ssh_session.arun_cmd_on_target) \
+            .set_scraper_cb(arun_scraping) \
+            .get_data_from_targets(get_data_from_targets) \
             .build()
 
         asyncio.run(scraper.scrape_forever())
@@ -109,7 +92,7 @@ class MyTestCase(unittest.TestCase):
 
     def test_async_ssh(self):
         async def asyncssh():
-            sc = ScrapeLogic(self.exporters, self.handlers)
+            sc = ScraperLogic(self.exporters, self.handlers)
 
             password = "Z0FBQUFBQmo2UUM5Q09FOTlZNWgtcEVmcjlRN0FwaUt5RG5Ub0h" \
                        "hbGtTTzV5aHYzTVgxMWJ4d0EwTmhfQWVOa2NKZWFiOEMwdmFndUc4ajNmTml5UlE3Yk9JT2tpelpMRmc9PQ=="
@@ -134,6 +117,10 @@ class MyTestCase(unittest.TestCase):
             self.assertEqual(isinstance(res, list), True)
 
         asyncio.run(asyncssh())
+
+    def test_scrape_commands(self):
+        cmds = get_data_from_targets()
+        pass
 
 
 if __name__ == '__main__':

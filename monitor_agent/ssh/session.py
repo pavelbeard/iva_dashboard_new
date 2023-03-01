@@ -41,7 +41,6 @@ class SSHSession:
             self, address: str, port: int, username: str,
             password: str, commands: dict, timeout: int
     ):
-        del commands['record_id']
         try:
             host_key = await asyncssh.get_server_host_key(host=address, port=port)
 

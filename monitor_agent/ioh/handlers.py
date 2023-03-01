@@ -1,7 +1,5 @@
 import re
-from abc import ABC
 
-from monitor_agent import settings
 from monitor_agent.logic.base import CommandOutputHandlerBase
 from monitor_agent.logic.extentions import DigitalDataConverters
 
@@ -206,9 +204,11 @@ class NetIfconfigOutputHandler(CommandOutputHandlerBase):
         net_data = []
 
         for interface in FORMAT_IFACES_INFO:
+            _interface_ = [0 if i == '' else i for i in interface]
+
             interface, status, ip_address, netmask, \
-                rx_bytes, rx_packets, rx_errors1, rx_errors2, rx_errors3, rx_errors4, \
-                tx_bytes, tx_packets, tx_errors1, tx_errors2, tx_errors3, tx_errors4, tx_errors5 = interface
+                rx_packets, rx_bytes, rx_errors1, rx_errors2, rx_errors3, rx_errors4, \
+                tx_packets, tx_bytes, tx_errors1, tx_errors2, tx_errors3, tx_errors4, tx_errors5 = interface
             net_data.append({
                 "interface": interface,
                 "status": status,

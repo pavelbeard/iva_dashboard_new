@@ -1,8 +1,8 @@
 {% load static %}
 
 <script type="module">
-    import {headers} from "{% static 'dashboard/js/base.js' %}";
-    import {convertBytesToMetric} from "{% static 'dashboard/js/converters.js' %}";
+    import {headers} from ".{% static 'dashboard/js/base.js' %}";
+    import {convertBytesToMetric} from ".{% static 'dashboard/js/converters.js' %}";
 
     let m = (i) => convertBytesToMetric(i);
     let random = () => {

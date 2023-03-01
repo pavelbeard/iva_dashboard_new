@@ -29,7 +29,6 @@ class DatabaseExporter(Exporter, ABC):
     def record_date() -> {}:
         return {"record_date": datetime.datetime.now()}
 
-
     @staticmethod
     def t_id(target_id) -> {}:
         return {"target_id": target_id}

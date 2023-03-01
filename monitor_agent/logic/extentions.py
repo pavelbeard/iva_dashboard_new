@@ -1,3 +1,14 @@
+def singleton(cls_):
+    instances = {}
+
+    def wrapper(*args, **kwargs):
+        if cls_ not in instances:
+            instances[cls_] = cls_(*args, **kwargs)
+        return instances[cls_]
+
+    return wrapper
+
+
 def row_2_dict(row) -> dict:
     """
     Превращает модель SQLAlchemy в словарь
@@ -47,10 +58,14 @@ class DigitalDataConverters:
                 return f"{amount_of_bytes / 1000:10.2f}KB".strip()
             elif 1_000_000.0 <= amount_of_bytes < 1_000_000_000.0:
                 return f"{amount_of_bytes / 1000 ** 2:10.2f}MB".strip()
-            else:
+            elif 1_000_000_000.0 <= amount_of_bytes <= 1_000_000_000_000.0:
                 return f"{amount_of_bytes / 1000 ** 3:10.2f}GB".strip()
+            elif 1_000_000_000_000.0 <= amount_of_bytes <= 1_000_000_000_000_000.0:
+                return f"{amount_of_bytes / 1000 ** 4:10.2f}TB".strip()
+            else:
+                return str(int(amount_of_bytes))
         except ValueError:
-            return ''
+            return '0'
 
     @staticmethod
     def from_cidr_to_prefixlen(ipaddr: str, netmask: str) -> str:

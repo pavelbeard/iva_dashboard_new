@@ -4,30 +4,24 @@ from django.views.generic import TemplateView
 
 from monitor_serv import settings
 
+
 # Create your views.py here.
-
-APP_VERSION = settings.APP_VERSION
-
 
 class CPUDetailView(AppVersionMixin, ContextDataFromImporterMixin, TemplateView):
     model = CPU
-    template_name = "dashboard_detail/2_cpu.html"
-    app_version = APP_VERSION
+    template_name = "dashboard_detail/parts/1_cpu.html"
 
 
 class RAMDetailView(AppVersionMixin, ContextDataFromImporterMixin, TemplateView):
     model = RAM
-    template_name = "dashboard_detail/3_ram.html"
-    app_version = APP_VERSION
+    template_name = "dashboard_detail/parts/2_ram.html"
 
 
 class DiskSpaceDetailView(AppVersionMixin, ContextDataFromImporterMixin, TemplateView):
     model = DiskSpace
-    template_name = "dashboard_detail/4_disk.html"
-    app_version = APP_VERSION
+    template_name = "dashboard_detail/parts/3_disk.html"
 
 
 class NetInterfaceView(AppVersionMixin, ContextDataFromImporterMixin, TemplateView):
     model = NetInterface
-    template_name = "dashboard_detail/5_net.html"
-    app_version = APP_VERSION
+    template_name = "dashboard_detail/parts/4_net.html"

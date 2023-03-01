@@ -1,13 +1,13 @@
 from django.contrib import messages
 from django.http import JsonResponse
 
+from monitor_serv import settings
+
 
 class AppVersionMixin:
-    app_version = None
-
     def get_context_data(self, **kwargs):
         context = super(AppVersionMixin, self).get_context_data(**kwargs)
-        context["app_version"] = self.app_version
+        context["app_version"] = settings.APP_VERSION
         return context
 
 

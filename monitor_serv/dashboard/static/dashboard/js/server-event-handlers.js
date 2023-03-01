@@ -46,6 +46,9 @@ function serverIsUp(targetId, reason= "") {
 function serverIsDown (targetId, reason, hardwareAttr, hardwarePic) {
     let targetElem = $(`#${targetId}`);
     let text = reason.replace(/:.*/g, ".");
+
+    targetElem.find('div[class*="-text"]').find('p').text("N/A");
+
     serverStatus(targetElem, "DOWN", false,
         text, "#ff0000aa", "none", hardwareAttr, hardwarePic);
 }
