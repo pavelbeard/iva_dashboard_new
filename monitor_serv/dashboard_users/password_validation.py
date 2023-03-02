@@ -62,7 +62,7 @@ class RepeatedPasswordValidator(Validator):
 
     def passwords(self, user, password):
         self.hashed_passwd = make_password(password=password, salt=SALT)
-        return models.StoredPassword.objects.filter(user=user, password=self.hashed_passwd).first()
+        return models.StoredPassword.objects.filtered_query(user=user, password=self.hashed_passwd).first()
 
     def validate(self, password, user=None):
         if user is None:

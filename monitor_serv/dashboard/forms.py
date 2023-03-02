@@ -1,3 +1,7 @@
+import ast
+
+from django.core.exceptions import ValidationError
+
 from core_logic import pass_handler
 from django import forms
 from django.conf import settings
@@ -45,4 +49,12 @@ class ServerDataForm(forms.ModelForm):
 
 
 class ScrapeCommandForm(forms.ModelForm):
-    pass
+    def clean(self):
+        scrape_command = self.cleaned_data['scrape_command']
+
+        try:
+            test = ast.literal_eval(scrape_command)
+        except Exception:
+            raise ValidationError("Некорректный синтаксис словаря команд.")
+
+        return self.cleaned_data

@@ -9,6 +9,7 @@ from django.db.models import fields
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
+
 # Create your models here.
 
 class DashboardSettings(models.Model):
@@ -30,14 +31,6 @@ class DashboardSettings(models.Model):
 class ScrapeCommand(models.Model):
     record_id = fields.IntegerField(primary_key=True, default=0, editable=False)
     scrape_command = fields.TextField(blank=True, verbose_name="Команда мониторинга:")
-    scrape_command_cpu = fields.TextField(blank=True, verbose_name="Команда мониторинга CPU:")
-    scrape_command_ram = fields.TextField(blank=True, verbose_name="Команда мониторинга RAM:")
-    scrape_command_fs = fields.TextField(blank=True, verbose_name="Команда мониторинга файловой системы:")
-    scrape_command_apps = fields.TextField(blank=True, verbose_name="Команда мониторинга приложений:")
-    scrape_command_net = fields.TextField(blank=True, verbose_name="Команда мониторинга сетевых интерфейсов:")
-    scrape_command_uptime = fields.TextField(blank=True, verbose_name="Команда мониторинга времени работы:")
-    scrape_command_hostnamectl = fields.TextField(blank=True, verbose_name="Мониторинг версии ОС, ядра и имени хоста:")
-    scrape_command_load_average = fields.TextField(blank=True, verbose_name="Мониторинг средней загрузки хоста:")
 
     def __str__(self):
         return f"Scrape commands {self.record_id}."
@@ -86,8 +79,12 @@ class CPU(models.Model):
     target = models.ForeignKey(Target, on_delete=models.CASCADE, verbose_name="Сервер:")
 
     @classmethod
-    def import_data_from_psql(cls, target_id):
-        return CPUDataImporter(cls).import_data(target_id=target_id)
+    def import_data_from_psql(cls, target_id, filter_key="minutes", time_value=15):
+        return CPUDataImporter(cls).import_data(
+            target_id=target_id,
+            filter_key=filter_key,
+            time_value=time_value
+        )
 
     def __str__(self):
         return f"CPU Data from target host {self.target.address}"
@@ -112,8 +109,11 @@ class RAM(models.Model):
     target = models.ForeignKey(Target, on_delete=models.CASCADE, verbose_name="Сервер:")
 
     @classmethod
-    def import_data_from_psql(cls, target_id):
-        return RAMDataImporter(cls).import_data(target_id=target_id)
+    def import_data_from_psql(cls, target_id, filter_key="minutes", time_value=15):
+        return RAMDataImporter(cls).import_data(
+            target_id=target_id,
+            filter_key=filter_key,
+            time_value=time_value)
 
     def __str__(self):
         return f"RAM Data from target host {self.target.address}."

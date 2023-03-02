@@ -3,24 +3,12 @@
 
 {% block dashboard_detail %}
     <div class="container" style="width: 75%">
-        <div class="pt-3">
-            <a href="{% url 'dashboard:dashboard' %}" class="nav-link">
-                <img src="{% static 'dashboard_detail/images/arrow-left-square.svg' %}"
-                 alt="backToDashboard"
-                 width="24">
-                Назад
-            </a>
-        </div>
+        {% include "base/_nav_bar.html" %}
+        {% include "base/_charts.html" %}
+
         {% block cpu_graph %}
         {% endblock %}
         {% block ram_graph %}
         {% endblock %}
     </div>
-    {% if ram %}
-        {% include "dashboard_detail/parts/3_ram_monitoring.js.html" %}
-    {% elif disk %}
-        {% include "dashboard_detail/parts/4_disk_monitoring.js.html" %}
-    {% elif net %}
-    {% elif load_average %}
-    {% endif %}
 {% endblock %}

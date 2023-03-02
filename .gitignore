@@ -5,6 +5,7 @@
 *.http
 *.sql
 *.sqlite3
+*-venv
 crm_status.txt
 
 /postgres-files

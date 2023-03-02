@@ -1,5 +1,10 @@
 {% extends "dashboard_detail/base/1_base.html" %}
+{% load static %}
 {% block ram_graph%}
-    <canvas id="lineChart1" width="300" height="100"></canvas>
-    <canvas id="lineChart2" width="300" height="100" class="pt-3 pb-3"></canvas>
+    {{ chartData|json_script:"chartData" }}
+    {{ target_id|json_script:"target_id" }}
+
+    <input type="hidden" id="ram-url" data-url="{% url 'dashboard_detail:ram' target_id %}">
+
+    <script type="module" src="{% static 'dashboard_detail/js/ram-monitoring.js' %}"></script>
 {% endblock %}

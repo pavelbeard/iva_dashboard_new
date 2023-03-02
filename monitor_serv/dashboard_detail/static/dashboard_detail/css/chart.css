@@ -1,0 +1,16 @@
+.chart-box {
+    width: 100%;
+    padding: 20px;
+    border: solid .5px #626060;
+}
+
+.container-chart {
+    margin: auto;
+    width: 100%;
+    max-width: 1200px;
+    overflow-x: scroll;
+}
+
+.container-body {
+    height: 380px;
+}

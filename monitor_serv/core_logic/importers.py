@@ -1,57 +1,38 @@
 from abc import ABC
+from datetime import timedelta, datetime
+from functools import partial
 
+from django.utils import timezone
+
+from app_logging.app_logger import get_logger
 from core_logic.base import DataImporter
-from dashboard import models
+from core_logic.chart import create_chart_data
+from core_logic.filters import BaseDatetimeFilter
+
+logger = get_logger(__name__)
 
 
 class DjangoORMImporter(DataImporter, ABC):
     def __init__(self, model):
         super().__init__(model)
+        self.filter = BaseDatetimeFilter.filter
 
 
 class CPUDataImporter(DjangoORMImporter, ABC):
     def __init__(self, model):
         super().__init__(model)
 
-    def import_data(self, target_id, *args, **kwargs):
-        labels = [f.attname for f in models.CPU._meta.fields][2:-2]
-        cpu_idle_data = []
-        cpu_iowait_data = []
-        cpu_irq_data = []
-        cpu_nice_data = []
-        cpu_softirq_data = []
-        cpu_steal_data = []
-        cpu_sys_data = []
-        cpu_user_data = []
-        record_dates = []
+    def import_data(self, target_id, filter_key, time_value, *args, **kwargs):
+        keys = ["cpu_idle", "cpu_iowait", "cpu_irq", "cpu_nice", "cpu_softirq",
+                "cpu_steal", "cpu_sys", "cpu_user"]
 
-        # TODO 24, 12, 6, 1, настраиваемый
-        queryset = self.model.objects.filter(target_id=target_id).order_by("-record_date")[:50]
+        Qfilter = partial(self.filter(filter_key), time_value)
 
-        for cpu_record in queryset:
-            cpu_idle_data.append(cpu_record.cpu_idle)
-            cpu_iowait_data.append(cpu_record.cpu_iowait)
-            cpu_irq_data.append(cpu_record.cpu_irq)
-            cpu_nice_data.append(cpu_record.cpu_nice)
-            cpu_softirq_data.append(cpu_record.cpu_softirq)
-            cpu_steal_data.append(cpu_record.cpu_steal)
-            cpu_sys_data.append(cpu_record.cpu_sys)
-            cpu_user_data.append(cpu_record.cpu_user)
-            record_dates.append(cpu_record.record_date.__format__("%d/%m/%y %H:%M:%S"))
+        data = create_chart_data(self.model, keys, target_id, Qfilter, args, kwargs)
 
         return {
-            "labels": labels,
-            "cpu_idle_data": cpu_idle_data,
-            "cpu_iowait_data": cpu_iowait_data,
-            "cpu_irq_data": cpu_irq_data,
-            "cpu_nice_data": cpu_nice_data,
-            "cpu_softirq_data": cpu_softirq_data,
-            "cpu_steal_data": cpu_steal_data,
-            "cpu_sys_data": cpu_sys_data,
-            "cpu_user_data": cpu_user_data,
-            "record_dates": record_dates,
+            "chartData": data,
             "target_id": target_id,
-            "cpu": True
         }
 
 
@@ -59,39 +40,20 @@ class RAMDataImporter(DjangoORMImporter, ABC):
     def __init__(self, model):
         super().__init__(model)
 
-    def import_data(self, target_id, *args, **kwargs):
-        labels = [f.attname for f in models.RAM._meta.fields][2:-2]
-        total_ram_data = []
-        ram_used_data = []
-        ram_free_data = []
-        ram_shared_data = []
-        ram_buff_cache_data = []
-        ram_avail_data = []
-        record_dates = []
+    def import_data(self, target_id, filter_key, time_value, *args, **kwargs):
+        keys = [["total_ram"], ["ram_used", "ram_free", "ram_shared",
+                                "ram_buff_cache", "ram_avail"]]
 
-        queryset = models.RAM.objects.filter(target_id=target_id).order_by("-record_date")[:50]
+        data = []
 
-        for ram_record in queryset:
-            total_ram_data.append(ram_record.total_ram)
-            ram_used_data.append(ram_record.ram_used)
-            ram_free_data.append(ram_record.ram_free)
-            ram_shared_data.append(ram_record.ram_shared)
-            ram_buff_cache_data.append(ram_record.ram_buff_cache)
-            ram_avail_data.append(ram_record.ram_avail)
-            record_dates.append(ram_record.record_date.__format__("%d/%m/%y %H:%M:%S"))
+        Qfilter = partial(self.filter(filter_key), time_value)
+
+        for nested_keys in keys:
+            data.append(create_chart_data(self.model, nested_keys, target_id, Qfilter, *args, **kwargs))
 
         return {
-            "label_total_ram": labels[0],
-            "remaining_labels": labels[1:],
-            "total_ram_data": total_ram_data,
-            "ram_used_data": ram_used_data,
-            "ram_free_data": ram_free_data,
-            "ram_shared_data": ram_shared_data,
-            "ram_buff_cache_data": ram_buff_cache_data,
-            "ram_avail_data": ram_avail_data,
-            "record_dates": record_dates,
+            "chartData": data,
             "target_id": target_id,
-            "ram": True
         }
 
 
@@ -100,43 +62,26 @@ class DiskDataImporter(DjangoORMImporter, ABC):
         super().__init__(model)
 
     def import_data(self, target_id, *args, **kwargs):
-        filesystems_id = [
-            i[0] for i in
-            models.DiskSpace.objects.filter(target_id=target_id).values_list('cluster_id', 'file_system').distinct()
-        ]
+        chart_data = []
 
-        filesystems_name = []
-        for fs_id in filesystems_id:
-            q = models.DiskSpace.objects.filter(target_id=target_id, cluster_id=fs_id).first()
-            filesystems_name.append(q.file_system)
+        query = self.model.objects.filtered_query(
+            target_id=target_id,
+            record_date__gt=timezone.now() - timedelta(minutes=15)
+        ).order_by("-record_date")
 
-        distributed_data = []
-        for fs_id, fs_name in zip(filesystems_id, filesystems_name):
-            fs_size_data = []
-            fs_used_data = []
-            fs_avail_data = []
-            record_dates = []
-
-            for i in models.DiskSpace.objects.filter(target_id=target_id, cluster_id=fs_id).order_by("-record_date")[:50]:
-                fs_size_data.append(i.fs_size)
-                fs_used_data.append(i.fs_used)
-                fs_avail_data.append(i.fs_avail)
-                record_dates.append(i.record_date.__format__("%d/%m/%y %H:%M:%S"))
-
-            distributed_data.append({
-                fs_name: {
-                    "fs_size_data": fs_size_data,
-                    "fs_used_data": fs_used_data,
-                    "fs_avail_data": fs_avail_data,
-                    "record_dates": record_dates,
-                }
+        for obj in self.model.objects.filtered_query(target_id=target_id).order_by("-record_date")[:50]:
+            chart_data.append({
+                "filesystem": obj.file_system,
+                "fsSize": obj.fs_size,
+                "fsUsed": obj.fs_used,
+                "fsAvail": obj.fs_avail,
+                "recordDates": obj.record_date.__format__("%d/%m/%y %H:%M:%S"),
             })
 
         return {
-            "distributed_data": distributed_data,
+            "chartDataKeys": [k for k in chart_data[0]],
+            "chartData": chart_data,
             "target_id": target_id,
-            "disk": True,
-            "chart_num_data": filesystems_id,
         }
 
 
@@ -145,13 +90,19 @@ class NetDataImporter(DjangoORMImporter, ABC):
         super().__init__(model)
 
     def import_data(self, target_id, *args, **kwargs):
+        chart_data = []
+
+        query = self.model.objects.filtered_query(
+            target_id=target_id,
+            record_date__gt=datetime.now() - timedelta(minutes=15))
+
         ifaces_ids = [
             i[0] for i in
-            self.model.objects.filter(target_id=target_id).values_list('interface_id').distinct()
+            self.model.objects.filtered_query(target_id=target_id).values_list('interface_id').distinct()
         ]
 
         ifaces_names = [
-            self.model.objects.filter(target_id=target_id, interface_id=iface_id).first().interface
+            self.model.objects.filtered_query(target_id=target_id, interface_id=iface_id).first().interface
             for iface_id in ifaces_ids
         ]
 
@@ -172,7 +123,9 @@ class NetDataImporter(DjangoORMImporter, ABC):
             tx_errors_collisions_data = []
             record_dates = []
 
-            for i in self.model.objects.filter(target_id=target_id, interface_id=iface_id).order_by("-record_date")[:50]:
+            for i in self.model.objects.filtered_query(target_id=target_id, interface_id=iface_id).order_by(
+                    "-record_date")[
+                     :50]:
                 rx_bytes_data.append(i.rx_bytes)
                 rx_packets_data.append(i.rx_packets)
                 rx_errors_errors_data.append(i.rx_errors_errors)

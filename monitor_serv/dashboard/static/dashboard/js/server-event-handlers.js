@@ -1,13 +1,11 @@
 import {
-    appPics,
-    cpuPics,
-    ethernetPics,
-    hardwareAttrs,
-    hardwareDropdownLocate,
-    ramPics,
-    serverPics,
-    ssdPics
-} from "./base.js";
+    APP_PICS, CPU_PICS, ETHERNET_PICS,
+    HARDWARE_ATTRS,
+    HARDWARE_DROPDOWN_LOCATE,
+    RAM_PICS,
+    SERVER_PICS,
+    SSD_PICS
+} from "../../../../static/js/base.js";
 
 function serverStatus(
     targetElem, status, availability,
@@ -79,22 +77,22 @@ function agentIsDown(response) {
         servers.find('.server-hostname').text("N/A");
         servers.find('.server-role').text("N/A");
 
-        servers.find(hardwareAttrs.server).attr('src', serverPics.serverMedia);
+        servers.find(HARDWARE_ATTRS.server).attr('src', SERVER_PICS.serverMedia);
 
-        servers.find(hardwareDropdownLocate.cpu).find('p').text('N/A');
-        servers.find(hardwareAttrs.cpu).attr('src', cpuPics.cpu);
+        servers.find(HARDWARE_DROPDOWN_LOCATE.cpu).find('p').text('N/A');
+        servers.find(HARDWARE_ATTRS.cpu).attr('src', CPU_PICS.cpu);
 
-        servers.find(hardwareDropdownLocate.ram).find('p').text('N/A');
-        servers.find(hardwareAttrs.ram).attr('src', ramPics.ram);
+        servers.find(HARDWARE_DROPDOWN_LOCATE.ram).find('p').text('N/A');
+        servers.find(HARDWARE_ATTRS.ram).attr('src', RAM_PICS.ram);
 
-        servers.find(hardwareDropdownLocate.disk).find('p').text('N/A');
-        servers.find(hardwareAttrs.disk).attr('src', ssdPics.deviceSsd);
+        servers.find(HARDWARE_DROPDOWN_LOCATE.disk).find('p').text('N/A');
+        servers.find(HARDWARE_ATTRS.disk).attr('src', SSD_PICS.deviceSsd);
 
-        servers.find(hardwareDropdownLocate.apps).find('p').text('N/A');
-        servers.find(hardwareAttrs.apps).attr('src', appPics.appIndicator);
+        servers.find(HARDWARE_DROPDOWN_LOCATE.apps).find('p').text('N/A');
+        servers.find(HARDWARE_ATTRS.apps).attr('src', APP_PICS.appIndicator);
 
-        servers.find(hardwareDropdownLocate.net).find('p').text('N/A');
-        servers.find(hardwareAttrs.net).attr('src', ethernetPics.ethernet);
+        servers.find(HARDWARE_DROPDOWN_LOCATE.net).find('p').text('N/A');
+        servers.find(HARDWARE_ATTRS.net).attr('src', ETHERNET_PICS.ethernet);
     }
 }
 

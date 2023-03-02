@@ -11,6 +11,7 @@ from django.test.runner import DiscoverRunner
 
 from . import forms, models
 
+
 # Create your tests here.
 
 
@@ -121,54 +122,8 @@ class TestAuth(TestCase):
         pass
 
 
-def add_targets():
-    from core_logic import pass_handler
-    from django.conf import settings
-
-    key = settings.ENCRYPTION_KEY
-
-    encrypted_passwd = pass_handler.encrypt_pass(password="test", encryption_key=key)
-
-    query = [
-        models.Target(
-            id=17, address="192.168.248.5", port=9200, username="test", password=encrypted_passwd,
-        ),
-        models.Target(
-            id=11, address="127.0.0.1", port=2000, username="test", password=encrypted_passwd,
-        ),
-        models.Target(
-            id=12, address="127.0.0.1", port=2001, username="test", password=encrypted_passwd,
-        ),
-        models.Target(
-            id=13, address="127.0.0.1", port=2002, username="test", password=encrypted_passwd,
-        ),
-        models.Target(
-            id=18, address="192.168.248.5", port=9201, username="test", password=encrypted_passwd,
-        ),
-        models.Target(
-            id=14, address="127.0.0.1", port=2003, username="test", password=encrypted_passwd,
-        ),
-    ]
-
-    for q in query:
-        q.save()
-
-
-def add_settings():
-    models.DashboardSettings(
-        command_id=1,
-        scraper_url="http://localhost:8001/api/monitor/metrics",
-        scrape_interval=15
-    ).save()
-
-
 class DashboardTests(TestCase):
     databases = {'iva_dashboard', 'default'}
-
-
-    @classmethod
-    def get_targets(cls):
-        return models.Target.objects.all()
 
     def setUp(self) -> None:
         # self.add_targets()
@@ -185,7 +140,6 @@ class DashboardTests(TestCase):
         self.assertEqual(response.status_code, 200)
 
     def test_cpu_top_info(self):
-        add_targets()
         response = self.client.get(urls.reverse("dashboard:cpu_top_info"))
         pprint(json.loads(response.content))
         self.assertEqual(response.status_code, 200)
@@ -197,7 +151,6 @@ class DashboardTests(TestCase):
         # self.assertContains(response, )
 
     def test_ram_info(self):
-        add_targets()
         response = self.client.get(urls.reverse("dashboard:ram_info"))
         pprint(json.loads(response.content))
         self.assertEqual(response.status_code, 200)
@@ -217,62 +170,37 @@ class DashboardTests(TestCase):
         print(objects)
 
     def test_db_filling(self):
-        add_targets()
         response: http.JsonResponse = self.client.get(urls.reverse("dashboard:hostnamectl"))
         # print(json.loads(response.content))
         self.assertEqual(response.status_code, 200)
 
     def test_net_model_filling(self):
-        add_targets()
         res = self.client.get(urls.reverse("dashboard:net_info"))
         self.assertEqual(res.status_code, 200)
         self.assertEqual(isinstance(res.content, bytes), True)
 
     def test_disk_model_filling(self):
-        add_settings()
-        add_targets()
         res = self.client.get(urls.reverse("dashboard:disk_info"))
         self.assertEqual(res.status_code, 200)
         self.assertEqual(isinstance(res.content, bytes), True)
 
     def test_cpu_model_filling(self):
-        add_settings()
-        add_targets()
         res = self.client.get(urls.reverse("dashboard:cpu_top_info"))
         self.assertEqual(res.status_code, 200)
         self.assertEqual(isinstance(res.content, bytes), True)
 
     def test_ram_model_filling(self):
-        add_settings()
-        add_targets()
         res = self.client.get(urls.reverse("dashboard:ram_info"))
         self.assertEqual(res.status_code, 200)
         self.assertEqual(isinstance(res.content, bytes), True)
 
     def test_get_all_data_from_agent(self):
-        add_targets()
-        models.DashboardSettings(
-            command_id=1,
-            scraper_url="http://localhost:8001/api/monitor/metrics/targets/all",
-            scraper_url_health_check="http://localhost:8001/api/monitor/ping",
-            scrape_interval=15
-        ).save()
-
         res = self.client.get(urls.reverse("dashboard:get_all_data_from_agent"))
         print(res.content)
         self.assertEqual(res.status_code, 200)
         self.assertEqual(isinstance(res.content, bytes), True)
 
     def test_check_agent_health(self):
-        add_targets()
-        models.DashboardSettings(
-            command_id=1,
-            scraper_url="http://localhost:8001/api/monitor/metrics/targets/all",
-            scraper_url_health_check="http://localhost:8001/api/monitor/ping",
-            scrape_interval=15
-        ).save()
-
         res = self.client.get(urls.reverse("dashboard:check_agent_health"))
         print(res.content)
         self.assertEqual(res.status_code, 200)
-

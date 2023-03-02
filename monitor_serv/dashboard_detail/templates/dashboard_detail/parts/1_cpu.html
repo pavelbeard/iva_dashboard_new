@@ -1,19 +1,10 @@
 {% extends "dashboard_detail/base/1_base.html" %}
 {% load static %}
 {% block cpu_graph%}
-    <canvas id="lineChart" width="300" height="100"></canvas>
+    {{ chartData|json_script:"chartData" }}
+    {{ target_id|json_script:"target_id" }}
 
-    {{ cpu_idle_data|json_script:"cpu-idle-data" }}
-    {{ cpu_iowait_data|json_script:"cpu-iowait-data" }}
-    {{ cpu_irq_data|json_script:"cpu-irq-data" }}
-    {{ cpu_nice_data|json_script:"cpu-nice-data" }}
-    {{ cpu_softirq_data|json_script:"cpu-softirq-data" }}
-    {{ cpu_steal_data|json_script:"cpu-steal-data" }}
-    {{ cpu_sys_data|json_script:"cpu-sys-data" }}
-    {{ cpu_user_data|json_script:"cpu-user-data" }}
-    {{ record_dates|json_script:"labels" }}
-
-    <input type="hidden" id="cpu-url" data-url="{% url 'dashboard_detail:cpu' target_id %}">
+    <input type="hidden" id="cpu-url" data-url="{% url 'dashboard_detail:cpu' target_id  %}">
 
     <script type="module" src="{% static 'dashboard_detail/js/cpu-monitoring.js' %}"></script>
 {% endblock %}
