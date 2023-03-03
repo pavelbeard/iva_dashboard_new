@@ -56,7 +56,7 @@ services:
       iva_dashboard_net:
         ipv4_address: 10.0.96.12
     ports:
-      - "8012:5432"
+      - "8042:5432"
     restart: always
 
   monitor-postgres:
