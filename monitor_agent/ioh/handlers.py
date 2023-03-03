@@ -181,54 +181,35 @@ class NetIfconfigOutputHandler(CommandOutputHandlerBase):
         :param data: Данные команды ifconfig
         :return: {}
         """
-        data = data.replace("\r", "")
-
-        PATTERN = "(.*|.*:.*):\s.*<(\w{2,4}).*\n\s+inet\s(\d+.\d+.\d+.\d+)\s+netmask\s(\d+.\d+.\d+.\d+).*\n|" + \
-                  ".*\n\s+RX\spackets\s(\d+)\s+bytes\s(\d+).*\n" + \
-                  ".*RX\serrors\s(\d+)\s+dropped\s(\d+)\s+overruns\s(\d+)\s+frame\s(\d+)\n" + \
-                  "\s+TX\spackets\s(\d+)\s+bytes\s(\d+)\s.*\n" + \
-                  "\s+TX\serrors\s(\d+)\s+dropped\s(\d+)\s+overruns\s(\d+)\s+carrier\s(\d+)\s+collisions\s(\d+)"
-
-        IFACES_INFO = re.findall(PATTERN, data, re.MULTILINE)
-
-        FORMAT_IFACES_INFO = []
-
-        for i, interface in enumerate(IFACES_INFO):
-            if all([x == "" for x in interface[0:3]]):
-                new_array = tuple([x for x in IFACES_INFO[i - 1] + IFACES_INFO[i] if x != ""])
-                FORMAT_IFACES_INFO.pop()
-                FORMAT_IFACES_INFO.append(new_array)
-            else:
-                FORMAT_IFACES_INFO.append(interface)
+        from ifconfigparser import IfconfigParser
+        interfaces = IfconfigParser(data)
 
         net_data = []
+        for i in interfaces.get_interfaces():
+            iface = interfaces.get_interface(i)
 
-        for interface in FORMAT_IFACES_INFO:
-            _interface_ = [0 if i == '' else i for i in interface]
-
-            interface, status, ip_address, netmask, \
-                rx_packets, rx_bytes, rx_errors1, rx_errors2, rx_errors3, rx_errors4, \
-                tx_packets, tx_bytes, tx_errors1, tx_errors2, tx_errors3, tx_errors4, tx_errors5 = interface
-            net_data.append({
-                "interface": interface,
-                "status": status,
+            dict = {
+                "interface": iface.name,
+                "status": iface.state,
                 "ip_address": DigitalDataConverters.from_cidr_to_prefixlen(
-                    ip_address, netmask
+                    iface.ipv4_addr, iface.ipv4_mask
                 ),
-                "rx_bytes": rx_bytes,
-                "rx_packets": rx_packets,
-                "rx_errors_errors": rx_errors1,
-                "rx_errors_dropped": rx_errors2,
-                "rx_errors_overruns": rx_errors3,
-                "rx_errors_frame": rx_errors4,
-                "tx_bytes": tx_bytes,
-                "tx_packets": tx_packets,
-                "tx_errors_errors": tx_errors1,
-                "tx_errors_dropped": tx_errors2,
-                "tx_errors_overruns": tx_errors3,
-                "tx_errors_carrier": tx_errors4,
-                "tx_errors_collisions": tx_errors5
-            })
+                "rx_bytes": iface.rx_bytes,
+                "rx_packets": iface.rx_packets,
+                "rx_errors_errors": iface.rx_errors,
+                "rx_errors_dropped": iface.rx_dropped,
+                "rx_errors_overruns": iface.rx_overruns,
+                "rx_errors_frame": iface.rx_frame,
+                "tx_bytes": iface.tx_bytes,
+                "tx_packets": iface.tx_packets,
+                "tx_errors_errors": iface.tx_errors,
+                "tx_errors_dropped": iface.tx_dropped,
+                "tx_errors_overruns": iface.tx_overruns,
+                "tx_errors_carrier": iface.tx_carrier,
+                "tx_errors_collisions": iface.tx_collisions
+            }
+
+            net_data.append(list(map(lambda x: 0 if x is None else x, list(dict.values()))))
 
         return net_data
 

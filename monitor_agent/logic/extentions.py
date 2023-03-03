@@ -1,3 +1,6 @@
+import math
+
+
 def singleton(cls_):
     instances = {}
 
@@ -44,28 +47,39 @@ class DigitalDataConverters:
             return float(amount[:-1])
 
     @staticmethod
-    def convert_bytes_to_metric(amount: str) -> str:
+    def convert_bytes_to_metric(amount) -> str:
         """
         Конвертирует байты в международные единицы измерения информации в метрической системе.\n
         :param amount: Количество байтов
         :return: str
         """
-        try:
-            amount_of_bytes = float(amount)
-            if 0.0 <= amount_of_bytes < 1000.0:
-                return f"{amount_of_bytes:10.2f}B".strip()
-            elif 1000.0 <= amount_of_bytes < 1_000_000.0:
-                return f"{amount_of_bytes / 1000:10.2f}KB".strip()
-            elif 1_000_000.0 <= amount_of_bytes < 1_000_000_000.0:
-                return f"{amount_of_bytes / 1000 ** 2:10.2f}MB".strip()
-            elif 1_000_000_000.0 <= amount_of_bytes <= 1_000_000_000_000.0:
-                return f"{amount_of_bytes / 1000 ** 3:10.2f}GB".strip()
-            elif 1_000_000_000_000.0 <= amount_of_bytes <= 1_000_000_000_000_000.0:
-                return f"{amount_of_bytes / 1000 ** 4:10.2f}TB".strip()
-            else:
-                return str(int(amount_of_bytes))
-        except ValueError:
-            return '0'
+        # try:
+        #     amount_of_bytes = float(amount)
+        #     if 0.0 <= amount_of_bytes < 1000.0:
+        #         return f"{amount_of_bytes:10.2f}B".strip()
+        #     elif 1000.0 <= amount_of_bytes < 1_000_000.0:
+        #         return f"{amount_of_bytes / 1000:10.2f}KB".strip()
+        #     elif 1_000_000.0 <= amount_of_bytes < 1_000_000_000.0:
+        #         return f"{amount_of_bytes / 1000 ** 2:10.2f}MB".strip()
+        #     elif 1_000_000_000.0 <= amount_of_bytes <= 1_000_000_000_000.0:
+        #         return f"{amount_of_bytes / 1000 ** 3:10.2f}GB".strip()
+        #     elif 1_000_000_000_000.0 <= amount_of_bytes <= 1_000_000_000_000_000.0:
+        #         return f"{amount_of_bytes / 1000 ** 4:10.2f}TB".strip()
+        #     else:
+        #         return str(int(amount_of_bytes))
+        # except ValueError:
+        #     return '0'
+        size_bytes = int(amount)
+
+        if size_bytes == 0:
+            return "0B"
+
+        size_name = ("B", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB", )
+        i = int(math.floor(math.log(size_bytes, 1024)))
+        p = math.pow(1024, i)
+        s = round(size_bytes / p, 2)
+
+        return f"{s}{size_name[i]}"
 
     @staticmethod
     def from_cidr_to_prefixlen(ipaddr: str, netmask: str) -> str:
