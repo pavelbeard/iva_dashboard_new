@@ -6,7 +6,7 @@
 *.sql
 *.sqlite3
 *-venv
-*.tar
+docker-images
 crm_status.txt
 
 /postgres-files
