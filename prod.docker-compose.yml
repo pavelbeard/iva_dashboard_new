@@ -3,15 +3,13 @@ version: '3.9'
 services:
 
   monitor-nginx:
-    build:
-      context: .
-      dockerfile: test.monitor_nginx.Dockerfile
+    image: pavelbeard/monitor-nginx:v1.0
     container_name: monitor-nginx
     volumes:
       - static_files:/home/monitor-server-app/web/staticfiles
     networks:
       iva_dashboard_net:
-        ipv4_address: 2.0.96.4
+        ipv4_address: 10.0.96.4
     ports:
       - "8004:80"
     depends_on:
@@ -25,17 +23,16 @@ services:
         window: 120s
 
   monitor-server:
-    build:
-      context: .
-      dockerfile: test.monitor_serv.Dockerfile
+    image: pavelbeard/monitor-server:v1.8
     container_name: monitor-server
     env_file:
-      - env/test.monitor-serv.env
+      - env/prod.monitor-serv.env
+    entrypoint: ["python3.11", "/home/monitor-server-app/web/entrypoint.py"]
     volumes:
       - static_files:/home/monitor-server-app/web/staticfiles
     networks:
       iva_dashboard_net:
-        ipv4_address: 2.0.96.3
+        ipv4_address: 10.0.96.3
     depends_on:
       - monitor-postgres
     restart: on-failure
@@ -48,17 +45,13 @@ services:
 
 
   monitor-postgres:
-    build:
-      context: .
-      dockerfile: test.monitor_postgres.Dockerfile
+    image: pavelbeard/monitor-postgres:v1.0
     container_name: monitor-postgres
     env_file:
-      - env/test.postgres.env
+      - env/prod.monitor-postgres.env
     networks:
       iva_dashboard_net:
-        ipv4_address: 2.0.96.2
-    ports:
-      - "8002:5432"
+        ipv4_address: 10.0.96.2
     restart: on-failure
     deploy:
       restart_policy:
@@ -68,15 +61,14 @@ services:
         window: 120s
 
   monitor-agent:
-    build:
-      context: .
-      dockerfile: test.monitor_agent.Dockerfile
+    image: pavelbeard/monitor-agent:v1.9
     container_name: monitor-agent
     env_file:
-      - env/test.monitor_agent.env
+      - env/prod.monitor-agent.env
+    entrypoint: ["python3.11", "/home/monitor-agent-app/monitor_agent/entrypoint.py"]
     networks:
       iva_dashboard_net:
-        ipv4_address: 2.0.96.1
+        ipv4_address: 10.0.96.1
     depends_on:
       - monitor-server
     restart: on-failure
@@ -92,8 +84,8 @@ networks:
   iva_dashboard_net:
     ipam:
       config:
-        - subnet: 2.0.96.0/28
-          gateway: 2.0.96.14
+        - subnet: 10.0.96.0/28
+          gateway: 10.0.96.14
 
 volumes:
   postgres_files:
