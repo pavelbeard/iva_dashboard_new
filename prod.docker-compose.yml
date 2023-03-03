@@ -11,7 +11,7 @@ services:
       iva_dashboard_net:
         ipv4_address: 10.0.96.4
     ports:
-      - "8004:80"
+      - "8040:80"
     depends_on:
       - monitor-server
     restart: on-failure
@@ -23,7 +23,9 @@ services:
         window: 120s
 
   monitor-server:
-    image: pavelbeard/monitor-server:v1.8
+    build:
+      context: .
+      dockerfile: prod.monitor_serv.Dockerfile
     container_name: monitor-server
     env_file:
       - env/prod.monitor-serv.env
@@ -61,7 +63,9 @@ services:
         window: 120s
 
   monitor-agent:
-    image: pavelbeard/monitor-agent:v1.9
+    build:
+      context: .
+      dockerfile: prod.monitor_agent.Dockerfile
     container_name: monitor-agent
     env_file:
       - env/prod.monitor-agent.env

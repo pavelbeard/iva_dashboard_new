@@ -1,5 +1,6 @@
-FROM pavelbeard/monitor-agent:v1.7
+FROM pavelbeard/monitor-agent:v1.9
+
+COPY monitor_agent .
 
 
-ENTRYPOINT ["python3.11", "/home/monitor-agent-app/monitor_agent/entrypoint.py"]
 
