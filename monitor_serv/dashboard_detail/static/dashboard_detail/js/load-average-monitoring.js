@@ -3,10 +3,10 @@ import {ChartBuilder} from "./chart-builder.js";
 
 window.onload = async function () {
     const chartData = JSON.parse(document.getElementById("chartData").textContent);
-    const titles = ["Всего ОЗУ, bytes", "Мониторинг ОЗУ, bytes"];
-    const chartIdArray = ["lineChartRam1", "lineChartRam2"];
+    const titles = ["Средняя загрузка сервера"];
+    const chartIdArray = ["lineChartLA1"];
 
     const charts = ChartBuilder.build(chartData, titles, chartIdArray)
 
-    setInterval(chartUpdate, 5000, 'ram-url', charts);
+    setInterval(chartUpdate, 5000, 'la-url', charts);
 }

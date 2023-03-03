@@ -1,8 +1,5 @@
-import random
 import uuid
 
-from core_logic.importers import (CPUDataImporter, DiskDataImporter,
-                                  NetDataImporter, RAMDataImporter)
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 from django.db.models import fields
@@ -78,14 +75,6 @@ class CPU(models.Model):
 
     target = models.ForeignKey(Target, on_delete=models.CASCADE, verbose_name="Сервер:")
 
-    @classmethod
-    def import_data_from_psql(cls, target_id, filter_key="minutes", time_value=15):
-        return CPUDataImporter(cls).import_data(
-            target_id=target_id,
-            filter_key=filter_key,
-            time_value=time_value
-        )
-
     def __str__(self):
         return f"CPU Data from target host {self.target.address}"
 
@@ -108,13 +97,6 @@ class RAM(models.Model):
 
     target = models.ForeignKey(Target, on_delete=models.CASCADE, verbose_name="Сервер:")
 
-    @classmethod
-    def import_data_from_psql(cls, target_id, filter_key="minutes", time_value=15):
-        return RAMDataImporter(cls).import_data(
-            target_id=target_id,
-            filter_key=filter_key,
-            time_value=time_value)
-
     def __str__(self):
         return f"RAM Data from target host {self.target.address}."
 
@@ -136,10 +118,6 @@ class DiskSpace(models.Model):
     record_date = fields.DateTimeField(default=timezone.now, null=False, verbose_name="Время опроса:")
 
     target = models.ForeignKey(Target, on_delete=models.CASCADE, verbose_name="Сервер:")
-
-    @classmethod
-    def import_data_from_psql(cls, target_id):
-        return DiskDataImporter(cls).import_data(target_id=target_id)
 
     def __str__(self):
         return f"Disk space data from target host {self.target.address}."
@@ -204,10 +182,6 @@ class NetInterface(models.Model):
     record_date = fields.DateTimeField(default=timezone.now, null=False, verbose_name="Время опроса:")
 
     target = models.ForeignKey(Target, on_delete=models.CASCADE, verbose_name="Сервер:")
-
-    @classmethod
-    def import_data_from_psql(cls, target_id):
-        return NetDataImporter(cls).import_data(target_id=target_id)
 
     def __str__(self):
         return f"Net interface data from target host {self.target.address}."

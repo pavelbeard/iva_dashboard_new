@@ -4,7 +4,8 @@ from django.contrib import messages
 from django.http import JsonResponse
 from django.urls import reverse
 
-from core_logic.filters import BaseDatetimeFilter
+from core_logic.chart import Chart
+from core_logic.filters import FilterByMinutes
 from dashboard.models import Target
 from monitor_serv import settings
 
@@ -48,30 +49,52 @@ class ContextDataFromImporterMixin:
     """
     model = None
     reverse_style_url = None
+    chart_class = None
+    keys = None
+    filter = None
+    time_value = None
 
-    def get_context_data(self, target_id, **kwargs):
+    def get_context_data(self, target_id, *args, **kwargs):
         context = super().get_context_data()
-        context |= self.model.import_data_from_psql(target_id=target_id)
-        context |= {"urls": [{"url": partial(reverse, self.reverse_style_url, kwargs={"target_id": i.id}),
-                              "address": i.address}
-                             for i in Target.objects.filter(is_being_scan=True).order_by('address')]}
-        context |= {"address": Target.objects.filter(id=target_id).first().address}
+        chart = self.chart_class(self.model)
+
+        data = []
+
+        filter = FilterByMinutes.get_filter(self.time_value)
+
+        for nested_keys in self.keys:
+            data.append(chart.create_chart_data(
+                nested_keys,
+                target_id,
+                filter, *args, **kwargs
+            ))
+
+        context['chartData'] = data
+        context['target_id'] = target_id
+
+        urls = []
+
+        for obj in Target.objects.filter(is_being_scan=True).order_by('address'):
+            urls.append({
+                'url': reverse(self.reverse_style_url, kwargs={'target_id': obj.id}),
+                'address': obj.address
+            })
+
+        context['urls'] = urls
+        context['address'] = Target.objects.filter(id=target_id).first().address
+
         return context
 
     def get(self, request, *args, **kwargs):
         target_id = int(kwargs.get('target_id'))
         context = self.get_context_data(target_id=target_id)
+
         if not request.headers.get('Content-Type') == "application/json":
             return self.render_to_response(context)
         else:
-            del context['view']
-            del context['filters']
-            del context['urls']
+            for key in ['view', 'filters', 'urls']:
+                context.pop(key)
             return JsonResponse(context, safe=False)
-
-    def post(self, request, *args, **kwargs):
-        self.object = self.get_object()
-        return super().post(request, *args, **kwargs)
 
 
 class DatetimeFiltersMixin:
@@ -91,7 +114,7 @@ class DatetimeFiltersMixin:
                    "Данные за неделю", "Данные за месяц", "Данные за полгода",
                    "Данные за год", "Вручную")
 
-    def get_context_data(self, **kwargs):
+    def get_context_data(self, *args, **kwargs):
         context = super().get_context_data()
-        context |= {"filters": zip(self.filter_keys, self.time_values, self.locale_keys)}
+        context['filters'] = zip(self.filter_keys, self.time_values, self.locale_keys)
         return context

@@ -1,7 +1,10 @@
 {% extends "dashboard_detail/base/1_base.html" %}
+{% load static %}
 {% block ram_graph%}
-    {% for chart_num in chart_num_data %}
-        <canvas id="lineChart{{ chart_num }}" width="300" height="100"
-                {% if chart_num != 0 %}class="pt-3 pb-3"{% endif %}></canvas>
-    {% endfor %}
+    {{ chartData|json_script:"chartData" }}
+    {{ target_id|json_script:"target_id" }}
+
+    <input type="hidden" id="disk-url" data-url="{% url 'dashboard_detail:disk' target_id %}">
+
+    <script type="module" src="{% static 'dashboard_detail/js/disk-monitoring.js' %}"></script>
 {% endblock %}

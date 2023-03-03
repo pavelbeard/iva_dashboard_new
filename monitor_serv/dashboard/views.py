@@ -1,6 +1,8 @@
 import json
 
 import requests
+
+
 from core_logic.views import AppVersionMixin, DevCredentialsMixin
 from django.conf import settings
 from django.contrib import messages

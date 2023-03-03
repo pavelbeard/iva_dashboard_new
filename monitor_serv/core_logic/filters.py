@@ -17,8 +17,8 @@ class BaseDatetimeFilter(ABC):
         return {mthd.__name__.split("By")[1].lower(): mthd.get_filter for mthd in cls.__subclasses__()}
 
     @classmethod
-    def filter(cls, filter_id):
-        return cls._filters_dict().get(filter_id)
+    def filter(cls, filter_key):
+        return cls._filters_dict().get(filter_key)
 
     @classmethod
     def get_filter_list(cls, filter_keys_tuple):
@@ -28,8 +28,8 @@ class BaseDatetimeFilter(ABC):
 
 class FilterByMinutes(BaseDatetimeFilter, ABC):
     @staticmethod
-    def get_filter(*args):
-        return Q(record_date__gt=timezone.now() - timedelta(minutes=args[0]))
+    def get_filter(minutes):
+        return Q(record_date__gt=timezone.now() - timedelta(minutes=minutes))
 
 
 class FilterByHours(BaseDatetimeFilter, ABC):

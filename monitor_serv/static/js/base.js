@@ -172,21 +172,24 @@ export function setChartConfig(
     };
 }
 
-export async function chartUpdate(urlId, chart) {
+export async function chartUpdate(urlId, charts) {
     const url = document.getElementById(urlId).getAttribute('data-url');
     const newData = await fetch(url, {
         method: HTTP_METHODS.get, headers: HEADERS
     }).then(async response => await response.json());
 
-    if (typeof(newData['chartData']) === typeof([])) {
-        newData['chartData'].forEach(data => {
-            chart.config.data = data;
-        });
-    } else {
-        chart.config.data = newData['chartData']
-    }
+    charts.forEach((chart, i=0) => {
+        chart.config.data = newData['chartData'][i]; i++;
+        chart.update();
+    })
 
-    chart.update()
+    console.log(newData)
+    // newData['chartData'].forEach(data => {
+    //     charts.forEach(chart => {
+    //         chart.config.data = data;
+    //         chart.update()
+    //     });
+    // });
 }
 
 export function chartGenerator(chartId, config) {

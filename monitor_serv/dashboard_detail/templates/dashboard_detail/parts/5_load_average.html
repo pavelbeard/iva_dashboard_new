@@ -1,0 +1,10 @@
+{% extends "dashboard_detail/base/1_base.html" %}
+{% load static %}
+{% block ram_graph%}
+    {{ chartData|json_script:"chartData" }}
+    {{ target_id|json_script:"target_id" }}
+
+    <input type="hidden" id="la-url" data-url="{% url 'dashboard_detail:load_average' target_id %}">
+
+    <script type="module" src="{% static 'dashboard_detail/js/load-average-monitoring.js' %}"></script>
+{% endblock %}

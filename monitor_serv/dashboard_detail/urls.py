@@ -9,4 +9,5 @@ urlpatterns = [
     urls.path('ram-detail/<int:target_id>/', views.RAMDetailView.as_view(), name="ram"),
     urls.path('disk-detail/<int:target_id>/', views.DiskSpaceDetailView.as_view(), name="disk"),
     urls.path('net-detail/<int:target_id>/', views.NetInterfaceView.as_view(), name="net"),
+    urls.path('la-detail/<int:target_id>/', views.LoadAverageView.as_view(), name="load_average"),
 ]
