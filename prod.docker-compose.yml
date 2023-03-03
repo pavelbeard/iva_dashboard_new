@@ -4,7 +4,7 @@ services:
 
   monitor-nginx:
     image: pavelbeard/monitor-nginx:v1.0
-    container_name: monitor-nginx
+    container_name: monitor-nginx-v1.0
     volumes:
       - static_files:/home/monitor-server-app/web/staticfiles
     networks:
@@ -26,7 +26,7 @@ services:
     build:
       context: .
       dockerfile: prod.monitor_serv.Dockerfile
-    container_name: monitor-server
+    container_name: monitor-server-v1.8
     env_file:
       - env/prod.monitor-serv.env
     entrypoint: ["python3.11", "/home/monitor-server-app/web/entrypoint.py"]
@@ -48,7 +48,7 @@ services:
 
   monitor-postgres:
     image: pavelbeard/monitor-postgres:v1.0
-    container_name: monitor-postgres
+    container_name: monitor-postgres-v1.0
     env_file:
       - env/prod.monitor-postgres.env
     networks:
@@ -66,7 +66,7 @@ services:
     build:
       context: .
       dockerfile: prod.monitor_agent.Dockerfile
-    container_name: monitor-agent
+    container_name: monitor-agent-v1.9
     env_file:
       - env/prod.monitor-agent.env
     entrypoint: ["python3.11", "/home/monitor-agent-app/monitor_agent/entrypoint.py"]
