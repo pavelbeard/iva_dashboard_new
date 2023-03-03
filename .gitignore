@@ -6,6 +6,7 @@
 *.sql
 *.sqlite3
 *-venv
+*.tar
 crm_status.txt
 
 /postgres-files
