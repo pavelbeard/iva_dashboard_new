@@ -47,9 +47,9 @@ class CustomUserAdmin(UserAdmin):
     @admin.display(description="Группы")
     def display_groups(self, queryset):
         try:
-            groups = [group.name for group in models.Group.objects.filtered_query(customuser=queryset)]
+            groups = [group.name for group in models.Group.objects.filter(customuser=queryset)]
             return groups
-        except queryset.ObjectDoesNotExists:
+        except queryset.DoesNotExist:
             return "N/A"
 
 

@@ -188,7 +188,7 @@ class NetIfconfigOutputHandler(CommandOutputHandlerBase):
         for i in interfaces.get_interfaces():
             iface = interfaces.get_interface(i)
 
-            dict = {
+            my_dict = {
                 "interface": iface.name,
                 "status": iface.state,
                 "ip_address": DigitalDataConverters.from_cidr_to_prefixlen(
@@ -209,7 +209,8 @@ class NetIfconfigOutputHandler(CommandOutputHandlerBase):
                 "tx_errors_collisions": iface.tx_collisions
             }
 
-            net_data.append(list(map(lambda x: 0 if x is None else x, list(dict.values()))))
+            net_data.append(dict(
+                map(lambda kv: (kv[0], 0) if kv[1] is None else (kv[0], kv[1]), my_dict.items())))
 
         return net_data
 

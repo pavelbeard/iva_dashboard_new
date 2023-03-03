@@ -161,7 +161,7 @@ class DiskSpaceStatistics(models.Model):
 class NetInterface(models.Model):
     uuid_record = fields.UUIDField(default=uuid.uuid4, primary_key=True, editable=False)
     interface = fields.CharField(null=False, default="none", max_length=32, verbose_name="Интерфейс:")
-    status = fields.CharField(null=False, default="none", max_length=4, verbose_name="Состояние:")
+    status = fields.CharField(null=False, default="none", max_length=64, verbose_name="Состояние:")
     ip_address = fields.GenericIPAddressField(null=False, default="0.0.0.0", verbose_name="IP-адрес интерфейса:")
     rx_bytes = fields.BigIntegerField(null=False, default=0, verbose_name="Получено байтов:")
     rx_packets = fields.BigIntegerField(null=False, default=0, verbose_name="Получено пакетов:")
