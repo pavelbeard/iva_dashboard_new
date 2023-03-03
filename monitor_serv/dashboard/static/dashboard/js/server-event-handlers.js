@@ -14,7 +14,7 @@ function serverStatus(
     hardwarePics=[]
 ) {
     targetElem.attr('data-available', availability);
-    targetElem.find('.server-status').text(status);
+    targetElem.find(HARDWARE_DROPDOWN_LOCATE.server).find('p').text(status);
     targetElem.find(`[data-add-info="server-add-info-indicator"]`).text(reason);
 
     if (role !== "") {
