@@ -117,7 +117,7 @@ DATABASES = {
         },
         'NAME': os.getenv('IVCS_POSTGRES_DB_NAME', "ivcs"),
         'USER': os.getenv('IVCS_POSTGRES_DB_USER', "ivcs"),
-        'PASSWORD': os.getenv('IVCS_POSTGRES_DB_PASSWORD', "kbxa"),
+        'PASSWORD': os.getenv('IVCS_POSTGRES_DB_PASSWORD', "ivcs"),
         'HOST': os.getenv('IVCS_POSTGRES_DB_HOST', "localhost"),
         'PORT': os.getenv('IVCS_POSTGRES_DB_PORT', "8012")
     }
@@ -224,4 +224,4 @@ SCRAPE_INTERVAL = os.getenv("SCRAPE_INTERVAL", 15)
 
 DATETIME_FORMAT = "%d/%m/%y %H:%M:%S"
 
-APP_VERSION = "v0.9.29"
+APP_VERSION = "v0.9.31"

@@ -4,10 +4,10 @@ export class ChartBuilder {
     constructor() {
 
     }
-    static build(chartData, chartTitles, chartIdArray) {
+    static build(chartData, chartTitles, chartIdArray, cb=undefined) {
         let configs = [];
         chartData.forEach((chartDataItem, i=0) => {
-            configs.push(setChartConfig(chartTitles[i], chartDataItem)); i++;
+            configs.push(setChartConfig(chartTitles[i], chartDataItem, cb)); i++;
         })
 
         let charts = [];

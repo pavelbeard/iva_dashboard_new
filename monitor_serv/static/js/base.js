@@ -11,19 +11,18 @@ export const HTTP_METHODS = {
     delete: "DELETE",
 }
 
-export const COLOR_PALLET = [
-	"#98e5fa", "#ee36f9", "#00bf00",
-	"#0042ee", "#008600", "#6912b6",
-	"#00f9db", "#6e00a1", "#005300",
-	"#bf63ff", "#135e13", "#ff7bff",
-	"#004900", "#dd8aff", "#ae8400",
-	"#4b0085", "#00efff", "#930051",
-	"#00edff", "#670046", "#00c1ff",
-	"#745c00", "#2f36a0", "#ba614d",
-	"#009aff", "#2e1f00", "#3d9cff",
-	"#0d110b", "#ca7ce1", "#00395d",
-	"#a2afff", "#004d71", "#003f94",
-];
+export function formatBytes(bytes, decimals = 2) {
+    if (!+bytes) return '0 Bytes'
+
+    const k = 1024
+    const dm = decimals < 0 ? 0 : decimals
+    const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB']
+
+    const i = Math.floor(Math.log(bytes) / Math.log(k))
+
+    return `${parseFloat((bytes / Math.pow(k, i)).toFixed(dm))} ${sizes[i]}`
+}
+
 
 const IMG_PATH = "/static/dashboard/images/bootstrap-svg";
 
@@ -124,7 +123,7 @@ export function setChartData(xLabels, dataLabels, data) {
 }
 
 export function setChartConfig(
-    title="",data=undefined,
+    title="",data=undefined, callback=undefined,
     type="line", responsive=true,
     position="top", size=14) {
     return  {
@@ -156,12 +155,13 @@ export function setChartConfig(
                 },
             },
             scales: {
-                yAxes: [{
+                y: [{
                     display: true,
                     gridLines: {
                         color: "#0F99CD"
                     },
                     ticks: {
+                        callback: callback,
                         max: 100,
                         min: 0,
                         padding: 20
@@ -203,7 +203,7 @@ export function chartGenerator(chartId, config) {
     const chart = new Chart(context, config);
 
     const totalLabels = chart.data.labels.length;
-    const maxLabelsWidth = 60;
+    const maxLabelsWidth = 100;
     const containerChart = document.querySelector('.container-chart');
 
 

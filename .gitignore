@@ -7,6 +7,6 @@
 *.sqlite3
 *-venv
 docker-images
-crm_status.txt
+for_testing
 
 /postgres-files

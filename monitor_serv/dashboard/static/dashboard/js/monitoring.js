@@ -196,7 +196,9 @@ function dataDistributor(responseData) {
 
         // проверяются данные каждого id на соответствие типу данных
         if (!(typeof (scrapedData) === typeof({}) || typeof (scrapedData) === typeof([]))) {
-            if (scrapedData.includes('unable to connect') || scrapedData.includes('unexpected exception'))
+            if (scrapedData.includes('unable to connect')
+                || scrapedData.includes('unexpected exception')
+                || scrapedData.includes('Connect call failed'))
                 serverIsDown(key, scrapedData,
                     Object.values(HARDWARE_ATTRS), Object.values(SERVER_DOWN_PICS));
             else if (scrapedData.includes('bad credentials'))
