@@ -6,11 +6,11 @@ window.onload = async function () {
     const titles = ["Размер файловой системы, bytes", "Занято места, bytes", "Доступно места, bytes"];
     const chartIdArray = ["lineChartDisk1", "lineChartDisk2", "lineChartDisk3"];
 
-    let cb = function (value, index, values) {
-        return formatBytes(value);
-    };
+    // let cb = function (value, index, values) {
+    //     return formatBytes(value);
+    // };
 
-    const charts = ChartBuilder.build(chartData, titles, chartIdArray, cb);
+    const charts = ChartBuilder.build(chartData, titles, chartIdArray);
 
     setInterval(chartUpdate, 5000, 'disk-url', charts);
 }

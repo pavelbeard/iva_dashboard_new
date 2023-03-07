@@ -6,7 +6,7 @@ from core_logic.views import (
     ContextDataFromImporterMixin,
     DatetimeFiltersMixin,
 )
-from core_logic.filters import BaseDatetimeFilter
+from core_logic.filters import BaseDatetimeFilter, filters_dict
 from dashboard.models import CPU, RAM, DiskSpace, NetInterface, LoadAverage
 
 
@@ -27,8 +27,7 @@ class CPUDetailView(
         "cpu_nice", "cpu_softirq", "cpu_steal",
         "cpu_sys", "cpu_user"
     ), )
-    filter = BaseDatetimeFilter.filter("minutes")
-    time_value = 15
+    filter = filters_dict.get_filter("from1hour")
 
 
 class RAMDetailView(
@@ -46,8 +45,6 @@ class RAMDetailView(
         ("ram_used", "ram_free", "ram_shared",
          "ram_buff_cache", "ram_avail")
     )
-    filter = BaseDatetimeFilter.filter("minutes")
-    time_value = 15
 
 
 class DiskSpaceDetailView(
@@ -65,8 +62,6 @@ class DiskSpaceDetailView(
         ("fs_used", ),
         ("fs_avail", ),
     )
-    filter = BaseDatetimeFilter.filter("minutes")
-    time_value = 15
 
 
 class NetInterfaceView(
@@ -84,8 +79,6 @@ class NetInterfaceView(
         ("rx_packets", "tx_packets"),
         ("rx_errors_errors", "rx_errors_dropped"),
     )
-    filter = BaseDatetimeFilter.filter("minutes")
-    time_value = 15
 
 
 class LoadAverageView(AppVersionMixin, ContextDataFromImporterMixin, DatetimeFiltersMixin, TemplateView):
@@ -96,5 +89,3 @@ class LoadAverageView(AppVersionMixin, ContextDataFromImporterMixin, DatetimeFil
     keys = (
         ("one_min", "five_min", "fteen_min"),
     )
-    filter = BaseDatetimeFilter.filter("minutes")
-    time_value = 15

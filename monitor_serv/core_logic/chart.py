@@ -21,7 +21,7 @@ class Chart:
         query = self.model \
             .objects \
             .filter(Q(target_id=target_id) & filter) \
-            .order_by("-record_date")
+            .order_by("record_date")
 
         for num, key in enumerate(keys):
             datasets.append({
@@ -104,7 +104,7 @@ class DiskSpaceChart(Chart):
                 query = self.model\
                     .objects\
                     .filter(Q(target_id=target_id) & Q(cluster_id=fs_name_id) & filter) \
-                    .order_by("-record_date")
+                    .order_by("record_date")
                 datasets.append({
                     "label": "{" + query.filter(cluster_id=fs_name_id).first().file_system + "}=" + key,
                     "backgroundColor": "#" + self.COLOR_PALETTE[fs_name_id],
@@ -116,8 +116,8 @@ class DiskSpaceChart(Chart):
                     i, "record_date").__format__("%d/%m/%y %H:%M:%S"), query))
 
         return {
-            "labels": labels,
-            "datasets": datasets
+             "labels": labels,
+             "datasets": datasets
         }
 
 
@@ -140,7 +140,7 @@ class NetInterfaceChart(Chart):
                     .model\
                     .objects\
                     .filter(Q(target_id=target_id) & Q(interface_id=iface_id) & filter) \
-                    .order_by("-record_date")
+                    .order_by("record_date")
                 datasets.append({
                     "label": "{" + query.filter(interface_id=iface_id).first().interface + "}=" + key,
                     "backgroundColor": "#" + self.COLOR_PALETTE[iface_id],

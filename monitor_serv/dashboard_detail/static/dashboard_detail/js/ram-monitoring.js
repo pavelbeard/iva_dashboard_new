@@ -6,11 +6,7 @@ window.onload = async function () {
     const titles = ["Всего ОЗУ, bytes", "Мониторинг ОЗУ, bytes"];
     const chartIdArray = ["lineChartRam1", "lineChartRam2"];
 
-    let cb = function (value, index, values) {
-        return formatBytes(value);
-    };
-
-    const charts = ChartBuilder.build(chartData, titles, chartIdArray, cb);
+    const charts = ChartBuilder.build(chartData, titles, chartIdArray);
 
     setInterval(chartUpdate, 5000, 'ram-url', charts);
 }

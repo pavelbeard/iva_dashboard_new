@@ -12,19 +12,6 @@ class BaseDatetimeFilter(ABC):
     def get_filter(self, *args, **kwargs):
         pass
 
-    @classmethod
-    def _filters_dict(cls):
-        return {mthd.__name__.split("By")[1].lower(): mthd.get_filter for mthd in cls.__subclasses__()}
-
-    @classmethod
-    def filter(cls, filter_key):
-        return cls._filters_dict().get(filter_key)
-
-    @classmethod
-    def get_filter_list(cls, filter_keys_tuple):
-        filter_dict = cls._filters_dict()
-        return tuple([filter_dict.get(f) for f in filter_keys_tuple])
-
 
 class FilterByMinutes(BaseDatetimeFilter, ABC):
     @staticmethod
@@ -60,3 +47,26 @@ class FilterByRange(BaseDatetimeFilter, ABC):
     @staticmethod
     def get_filter(start, end):
         return Q(record_date__range=(start, end))
+
+
+class Filters(BaseDatetimeFilter):
+    def __init__(self):
+        self.filters = {}
+
+    def update(self, **filter):
+        self.filters.update(filter)
+
+    def get_filter(self, filter_key, *args, **kwargs):
+        return self.filters.get(filter_key)
+
+
+filters_dict = Filters()
+filters_dict.update(
+    from1hour=FilterByHours.get_filter(1),
+    from3hours=FilterByHours.get_filter(3),
+    from6hours=FilterByHours.get_filter(6),
+    from12hours=FilterByHours.get_filter(12),
+    from1day=FilterByDays.get_filter(1),
+    from1week=FilterByDays.get_filter(7),
+    from1month=FilterByMonths.get_filter(1),
+)

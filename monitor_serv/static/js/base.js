@@ -154,20 +154,6 @@ export function setChartConfig(
                     }
                 },
             },
-            scales: {
-                y: [{
-                    display: true,
-                    gridLines: {
-                        color: "#0F99CD"
-                    },
-                    ticks: {
-                        callback: callback,
-                        max: 100,
-                        min: 0,
-                        padding: 20
-                    }
-                }],
-            }
         }
     };
 }
@@ -177,23 +163,31 @@ export async function chartUpdate(urlId, charts) {
     const newData = await fetch(url, {
         method: HTTP_METHODS.get, headers: HEADERS
     }).then(async response => await response.json());
+    
+    function removeData(chart) {
+        chart.data.labels.pop();
+        chart.data.datasets.forEach(dataset => {
+            dataset.data.pop();
+        });
+        chart.update();
+    }
+
+    function addData(chart, label, data) {
+        chart.labels.push(label);
+        chart.data.datasets.forEach(dataset => {
+            dataset.data.push(data);
+        });
+        chart.update();
+    }
 
     charts.forEach((chart, i=0) => {
-        chart.config.data = newData['chartData'][i]; i++;
+        chart.config.data = newData['chartData'][i];
         chart.update();
     })
-
-    console.log(newData)
-    // newData['chartData'].forEach(data => {
-    //     charts.forEach(chart => {
-    //         chart.config.data = data;
-    //         chart.update()
-    //     });
-    // });
 }
 
 export function chartGenerator(chartId, config) {
-    const containerBody = document.querySelector('.container-body');
+    const containerBody = document.querySelector('#chartBox');
 
     let canvas = document.createElement('canvas');
     canvas.setAttribute('id', chartId);
@@ -202,19 +196,19 @@ export function chartGenerator(chartId, config) {
     const context = document.getElementById(chartId).getContext('2d');
     const chart = new Chart(context, config);
 
-    const totalLabels = chart.data.labels.length;
-    const maxLabelsWidth = 100;
-    const containerChart = document.querySelector('.container-chart');
-
-
-    if (totalLabels > maxLabelsWidth) {
-        containerChart.style.overflowX = "scroll";
-        const newWidth = (containerBody.style.width + (totalLabels - maxLabelsWidth) * 30);
-        containerBody.style.width = `${newWidth}px`;
-    }
-    else {
-        containerChart.style.overflowX = "hidden";
-    }
+    // const totalLabels = chart.data.labels.length;
+    // const maxLabelsWidth = 100;
+    // const containerChart = document.querySelector('.container-chart');
+    //
+    //
+    // if (totalLabels > maxLabelsWidth) {
+    //     containerChart.style.overflowX = "scroll";
+    //     const newWidth = (containerBody.style.width + (totalLabels - maxLabelsWidth) * 30);
+    //     containerBody.style.width = `${newWidth}px`;
+    // }
+    // else {
+    //     containerChart.style.overflowX = "hidden";
+    // }
 
     return chart;
 }

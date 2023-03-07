@@ -8,9 +8,9 @@ window.onload = async function () {
                     "Ошибок"];
     const chartIdArray = ['lineChartNet1', 'lineChartNet2', 'lineChartNet3', ];
 
-    let cb = function (value, index, values) {
-        return formatBytes(value);
-    };
+    // let cb = function (value, index, values) {
+    //     return formatBytes(value);
+    // };
 
     const charts = ChartBuilder.build(chartData, titles, chartIdArray)
 

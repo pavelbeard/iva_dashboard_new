@@ -5,7 +5,7 @@ from django.http import JsonResponse
 from django.urls import reverse
 
 from core_logic.chart import Chart
-from core_logic.filters import FilterByMinutes
+from core_logic.filters import FilterByMinutes, filters_dict
 from dashboard.models import Target
 from monitor_serv import settings
 
@@ -54,19 +54,21 @@ class ContextDataFromImporterMixin:
     filter = None
     time_value = None
 
+    default_filter = filters_dict.get_filter("from1hour")
+
     def get_context_data(self, target_id, *args, **kwargs):
         context = super().get_context_data()
         chart = self.chart_class(self.model)
 
         data = []
 
-        filter = FilterByMinutes.get_filter(self.time_value)
+        filter_ = self.default_filter if self.filter is None else self.filter
 
         for nested_keys in self.keys:
             data.append(chart.create_chart_data(
                 nested_keys,
                 target_id,
-                filter, *args, **kwargs
+                filter_, *args, **kwargs
             ))
 
         context['chartData'] = data
@@ -101,18 +103,16 @@ class DatetimeFiltersMixin:
     """
     Adding filters to the context data
     """
-    # 1 min, 15 min, 30 min, 1 hour, 6 hour, 1 day, 7 days, 1 month, 6 months, 1 year, range
+    # 1 hour, 3 hour, 6 hour, 12 hour, 1 days, 1 week, 6 months, 1 year, range
     filter_keys = (
-        "minutes", "minutes", "minutes",
         "hours", "hours", "days",
         "days", "months", "months",
-        "years", "range"
+        "range"
     )
-    time_values = (1, 15, 30, 1, 6, 1, 7, 1, 6, 1, 0)
-    locale_keys = ("Данные за 1 минуту", "Данные за 15 минут", "Данные за 30 минут",
-                   "Данные за 1 час", "Данные за 6 часов", "Данные за день",
-                   "Данные за неделю", "Данные за месяц", "Данные за полгода",
-                   "Данные за год", "Вручную")
+    time_values = (1, 3, 1, 6, 1, 7, 1, 6, 1, 0)
+    locale_keys = ("Данные за 1 час", "Данные за 3 часа", "Данные за 6 часов",
+                   "Данные за 12 часов", "Данные за день", "Данные за неделю",
+                   "Данные за месяц", "Вручную")
 
     def get_context_data(self, *args, **kwargs):
         context = super().get_context_data()
