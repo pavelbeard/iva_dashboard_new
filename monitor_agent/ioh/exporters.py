@@ -2,15 +2,18 @@ import datetime
 import uuid
 from abc import ABC
 
+from sqlalchemy import func, cast
+from sqlalchemy.dialects.postgresql import JSONB
+
 from monitor_agent.agent import get_logger
 from monitor_agent.dashboard.models import (CPU, DiskSpace,
-                                            DiskSpaceStatistics, NetInterface,
-                                            ServerData)
+                                            NetInterface,
+                                            ServerData, Process, Uptime)
 from monitor_agent.logic.base import Exporter
 from monitor_agent.database.creator import insert_all_to_table, insert_to_table
 from monitor_agent.logic.exceptions import ModelIsNotMatch
 from monitor_agent.database.reader import get_server_data, get_target
-from monitor_agent.database.updater import update_server_data
+from monitor_agent.database.updater import update_server_data, update_server_data_json
 
 logger = get_logger(__name__)
 
@@ -150,6 +153,19 @@ class ServerDataDatabaseExporter(DatabaseExporter):
             update_server_data(self.model, target_id, values)
             logger.info(f"Updated target data {self.get_address_port(target_id)} "
                         f"by {self.model.__table__.name} model.")
+
+
+class JSONDataExporter(DatabaseExporter, ABC):
+    def __init__(self, model):
+        super().__init__(model)
+
+    def export(self, target_id, *args, **kwargs):
+        values = {"metrics": kwargs.get('values')}
+        values |= self.uuid_record() | self.record_date() | self.t_id(target_id)
+
+        insert_to_table(table=self.model, values=values)
+        logger.info(f"Updated target data {self.get_address_port(target_id)} "
+                    f"by {self.model.__table__.name} model.")
 
 
 class MonitoringServerExporter(Exporter, ABC):

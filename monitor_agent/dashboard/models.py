@@ -1,4 +1,4 @@
-from sqlalchemy import PrimaryKeyConstraint, Table
+from sqlalchemy import Table
 
 from monitor_agent.database.configuration import Base, metadata
 
@@ -27,8 +27,8 @@ class DiskSpace(Base):
     __table__ = Table('dashboard_diskspace', metadata)
 
 
-class DiskSpaceStatistics(Base):
-    __table__ = Table('dashboard_diskspacestatistics', metadata)
+# class DiskSpaceStatistics(Base):
+#     __table__ = Table('dashboard_diskspacestatistics', metadata)
 
 
 class NetInterface(Base):

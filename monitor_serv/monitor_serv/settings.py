@@ -39,6 +39,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     # custom apps
+    'api',
     'dashboard',
     'dashboard_detail',
     'dashboard_ivcs',
@@ -47,7 +48,9 @@ INSTALLED_APPS = [
     'bootstrap_modal_forms',
     'widget_tweaks',
     'crispy_forms',
-    'crispy_bootstrap5'
+    'crispy_bootstrap5',
+    'rest_framework',
+    'corsheaders'
 ]
 
 MIDDLEWARE = [
@@ -223,5 +226,11 @@ SCRAPER_HEALTH_CHECK = os.getenv("SCRAPER_URL", "http://2.0.96.1:8000/api/monito
 SCRAPE_INTERVAL = os.getenv("SCRAPE_INTERVAL", 15)
 
 DATETIME_FORMAT = "%d/%m/%y %H:%M:%S"
+
+REST_FRAMEWORK = {
+    'DEFAULT_RENDERER_CLASSES': (
+        'rest_framework.renderers.JSONRenderer'
+    )
+}
 
 APP_VERSION = "v0.9.32"

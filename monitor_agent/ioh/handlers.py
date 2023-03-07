@@ -54,7 +54,7 @@ class CpuTopOutputHandler(CommandOutputHandlerBase):
         for num, core in enumerate(cores_data):
             processor_cores_data.append(self._cpu_analysis(cpu_data=core, core_num=num))
 
-        return {"whole_processor_data": whole_processor_data, "processor_cores_data": cores_data}
+        return {"cpu_data": {"whole_processor_data": whole_processor_data, "processor_cores_data": cores_data}}
 
 
 class RamFreeOutputHandler(CommandOutputHandlerBase):
@@ -86,13 +86,15 @@ class RamFreeOutputHandler(CommandOutputHandlerBase):
 
         # тут уже можно смело пересылать данные в бд
         return {
-            "total_ram": total_ram,
-            "ram_used": ram_used,
-            "ram_free": ram_free,
-            "ram_shared": ram_shared,
-            "ram_buff_cache": ram_buff_cache,
-            "ram_avail": ram_avail,
-            "ram_util": ram_util
+            "ram_data": {
+                "total_ram": total_ram,
+                "ram_used": ram_used,
+                "ram_free": ram_free,
+                "ram_shared": ram_shared,
+                "ram_buff_cache": ram_buff_cache,
+                "ram_avail": ram_avail,
+                "ram_util": ram_util
+            }
         }
 
 
@@ -111,12 +113,12 @@ class DiskDfLsblkOutputHandler(CommandOutputHandlerBase):
             return {"err_message": "command not found."}
 
         fs_data = data.split("\n")
-        part_fs_data = []
+        disk_data = []
         # filesystem size used available use% mounted on
         for fs in fs_data[1:-2]:
             tmp_tuple = tuple(map(lambda x: x.strip(), fs.split()))
             file_system, fs_size, used, fs_avail, fs_used_prc, mounted_on = tmp_tuple
-            part_fs_data.append({
+            disk_data.append({
                 "file_system": file_system,
                 "fs_size": fs_size,
                 "fs_used": used,
@@ -126,10 +128,10 @@ class DiskDfLsblkOutputHandler(CommandOutputHandlerBase):
             })
 
         most_valuable_partition = max(
-            part_fs_data, key=lambda x: DigitalDataConverters.convert_metric_to_bytes(x.get('fs_size'))
+            disk_data, key=lambda x: DigitalDataConverters.convert_metric_to_bytes(x.get('fs_size'))
         )
 
-        part_fs_data += [{
+        disk_data += [{
             "total_disk_size": fs_data[-2].split()[3],
             "most_valuable_part_fs": most_valuable_partition.get('file_system'),
             "most_valuable_part_size": most_valuable_partition.get('fs_size'),
@@ -138,7 +140,7 @@ class DiskDfLsblkOutputHandler(CommandOutputHandlerBase):
             "most_valuable_part_use_percent": most_valuable_partition.get('fs_used_prc')
         }]
 
-        return part_fs_data
+        return {"disk_data": disk_data}
 
 
 class AppServiceStatusAllOutputHandler(CommandOutputHandlerBase):
@@ -171,7 +173,7 @@ class AppServiceStatusAllOutputHandler(CommandOutputHandlerBase):
                 "process_name": process_name, "process_status": process_status
             })
 
-        return processes_list
+        return {"processes_list": processes_list}
 
 
 class NetIfconfigOutputHandler(CommandOutputHandlerBase):
@@ -212,7 +214,7 @@ class NetIfconfigOutputHandler(CommandOutputHandlerBase):
             net_data.append(dict(
                 map(lambda kv: (kv[0], 0) if kv[1] is None else (kv[0], kv[1]), my_dict.items())))
 
-        return net_data
+        return {"net_data": net_data}
 
 
 class UptimeUptimeOutputHandler(CommandOutputHandlerBase):
@@ -254,9 +256,7 @@ class ServerDataHostnamectlOutputHandler(CommandOutputHandlerBase):
         os_version = re.search("PRETTY_NAME=\"(.*)\"", data)[1]
         os_kernel = splitted_data[1]
 
-        # костыль
-
-        return {"hostname": hostname, "os": os_version, "kernel": os_kernel, }
+        return {"hostname": hostname, "os": os_version, "kernel": os_kernel}
 
 
 class CrmStatusOutputHandler(CommandOutputHandlerBase):
@@ -279,4 +279,4 @@ class LoadAverageUptimeOutputHandler(CommandOutputHandlerBase):
         :return: {}
         """
         ONE_MIN, FIVE_MIN, FTEEN_MIN = re.findall("(\d+\.\d+)", data)
-        return {"one_min": ONE_MIN, "five_min": FIVE_MIN, "fteen_min": FTEEN_MIN}
+        return {"load_average_data": {"one_min": ONE_MIN, "five_min": FIVE_MIN, "fteen_min": FTEEN_MIN}}
