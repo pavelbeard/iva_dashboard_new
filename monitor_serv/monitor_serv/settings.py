@@ -227,10 +227,11 @@ SCRAPE_INTERVAL = os.getenv("SCRAPE_INTERVAL", 15)
 
 DATETIME_FORMAT = "%d/%m/%y %H:%M:%S"
 
-REST_FRAMEWORK = {
-    'DEFAULT_RENDERER_CLASSES': (
-        'rest_framework.renderers.JSONRenderer'
+REST_FRAMEWORK = {}
+
+if not DEBUG:
+    REST_FRAMEWORK['DEFAULT_RENDERER_CLASSES'] = (
+            'rest_framework.renderers.JSONRenderer'
     )
-}
 
 APP_VERSION = "v0.9.32"

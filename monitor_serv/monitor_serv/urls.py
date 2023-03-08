@@ -20,6 +20,7 @@ from django.views import generic
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('api/v1/', include('api.urls')),
     path('dashboard/', include('dashboard.urls')),
     path('dashboard-ivcs/', include('dashboard_ivcs.urls')),
     path('dashboard-detail/', include('dashboard_detail.urls')),

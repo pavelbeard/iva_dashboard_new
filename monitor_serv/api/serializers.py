@@ -6,9 +6,10 @@ from dashboard.models import Target, CPU
 class TargetSerializer(serializers.ModelSerializer):
     class Meta:
         model = Target
-        fields = ('id', 'address', 'port', 'username', 'password', 'is_being_scan')
+        fields = ('id', 'address', 'port',)
 
 
-class CpuSerializer(serializers.ModelSerializer):
+class CpuDataSerializer(serializers.ModelSerializer):
     class Meta:
         model = CPU
+        fields = ('metrics', 'record_date')
