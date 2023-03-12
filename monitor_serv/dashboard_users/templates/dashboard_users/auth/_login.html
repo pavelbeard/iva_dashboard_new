@@ -12,8 +12,8 @@
             {% csrf_token %}
             {{ form|crispy }}
             <button class="btn btn-primary" type="submit">Войти</button>
-            <p class="text-center auth-refs">
-                Вы еще не зарегистрированы? <a href="{% url 'dashboard_users:register' %}">
+            <p class="text-center">
+                Вы еще не зарегистрированы? <a href="{% url 'dashboard_users:register' %}" class="text-decoration-none">
                 <br> Зарегистрируйтесь и ожидайте подтверждения администратором.
             </a>
             </p>

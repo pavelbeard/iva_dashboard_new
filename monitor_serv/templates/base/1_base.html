@@ -2,28 +2,15 @@
 <html lang="en" class="h-100">
 <head>
     {% load static %}
+    {% load bootstrap5 %}
     <meta charset="UTF-8">
 
-    {% block static_files %}
-        <link rel="stylesheet" href="{% static "vendors/bootstrap/css/bootstrap.css" %}">
-        <link rel="stylesheet" href="{% static "vendors/bootstrap/icons/bootstrap-icons.css" %}">
-        <script src="{% static "vendors/jquery/jquery-3.6.3.js" %}"></script>
-        <link rel="stylesheet" href="{% static "css/main.css" %}">
-        <script src="{% static "vendors/bootstrap/js/bootstrap.js" %}"></script>
-        <script src="{% static "vendors/sweetalert/dist/sweetalert2.all.js" %}"></script>
-        <script src="{% static 'js/jquery.bootstrap.modal.forms.js' %}"></script>
-        <script type="module" src="{% static 'vendors/chartjs/chart.js' %}"></script>
-        <script type="module" src="{% static 'vendors/chartjs/chart.umd.js' %}"></script>
-        <script type="module" src="{% static 'vendors/chartjs/helpers.js' %}"></script>
-        <!-- CUSTOM SCRIPTS and STYLES-->
-        <link rel="stylesheet" href="{% static "dashboard/css/dashboard.css" %}">
-        <link rel="stylesheet" href="{% static "dashboard_users/css/dashboard_users.css" %}">
-        <link rel="stylesheet" href="{% static "dashboard_ivcs/css/dashboard_ivcs.css" %}">
-        <script type="module" src="{% static 'dashboard/js/monitoring.js' %}"></script>
+    {% bootstrap_css %}
+    {% bootstrap_javascript %}
 
+    {% block css %}
     {% endblock %}
-    {% if user.is_authenticated and targets %}
-    {% endif %}
+
     <title>{% block title %}Dashboard{% endblock %}</title>
 </head>
 <body class="d-flex flex-column h-100">

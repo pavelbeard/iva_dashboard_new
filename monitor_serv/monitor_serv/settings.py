@@ -12,8 +12,12 @@ https://docs.djangoproject.com/en/4.1/ref/settings/
 import os
 from pathlib import Path
 
+import corsheaders.middleware
 from django.contrib.messages import constants as messages
 from django.urls import reverse_lazy
+
+import common.dbrouters
+from common.dbrouters import IvaDashboardRouter, IvcsRouter
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -41,16 +45,15 @@ INSTALLED_APPS = [
     # custom apps
     'api',
     'dashboard',
-    'dashboard_detail',
     'dashboard_ivcs',
     'dashboard_users',
     # pip apps
-    'bootstrap_modal_forms',
     'widget_tweaks',
     'crispy_forms',
+    'bootstrap5',
     'crispy_bootstrap5',
     'rest_framework',
-    'corsheaders'
+    'corsheaders',
 ]
 
 MIDDLEWARE = [
@@ -61,6 +64,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
 ]
 
 ROOT_URLCONF = 'monitor_serv.urls'
@@ -70,9 +74,8 @@ TEMPLATES = [
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
         'DIRS': [
             BASE_DIR / 'templates',
-            BASE_DIR / 'dashboard/templates/dashboard',
+            BASE_DIR / 'dashboard/src/templates/dashboard',
             BASE_DIR / 'dashboard_users/templates/dashboard_users',
-            BASE_DIR / 'dashboard_detail/templates/dashboard_detail',
             BASE_DIR / 'dashboard_ivcs/templates/dashboard_ivcs',
         ]
         ,
@@ -93,23 +96,19 @@ WSGI_APPLICATION = 'monitor_serv.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/4.1/ref/settings/#databases
 
-DATABASE_ROUTERS = (
-    'core_logic.dbrouters.IvaDashboardRouter',
-    'core_logic.dbrouters.IvcsRouter',
-)
-
 DEFAULT_IVCS_SCHEMAS = "search_path=auth,billing,instantmessaging,smpp,statistic,storage,updates,videoconference"
+
+DATABASE_ROUTERS = (
+    # 'common.dbrouters.IvaDashboardRouter',
+    'common.dbrouters.IvcsRouter',
+)
 
 DATABASES = {
     'default': {
-        'ENGINE': "django.db.backends.sqlite3",
-        'NAME': "iva_dashboard.sqlite3",
-    },
-    'iva_dashboard': {
         'ENGINE': os.getenv("ENGINE", "django.db.backends.postgresql_psycopg2"),
-        'NAME': os.getenv('POSTGRES_DB_NAME', "test_db"),
-        'USER': os.getenv('POSTGRES_DB_USER', "test_db"),
-        'PASSWORD': os.getenv('POSTGRES_DB_PASSWORD', "test_db"),
+        'NAME': os.getenv('POSTGRES_DB_NAME', "admin_test"),
+        'USER': os.getenv('POSTGRES_DB_USER', "admin_test"),
+        'PASSWORD': os.getenv('POSTGRES_DB_PASSWORD', "iva_dashboard_test"),
         'HOST': os.getenv('POSTGRES_DB_HOST', "localhost"),
         'PORT': os.getenv('POSTGRES_DB_PORT', "8002"),
     },
@@ -122,7 +121,7 @@ DATABASES = {
         'USER': os.getenv('IVCS_POSTGRES_DB_USER', "ivcs"),
         'PASSWORD': os.getenv('IVCS_POSTGRES_DB_PASSWORD', "ivcs"),
         'HOST': os.getenv('IVCS_POSTGRES_DB_HOST', "localhost"),
-        'PORT': os.getenv('IVCS_POSTGRES_DB_PORT', "8012")
+        'PORT': os.getenv('IVCS_POSTGRES_DB_PORT', "8002")
     }
 
 }
@@ -137,7 +136,7 @@ AUTH_PASSWORD_VALIDATORS = [
     {
         'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
         'OPTIONS': {
-            'min_length': 8
+            'min_length': 12
         }
     },
     {
@@ -155,15 +154,12 @@ AUTH_PASSWORD_VALIDATORS = [
     {
         'NAME': 'dashboard_users.password_validation.NumberPasswordValidator'
     },
-    # {
-    #     'NAME': 'monitor_serv.password_validation.RepeatedPasswordValidator'
-    # },
 ]
 
 # Internationalization
 # https://docs.djangoproject.com/en/4.1/topics/i18n/
 
-LANGUAGE_CODE = 'ru'
+LANGUAGE_CODE = 'ru-RU'
 
 TIME_ZONE = 'Europe/Moscow'
 
@@ -184,8 +180,7 @@ STATICFILES_FINDERS = (
 
 STATICFILES_DIRS = (
     os.path.join(BASE_DIR, "static"),
-    os.path.join(BASE_DIR, "dashboard", "static"),
-    os.path.join(BASE_DIR, "dashboard_detail", "static"),
+    os.path.join(BASE_DIR, "dashboard", "src", "static"),
     os.path.join(BASE_DIR, "dashboard_users", "static"),
     os.path.join(BASE_DIR, "dashboard_ivcs", "static"),
 )
@@ -200,7 +195,7 @@ CSRF_TRUSTED_ORIGINS = os.getenv('CSRF_TRUSTED_ORIGINS', default="http://*localh
 
 CONN_HEALTH_CHECKS = True
 
-LOGIN_REDIRECT_URL = reverse_lazy("dashboard:dashboard")
+LOGIN_REDIRECT_URL = reverse_lazy("dashboard:targets")
 LOGOUT_REDIRECT_URL = reverse_lazy("dashboard:index")
 
 AUTH_USER_MODEL = "dashboard_users.CustomUser"
@@ -216,21 +211,34 @@ MESSAGE_TAGS = {
     messages.SUCCESS: 'alert-success',
     messages.WARNING: 'alert-warning',
     messages.ERROR: 'alert-danger',
- }
+}
 
 MAIL_TO_DEV = os.getenv("MAIL_TO_DEV", "borodinpa@css.rzd")
 CALL_TO_DEV = os.getenv("CALL_TO_DEV", "77619")
 
-SCRAPER_URL = os.getenv("SCRAPER_URL", "http://2.0.96.1:8000/api/monitor/metrics/targets/all")
-SCRAPER_HEALTH_CHECK = os.getenv("SCRAPER_URL", "http://2.0.96.1:8000/api/monitor/ping")
-SCRAPE_INTERVAL = os.getenv("SCRAPE_INTERVAL", 15)
-
 DATETIME_FORMAT = "%d/%m/%y %H:%M:%S"
 
-REST_FRAMEWORK = {
-    'DEFAULT_RENDERER_CLASSES': (
-        'rest_framework.renderers.JSONRenderer'
-    )
-}
+if not DEBUG:
+    REST_FRAMEWORK = {
+        'DEFAULT_RENDERER_CLASSES': (
+            'rest_framework.renderers.JSONRenderer'
+        )
+    }
 
-APP_VERSION = "v0.9.32"
+# CORS_ALLOWED_ORIGINS_REGEXES = (
+#     r"http:\/\/(localhost|127.0.0.1):(8000|8004|8040|10011)",
+# )
+CORS_ALLOWED_ORIGINS = [
+    "http://127.0.0.1:10011",
+    "http://localhost:10011",
+]
+CORS_ALLOW_ALL_ORIGINS = True
+CORS_ALLOW_HEADERS = (
+    "content-type",
+    "origin",
+    "x-csrftoken",
+    "x-requested-with",
+)
+CSRF_COOKIE_NAME = "csrftoken"
+
+APP_VERSION = "v0.8.32"

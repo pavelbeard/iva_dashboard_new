@@ -24,29 +24,6 @@ services:
         max_attempts: 3
         window: 120s
 
-  monitor-server:
-    build:
-      context: .
-      dockerfile: prod.monitor_serv.Dockerfile
-    container_name: monitor-server-v1.8
-    env_file:
-      - env/prod.monitor-serv.env
-    entrypoint: ["python3.11", "/home/monitor-server-app/web/entrypoint.py"]
-    volumes:
-      - static_files:/home/monitor-server-app/web/staticfiles
-    networks:
-      iva_dashboard_net:
-        ipv4_address: 10.0.96.3
-    depends_on:
-      - monitor-postgres
-    restart: on-failure
-    deploy:
-      restart_policy:
-        condition: on-failure
-        delay: 5s
-        max_attempts: 3
-        window: 120s
-
   monitor-postgres-iva:
     image: pavelbeard/monitor-postgres:v1.0
     container_name: monitor-postgres-iva-v1.0
@@ -75,19 +52,21 @@ services:
         max_attempts: 3
         window: 120s
 
-  monitor-agent:
+  monitor-server:
     build:
       context: .
-      dockerfile: prod.monitor_agent.Dockerfile
-    container_name: monitor-agent-v1.9
+      dockerfile: prod.monitor_serv.Dockerfile
+    container_name: monitor-server-v1.8
     env_file:
-      - env/prod.monitor-agent.env
-    entrypoint: ["python3.11", "/home/monitor-agent-app/monitor_agent/entrypoint.py"]
+      - env/prod.monitor-serv.env
+    entrypoint: ["python3.11", "/home/monitor-server-app/web/entrypoint.py"]
+    volumes:
+      - static_files:/home/monitor-server-app/web/staticfiles
     networks:
       iva_dashboard_net:
-        ipv4_address: 10.0.96.1
+        ipv4_address: 10.0.96.2
     depends_on:
-      - monitor-server
+      - monitor-postgres
     restart: on-failure
     deploy:
       restart_policy:
@@ -95,7 +74,6 @@ services:
         delay: 5s
         max_attempts: 3
         window: 120s
-
 
 networks:
   iva_dashboard_net:

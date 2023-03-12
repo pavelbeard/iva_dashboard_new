@@ -22,23 +22,6 @@
         {% endblock %}
         {% block login %}
         {% endblock %}
-
-        <!-- MODAL LOGIN/SIGNUP
-        {#        {% include "dashboard_users/auth/_no_auth.html" %}#}
-        {#        {% include "dashboard/base/_modal.html" %}#}
-
-        <script type="text/javascript">
-            $(function () {
-                $("#signupForm").modalForm({
-                    formURL: {# "{% url 'dashboard_users:signup' %}" #}
-                });
-
-                $("#loginForm").modalForm({
-                    formURL: {# "{% url 'dashboard_users:login' %}" #}
-                });
-            });
-        </script>
-        -->
     {% else %}
         <div class="container py-md-5">
             <h3 class="text-center mb-5">Добро пожаловать в IVA MCU Dashboard</h3>
@@ -63,8 +46,8 @@
             </div>
             <div class="d-flex justify-content-center">
                 <div class="mb-2 auth-refs">
-                    <a href="{% url 'dashboard_users:login' %}">Войдите</a> или
-                    <a href="{% url 'dashboard_users:register' %}">зарегистрируйтесь</a>
+                    <a href="{% url 'dashboard_users:login' %}" class="text-decoration-none">Войдите</a> или
+                    <a href="{% url 'dashboard_users:register' %}" class="text-decoration-none">зарегистрируйтесь</a>
                 </div>
             </div>
         </div>

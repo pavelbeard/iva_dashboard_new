@@ -6,7 +6,9 @@
 *.sql
 *.sqlite3
 *-venv
+*venv
 docker-images
 for_testing
+node_modules
 
 /postgres-files

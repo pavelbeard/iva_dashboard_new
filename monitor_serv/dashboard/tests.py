@@ -4,7 +4,7 @@ import random
 import unittest
 from pprint import pprint
 
-import core_logic.dbrouters
+import common.dbrouters
 from django import http, urls
 from django.test import TestCase
 from django.test.runner import DiscoverRunner

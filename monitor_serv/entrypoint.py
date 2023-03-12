@@ -3,7 +3,7 @@ import subprocess
 
 PYTHON_NAME = "python3.11" if os.name == "posix" else "python"
 WIN_APP_HOME = os.path.join("D:\\", "Pycharm", "work-projects", "iva_dashboard", "monitor_serv")
-MONITOR_SERVER_ADDRESS = os.getenv('MONITOR_SERVER_ADDRESS', "10.0.96.3")
+MONITOR_SERVER_ADDRESS = os.getenv('MONITOR_SERVER_ADDRESS', "2.0.96.1")
 MONITOR_SERVER_PORT = os.getenv('MONITOR_SERVER_PORT', 8000)
 
 
@@ -45,8 +45,6 @@ if __name__ == '__main__':
         call_django_command(pre_args, ["migrate", "dashboard", "--database", "iva_dashboard"])
         call_django_command(pre_args, ["migrate", "dashboard_users", "--database", "iva_dashboard"])
         call_django_command(pre_args, ["migrate", "admin", "--database", "iva_dashboard"])
-        call_django_command(pre_args, ["addscrapecommands"])
-        call_django_command(pre_args, ["setupdashboard"])
         call_django_command(pre_args, ["createsuperuser", "--username", os.getenv('DJANGO_SUPERUSER_USERNAME', 'admin'),
                                        "--noinput", "--database", "iva_dashboard",
                                        "--email", os.getenv('DJANGO_SUPERUSER_EMAIL', 'admin@example.com')])

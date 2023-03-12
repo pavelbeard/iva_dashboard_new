@@ -27,12 +27,12 @@ export function formatBytes(bytes, decimals = 2) {
 const IMG_PATH = "/static/dashboard/images/bootstrap-svg";
 
 export const SERVER_PICS = {
-    serverMedia: IMG_PATH + "/server.svg",
-    serverMediaUp: IMG_PATH + "/server-n.svg",
-    serverMediaDown: IMG_PATH + "/server-d.svg",
-    serverHead: IMG_PATH + "/server-head.svg",
-    serverHeadUp: IMG_PATH + "/server-head-n.svg",
-    serverHeadDown: IMG_PATH + "/server-head-d.svg"
+    serverMedia: IMG_PATH + "/card.svg",
+    serverMediaUp: IMG_PATH + "/card-n.svg",
+    serverMediaDown: IMG_PATH + "/card-d.svg",
+    serverHead: IMG_PATH + "/card-head.svg",
+    serverHeadUp: IMG_PATH + "/card-head-n.svg",
+    serverHeadDown: IMG_PATH + "/card-head-d.svg"
 };
 
 export const CPU_PICS = {
@@ -95,12 +95,12 @@ export const SERVER_DOWN_PICS = {
 }
 
 export const HARDWARE_DROPDOWN_LOCATE = {
-    server: '.server-text.dropend',
-    cpu: '.server-cpu-text.dropend',
-    ram: '.server-ram-text.dropend',
-    disk: '.server-disk-text.dropend',
-    apps: '.server-apps-text.dropend',
-    net: '.server-network-text.dropup',
+    server: '.card-text.dropend',
+    cpu: '.card-cpu-text.dropend',
+    ram: '.card-ram-text.dropend',
+    disk: '.card-disk-text.dropend',
+    apps: '.card-apps-text.dropend',
+    net: '.card-network-text.dropup',
 }
 
 export function setChartData(xLabels, dataLabels, data) {
@@ -195,21 +195,6 @@ export function chartGenerator(chartId, config) {
 
     const context = document.getElementById(chartId).getContext('2d');
     const chart = new Chart(context, config);
-
-    // const totalLabels = chart.data.labels.length;
-    // const maxLabelsWidth = 100;
-    // const containerChart = document.querySelector('.container-chart');
-    //
-    //
-    // if (totalLabels > maxLabelsWidth) {
-    //     containerChart.style.overflowX = "scroll";
-    //     const newWidth = (containerBody.style.width + (totalLabels - maxLabelsWidth) * 30);
-    //     containerBody.style.width = `${newWidth}px`;
-    // }
-    // else {
-    //     containerChart.style.overflowX = "hidden";
-    // }
-
     return chart;
 }
 
