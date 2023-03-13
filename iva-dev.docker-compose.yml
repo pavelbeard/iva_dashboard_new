@@ -1,0 +1,76 @@
+version: '3.9'
+
+services:
+
+  monitor-nginx:
+    build:
+      context: .
+      dockerfile: iva-dev.monitor_nginx.Dockerfile
+    container_name: monitor-nginx-v1.0
+    volumes:
+      - static_files:/home/monitor-server-app/web/staticfiles
+    networks:
+      iva_dashboard_net:
+        ipv4_address: 2.0.96.3
+    ports:
+      - "8004:80"
+    depends_on:
+      - monitor-server
+    restart: on-failure
+    deploy:
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+        window: 120s
+
+  monitor-postgres:
+    image: pavelbeard/monitor-postgres:v1.0
+    container_name: monitor-postgres-v1.0
+    env_file:
+      - env/iva-dev.postgres.env
+    networks:
+      iva_dashboard_net:
+        ipv4_address: 2.0.96.2
+    restart: on-failure
+    deploy:
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+        window: 120s
+
+  monitor-server:
+    build:
+      context: .
+      dockerfile: iva-dev.monitor_serv.Dockerfile
+    container_name: monitor-server-v1.8
+    env_file:
+      - env/prod.monitor-serv.env
+    entrypoint: ["python3.11", "/home/monitor-server-app/web/entrypoint.py"]
+    volumes:
+      - static_files:/home/monitor-server-app/web/staticfiles
+    networks:
+      iva_dashboard_net:
+        ipv4_address: 2.0.96.1
+    depends_on:
+      - monitor-postgres
+    restart: on-failure
+    deploy:
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+        window: 120s
+
+networks:
+  iva_dashboard_net:
+    ipam:
+      config:
+        - subnet: 2.0.96.0/26
+          gateway: 2.0.96.62
+
+volumes:
+  postgres_files:
+  static_files:
+

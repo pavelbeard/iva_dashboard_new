@@ -38,16 +38,14 @@ if __name__ == '__main__':
     pre_args = [
         PYTHON_NAME, os.path.join(os.getenv('APP_HOME', WIN_APP_HOME), "manage.py"),
     ]
-    result1 = check_db(pre_args, post_args=["checkdb", "--database"], database="iva_dashboard")
+    result1 = check_db(pre_args, post_args=["checkdb", "--database"], database="default")
     result2 = check_db(pre_args, post_args=["checkdb", "--database"], database="ivcs")
 
     if result1 and result2:
-        call_django_command(pre_args, ["migrate", "dashboard", "--database", "iva_dashboard"])
-        call_django_command(pre_args, ["migrate", "dashboard_users", "--database", "iva_dashboard"])
-        call_django_command(pre_args, ["migrate", "admin", "--database", "iva_dashboard"])
+        call_django_command(pre_args, ["migrate"])
         call_django_command(pre_args, ["createsuperuser", "--username", os.getenv('DJANGO_SUPERUSER_USERNAME', 'admin'),
-                                       "--noinput", "--database", "iva_dashboard",
-                                       "--email", os.getenv('DJANGO_SUPERUSER_EMAIL', 'admin@example.com')])
+                                       "--noinput", "--email",
+                                       os.getenv('DJANGO_SUPERUSER_EMAIL', 'admin@example.com')])
         call_django_command(pre_args, ["collectstatic", "--noinput", "--clear"])
 
         run_server = subprocess.Popen(

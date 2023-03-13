@@ -10,5 +10,5 @@
 docker-images
 for_testing
 node_modules
-
+prometheus*
 /postgres-files

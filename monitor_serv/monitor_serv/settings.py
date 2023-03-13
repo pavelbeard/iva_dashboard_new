@@ -50,7 +50,6 @@ INSTALLED_APPS = [
     # pip apps
     'widget_tweaks',
     'crispy_forms',
-    'bootstrap5',
     'crispy_bootstrap5',
     'rest_framework',
     'corsheaders',
@@ -241,4 +240,4 @@ CORS_ALLOW_HEADERS = (
 )
 CSRF_COOKIE_NAME = "csrftoken"
 
-APP_VERSION = "v0.8.32"
+APP_VERSION = "v0.8.33"
