@@ -12,7 +12,6 @@ https://docs.djangoproject.com/en/4.1/ref/settings/
 import os
 from pathlib import Path
 
-import corsheaders.middleware
 from django.contrib.messages import constants as messages
 from django.urls import reverse_lazy
 
@@ -232,8 +231,10 @@ CORS_ALLOWED_ORIGINS = [
     "http://localhost:10011",
     "http://127.0.0.1:8000",
     "http://localhost:8000",
+    "http://2.0.96.1:8000",
+    "http://1.0.96.49:8000",
+    "http://1.0.96.50:8000",
 ]
-CORS_ALLOW_ALL_ORIGINS = True
 CORS_ALLOW_HEADERS = (
     "content-type",
     "origin",

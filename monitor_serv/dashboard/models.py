@@ -28,8 +28,11 @@ class PromQL(models.Model):
         return f"query for [{self.fk_target.address}]={self.query}"
 
 
-class BackendSettings(models.Model):
-    refresh_interval = fields.SmallIntegerField(null=False)
+class DashboardSettings(models.Model):
+    refresh_interval = fields.SmallIntegerField(default=5)
+    address_for_check_ssl = fields.TextField()
+    port = fields.SmallIntegerField()
+    protocol = fields.CharField(max_length=10)
 
     def __str__(self):
         return f"dashboard refresh interval: {self.refresh_interval}"

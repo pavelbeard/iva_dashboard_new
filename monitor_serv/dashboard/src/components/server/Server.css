@@ -1,0 +1,4 @@
+div[data-ivcs-server-attr="targetInfo"] > a:hover {
+    transition: .3s;
+    color: white;
+}

@@ -32,8 +32,13 @@
 }
 
 /*SERVER*/
-.server {
+.server, .iva {
     font-size: 10px;
+    font-weight: 600;
+}
+
+.iva-left-part {
+    height: 44px;
 }
 
 /*.dashboard-card.div*/

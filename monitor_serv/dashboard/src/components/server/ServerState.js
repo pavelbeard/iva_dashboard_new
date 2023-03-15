@@ -3,8 +3,9 @@ import axios from "axios";
 import {Server} from "react-bootstrap-icons";
 import 'react-tooltip/dist/react-tooltip.css';
 import {Tooltip} from 'react-tooltip';
-import {renderToStaticMarkup} from "react-dom/server";
 import {v4} from "uuid";
+
+import './Server.css';
 
 const ServerState = ({address, port, refreshInterval}) => {
     const [targetInfo, setTargetInfo] = useState([])
@@ -14,8 +15,8 @@ const ServerState = ({address, port, refreshInterval}) => {
     useEffect(() => {
         const host = `${address}:${port}`;
 
-        const interval = setInterval(() => {
-            const url = `http://${host}/api/v1/targets?state=any`;
+        const interval = address && port ? setInterval(() => {
+            const url = `/api/v1/prom_targets/${host}`;
             axios(url).then(response => {
                 setNodeStatus("UP");
                 setTargetInfo(response.data);
@@ -27,7 +28,7 @@ const ServerState = ({address, port, refreshInterval}) => {
                 setColor("#ff2d16")
                 // console.log(err)
             });
-        }, refreshInterval)
+        }, refreshInterval) : 5000;
 
         return () => clearInterval(interval)
     }, [])
@@ -35,7 +36,7 @@ const ServerState = ({address, port, refreshInterval}) => {
     const uuid = v4();
 
     return(
-        <div>
+        <div className="server">
             <div className="d-flex flex-row justify-content-center mt-3">
                 <Server height="32" width="32" color={color} data-ivcs-server-img-attr="server"/>
             </div>
