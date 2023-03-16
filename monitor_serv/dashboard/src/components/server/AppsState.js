@@ -6,36 +6,54 @@ import axios from "axios";
 
 const AppsState = ({address, port, refreshInterval}) => {
     const [appsCount, setAppsCount] = useState("N/A");
-    const [appsDataTooltip, setAppsDataTooltip] = useState("N/A");
+    const [appsDataTooltip, setAppsDataTooltip] = useState();
     const [color, setColor] = useState("#000000");
     const [iRefreshInterval, setIRefreshInterval] = useState(300);
 
+    const setDefault = () => {
+        setAppsCount("N/A");
+        setAppsDataTooltip(undefined);
+        setColor("#000000");
+        setIRefreshInterval(5000);
+    };
+
+
     useEffect(() => {
-        const interval = address && port ? setInterval(() => {
-            const query = 'query?query=label_keep(alias(sum by (instance) ' +
-                '(namedprocess_namegroup_num_procs), "Process count"), "__name__")';
-            const url = `http://${address}:${port}/api/v1/${query}`;
+        try {
+            const interval = address && port ? setInterval(() => {
+                const query = 'query?query=label_keep(alias(sum by (instance) ' +
+                    '(namedprocess_namegroup_num_procs), "Process count"), "__name__")';
+                const url = `http://${address}:${port}/api/v1/${query}`;
 
-            axios.get(url, {params: {query: encodeURI(query)}})
-                .then(response => {
-                    if (response.data) {
-                        setAppsDataTooltip(response.data);
+                axios.get(url, {params: {query: encodeURI(query)}})
+                    .then(response => {
+                        if (response.data) {
+                            setAppsDataTooltip(response.data);
 
-                        const __appsCount__ = parseInt(response.data.data.result[0].value[1]);
+                            const __appsCount__ = parseInt(response.data.data.result[0].value[1]);
 
-                        if (0 <= __appsCount__ && __appsCount__ < 100 )
-                            setColor("#16b616");
-                        else if (100 <= __appsCount__ && __appsCount__ < 400)
-                            setColor("#ff9900");
-                        else
-                            setColor("#ff0000");
+                            if (0 <= __appsCount__ && __appsCount__ < 100)
+                                setColor("#16b616");
+                            else if (100 <= __appsCount__ && __appsCount__ < 400)
+                                setColor("#ff9900");
+                            else
+                                setColor("#ff0000");
 
-                        setAppsCount(response.data.data.result[0].value[1]);
-                        setIRefreshInterval(refreshInterval);
-                    }
+                            setAppsCount(response.data.data.result[0].value[1]);
+                            setIRefreshInterval(refreshInterval);
+                        }
+                    }).catch(err => {
+                    console.log(err);
+                    setDefault();
                 })
 
-        }, iRefreshInterval) : 500;
+            }, iRefreshInterval) : 500;
+
+            return () => clearInterval(interval);
+        } catch (e) {
+            console.log(e);
+            setDefault();
+        }
     }, []);
 
     const uuid = v4();
@@ -53,7 +71,8 @@ const AppsState = ({address, port, refreshInterval}) => {
                             </tr>
                         </thead>
                         <tbody>
-                            {appsDataTooltip.data === undefined ? "N/A" : appsDataTooltip.data.result.map(i => {
+                            {appsDataTooltip === undefined || appsDataTooltip.data === undefined ? "N/A"
+                                : appsDataTooltip.data.result.map(i => {
                                 return(
                                     <tr key={i.metric.__name__}>
                                         <td>{i.value[1]}</td>

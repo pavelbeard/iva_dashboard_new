@@ -12,60 +12,74 @@ const CpuState = ({address, port, refreshInterval}) => {
     const [color, setColor] = useState("#000000");
     const [iRefreshInterval, setIRefreshInterval] = useState(300);    //innerRefreshInterval
 
+    const setDefault = () => {
+        setCpuLoad("N/A");
+        setCpuDataTooltip(undefined);
+        setCpuCoresCount(undefined);
+        setCpuCoresLabel(undefined);
+        setColor("#000000");
+        setIRefreshInterval(5000);
+    };
+
     useEffect(() => {
-        const interval = setInterval(async () => {
-            const query1 = 'query?query=sum by (mode,instance) ' +
-                '(label_keep(rate(node_cpu_seconds_total), "mode")) * 100 / ' +
-                'distinct(label_value(node_cpu_seconds_total, "cpu"))';
+        try {
+            const interval = setInterval(async () => {
+                const query1 = 'query?query=sum by (mode,instance) ' +
+                    '(label_keep(rate(node_cpu_seconds_total), "mode")) * 100 / ' +
+                    'distinct(label_value(node_cpu_seconds_total, "cpu"))';
 
-            const query2 = 'query?query=label_keep(alias(count(node_cpu_seconds_total{mode="idle"}) ' +
-                'without (cpu, mode), "Cpu cores"), "__name__", "device")';
+                const query2 = 'query?query=label_keep(alias(count(node_cpu_seconds_total{mode="idle"}) ' +
+                    'without (cpu, mode), "Cpu cores"), "__name__", "device")';
 
-            const host = `${address}:${port}`;
-            const url = `/api/v1/prom_data/${host}`;
+                const host = `${address}:${port}`;
+                const url = `/api/v1/prom_data/${host}`;
 
-            axios.get(url, {params: {query: encodeURI(query1)}})
-                .then(response => {
-                    if (response.data) {
-                        setCpuDataTooltip(response.data);
+                axios.get(url, {params: {query: encodeURI(query1)}})
+                    .then(response => {
+                        if (response.data) {
+                            setCpuDataTooltip(response.data);
 
-                        const idle = parseFloat(response.data.data.result[0].value[1]);
-                        let __cpuLoad__ = (100 - idle).toFixed(2);
+                            const idle = parseFloat(response.data.data.result[0].value[1]);
+                            let __cpuLoad__ = (100 - idle).toFixed(2);
 
-                        if ( 0 <= __cpuLoad__ && __cpuLoad__ < 50.0)
+                            if (0 <= __cpuLoad__ && __cpuLoad__ < 50.0)
+                                setColor("#16b616")
+                            else if (50.0 <= __cpuLoad__ && __cpuLoad__ < 75.0)
+                                setColor("#ff9900")
+                            else if (75.0 <= __cpuLoad__ && __cpuLoad__ <= 100.0)
+                                setColor("#ff0000")
+                            else
+                                __cpuLoad__ = 0;
                             setColor("#16b616")
-                        else if ( 50.0 <= __cpuLoad__ && __cpuLoad__ < 75.0)
-                            setColor("#ff9900")
-                        else if (75.0 <= __cpuLoad__ && __cpuLoad__ <= 100.0)
-                            setColor("#ff0000")
-                        else
-                            __cpuLoad__ = 0;
-                            setColor("#16b616")
 
-                        setCpuLoad(__cpuLoad__ + "%");
-                        setIRefreshInterval(refreshInterval);
-                    }
-                })
-                .catch(err => {
-                    setColor("#000000");
-                    setCpuLoad("N/A");
-                });
+                            setCpuLoad(__cpuLoad__ + "%");
+                            setIRefreshInterval(refreshInterval);
+                        }
+                    })
+                    .catch(err => {
+                        console.log(err);
+                        setDefault();
+                    });
 
-            axios.get(url, {params: {query: encodeURI(query2)}})
-                .then(response => {
-                    if (response.data) {
-                        setCpuCoresCount(response.data.data.result[0].value[1]);
-                        setCpuCoresLabel(response.data.data.result[0].metric.__name__);
-                    }
-                })
-                .catch(err => {
-                    setCpuCoresCount(undefined);
-                    setCpuCoresLabel(undefined);
-                });
+                axios.get(url, {params: {query: encodeURI(query2)}})
+                    .then(response => {
+                        if (response.data) {
+                            setCpuCoresCount(response.data.data.result[0].value[1]);
+                            setCpuCoresLabel(response.data.data.result[0].metric.__name__);
+                        }
+                    })
+                    .catch(err => {
+                        console.log(err);
+                        setDefault();
+                    });
 
-        }, iRefreshInterval);
+            }, iRefreshInterval);
 
-        return () => clearInterval(interval);
+            return () => clearInterval(interval);
+        } catch (e) {
+            console.log(e);
+            setDefault();
+        }
 
     }, []);
 
@@ -97,7 +111,8 @@ const CpuState = ({address, port, refreshInterval}) => {
                             </tr>
                         </thead>
                         <tbody>
-                            {cpuDataTooltip === undefined ? "N/A" : cpuDataTooltip.data.result.map(i => {
+                            {cpuDataTooltip === undefined || cpuDataTooltip.data === undefined ? "N/A"
+                                : cpuDataTooltip.data.result.map(i => {
                                 return (
                                     <tr key={i.metric.mode}>
                                         <td>{i.metric.mode}</td>

@@ -44,13 +44,18 @@ class BackendSettingsAPIView(EmptyQueryCheckMixin, ListAPIView):
 class PromTargetAPIView(APIView):
     def get(self, request, prom_target_address):
         url = f"http://{prom_target_address}/api/v1/targets?state=any"
-        response = requests.get(url)
 
-        if response.status_code > 400:
-            return JsonResponse(data={"message": "error"}, status=HTTPStatus.INTERNAL_SERVER_ERROR)
+        try:
+            response = requests.get(url)
 
-        json_response = response.json()
-        return JsonResponse(data=json_response, safe=False, status=HTTPStatus.OK)
+            if response.status_code > 400:
+                raise requests.exceptions.ConnectionError
+
+            json_response = response.json()
+            return JsonResponse(data=json_response, safe=False, status=HTTPStatus.OK)
+        except requests.exceptions.ConnectionError:
+            return JsonResponse(data={"error": f"no connection with {prom_target_address}"},
+                                status=HTTPStatus.INTERNAL_SERVER_ERROR)
 
 
 class PromQlView(BaseDataView, APIView):
@@ -59,8 +64,11 @@ class PromQlView(BaseDataView, APIView):
         return f'http://{prom_target}/api/v1/{query}'
 
     def get(self, request, prom_target_address):
-        context = requests.get(self.create_url(prom_target_address, request.GET['query']))
-        return JsonResponse(data=context.json(), status=HTTPStatus.OK, safe=False)
+        try:
+            context = requests.get(self.create_url(prom_target_address, request.GET['query']))
+            return JsonResponse(data=context.json(), status=HTTPStatus.OK, safe=False)
+        except requests.exceptions.ConnectionError:
+            return JsonResponse(data={"error": f"no connection with {prom_target_address}"})
 
 
 class SslCerDataAPIView(TemplateView, APIView):
@@ -74,5 +82,3 @@ class SslCerDataAPIView(TemplateView, APIView):
         except AttributeError:
             return JsonResponse(data={"error": "unexpected error"},
                                 status=HTTPStatus.INTERNAL_SERVER_ERROR, safe=False)
-
-

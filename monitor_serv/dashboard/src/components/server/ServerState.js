@@ -13,27 +13,37 @@ const ServerState = ({address, port, refreshInterval}) => {
     const [color, setColor] = useState("#000000");
     const [iRefreshInterval, setIRefreshInterval] = useState(300);    //innerRefreshInterval
 
+    const setDefault = () => {
+        setNodeStatus("DOWN")
+        setTargetInfo([])
+        setColor("#ff2d16")
+        setIRefreshInterval(5000);
+    }
+
 
     useEffect(() => {
-        const host = `${address}:${port}`;
+        try {
+            const host = `${address}:${port}`;
 
-        const interval = address && port ? setInterval(() => {
-            const url = `/api/v1/prom_targets/${host}`;
-            axios(url).then(response => {
-                setNodeStatus("UP");
-                setTargetInfo(response.data);
-                setColor("#16b616")
-                setIRefreshInterval(refreshInterval);
+            const interval = address && port ? setInterval(() => {
+                const url = `/api/v1/prom_targets/${host}`;
+                axios(url).then(response => {
+                    setNodeStatus("UP");
+                    setTargetInfo(response.data);
+                    setColor("#16b616")
+                    setIRefreshInterval(refreshInterval);
 
-            }).catch(() => {
-                setNodeStatus("DOWN")
-                setTargetInfo([])
-                setColor("#ff2d16")
-                // console.log(err)
-            });
-        }, iRefreshInterval) : 5000;
+                }).catch(err => {
+                    console.log(err);
+                    setDefault();
+                });
+            }, iRefreshInterval) : 5000;
 
-        return () => clearInterval(interval)
+            return () => clearInterval(interval);
+        } catch (e) {
+            console.log(e);
+            setDefault();
+        }
     }, [])
 
     const uuid = v4();
@@ -52,7 +62,8 @@ const ServerState = ({address, port, refreshInterval}) => {
             <div className="text-center mt-2" data-ivcs-server-attr="targetInfo">
                 <a data-tooltip-id={uuid}>Target info</a>
                 <Tooltip id={uuid} place="bottom" key={10}>
-                    {targetInfo.data === undefined ? "N/A" : targetInfo.data.activeTargets.map(ti => {
+                    {targetInfo.data === undefined ? "N/A"
+                        : targetInfo.data.activeTargets.map(ti => {
                         return(
                             <div key={ti.labels.instance}>
                                 <div>Label: {ti.labels.instance}</div>

@@ -44,9 +44,9 @@ services:
     build:
       context: .
       dockerfile: iva-dev.monitor_serv.Dockerfile
-    container_name: monitor-server-v1.8
+    container_name: test-monitor-server-v1.10
     env_file:
-      - env/prod.monitor-serv.env
+      - env/iva-dev.monitor-serv.env
     entrypoint: ["python3.11", "/home/monitor-server-app/web/entrypoint.py"]
     volumes:
       - static_files:/home/monitor-server-app/web/staticfiles

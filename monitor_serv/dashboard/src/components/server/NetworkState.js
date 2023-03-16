@@ -11,34 +11,43 @@ const NetworkState = ({address, port, refreshInterval}) => {
     const [color, setColor] = useState("#000000");
     const [iRefreshInterval, setIRefreshInterval] = useState(1000);    //innerRefreshInterval
 
+    const setDefault = () => {
+        setNetDataTooltip(undefined);
+        setNetStatusTooltip(undefined);
+        setNetStatus("N/A");
+        setColor("#000000");
+        setIRefreshInterval(5000);
+    };
 
     useEffect(() => {
-        const interval = address && port ? setInterval(() => {
-            const query = 'query?query=label_keep(('
-                        + 'alias((rate(node_network_receive_bytes_total) * 8 / 1024), "RX"),'
-                        + 'alias((rate(node_network_transmit_bytes_total) * 8 / 1024), "TX")'
-                        + '), "__name__", "device")'
+        try {
+            const interval = address && port ? setInterval(() => {
+                const query = 'query?query=label_keep(('
+                    + 'alias((rate(node_network_receive_bytes_total) * 8 / 1024), "RX"),'
+                    + 'alias((rate(node_network_transmit_bytes_total) * 8 / 1024), "TX")'
+                    + '), "__name__", "device")'
 
-            const host = `${address}:${port}`;
-            const url = `/api/v1/prom_data/${host}`;
-            axios.get(url, {params: {query: encodeURI(query)}})
-                .then(response => {
-                    if (response.data) {
-                        setNetStatus("UP");
-                        setNetDataTooltip(response.data);
-                        setColor("#16b616")
-                        setIRefreshInterval(refreshInterval);
+                const host = `${address}:${port}`;
+                const url = `/api/v1/prom_data/${host}`;
+                axios.get(url, {params: {query: encodeURI(query)}})
+                    .then(response => {
+                        if (response.data && response.data.error === undefined) {
+                            setNetStatus("UP");
+                            setNetDataTooltip(response.data);
+                            setColor("#16b616")
+                            setIRefreshInterval(refreshInterval);
+                        }
+                    }).catch(err => {
+                    console.log(err);
+                    setDefault();
+                });
+            }, iRefreshInterval) : 5000;
 
-                    }
-                }).catch(err => {
-                    setColor("#000000");
-                    setNetDataTooltip();
-                    setNetStatusTooltip();
-                    setNetStatus("N/A");
-            });
-        }, iRefreshInterval) : 5000;
-
-        return () => clearInterval(interval);
+            return () => clearInterval(interval);
+        } catch (e) {
+            console.log(e);
+            setDefault();
+        }
     }, [])
 
     const uuid = v4();
@@ -59,7 +68,8 @@ const NetworkState = ({address, port, refreshInterval}) => {
                                 </tr>
                             </thead>
                             <tbody>
-                                {netDataTooltip === undefined ? "N/A" : netDataTooltip.data.result.map(i => {
+                                {netDataTooltip === undefined || netDataTooltip.data === undefined  ? "N/A"
+                                    : netDataTooltip.data.result.map(i => {
                                      return(
                                          <tr key={i.metric.__name__ + "|" + i.metric.device}>
                                              <td>{i.metric.__name__}</td>
