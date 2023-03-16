@@ -16,7 +16,7 @@ class PromQueryMixin:
         try:
             url = f"http://{self._prom_target_address}/api/v1/{query['query']}"
             response = requests.get(url)
-            handler = self.data_handler_class(response.json())
+            handler = self.data_handler_class(response.json(), query['label'])
             return {"value": handler.get_handled_data()}
         except requests.RequestException:
             return HTTPStatus.SERVICE_UNAVAILABLE

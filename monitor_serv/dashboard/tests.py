@@ -9,7 +9,7 @@ from django import http, urls
 from django.test import TestCase
 from django.test.runner import DiscoverRunner
 
-from . import forms, models
+from . import models
 
 
 # Create your tests here.

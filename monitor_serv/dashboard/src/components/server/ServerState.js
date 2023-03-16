@@ -11,6 +11,8 @@ const ServerState = ({address, port, refreshInterval}) => {
     const [targetInfo, setTargetInfo] = useState([])
     const [nodeStatus, setNodeStatus] = useState("N/A");
     const [color, setColor] = useState("#000000");
+    const [iRefreshInterval, setIRefreshInterval] = useState(300);    //innerRefreshInterval
+
 
     useEffect(() => {
         const host = `${address}:${port}`;
@@ -21,6 +23,7 @@ const ServerState = ({address, port, refreshInterval}) => {
                 setNodeStatus("UP");
                 setTargetInfo(response.data);
                 setColor("#16b616")
+                setIRefreshInterval(refreshInterval);
 
             }).catch(() => {
                 setNodeStatus("DOWN")
@@ -28,7 +31,7 @@ const ServerState = ({address, port, refreshInterval}) => {
                 setColor("#ff2d16")
                 // console.log(err)
             });
-        }, refreshInterval) : 5000;
+        }, iRefreshInterval) : 5000;
 
         return () => clearInterval(interval)
     }, [])
@@ -48,10 +51,10 @@ const ServerState = ({address, port, refreshInterval}) => {
             </div>
             <div className="text-center mt-2" data-ivcs-server-attr="targetInfo">
                 <a data-tooltip-id={uuid}>Target info</a>
-                <Tooltip id={uuid} place="bottom">
+                <Tooltip id={uuid} place="bottom" key={10}>
                     {targetInfo.data === undefined ? "N/A" : targetInfo.data.activeTargets.map(ti => {
                         return(
-                            <div>
+                            <div key={ti.labels.instance}>
                                 <div>Label: {ti.labels.instance}</div>
                                 <div>Health: {ti.health}</div>
                             </div>

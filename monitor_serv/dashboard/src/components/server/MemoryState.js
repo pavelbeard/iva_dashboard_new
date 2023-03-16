@@ -8,6 +8,8 @@ const MemoryState = ({address, port, refreshInterval}) => {
     const [memoryData, setMemoryData] = useState("N/A");
     const [memoryDataTooltip, setMemoryDataTooltip] = useState();
     const [color, setColor] = useState("#000000");
+    const [iRefreshInterval, setIRefreshInterval] = useState(300);    //innerRefreshInterval
+
 
     useEffect(() => {
         const host = `${address}:${port}`;
@@ -36,6 +38,7 @@ const MemoryState = ({address, port, refreshInterval}) => {
                         else
                             setColor("#ff0000")
 
+                        setIRefreshInterval(refreshInterval);
                         setMemoryDataTooltip(parsedData);
                         setMemoryData(availMemPrc.toFixed(2) + "%");
 
@@ -46,7 +49,7 @@ const MemoryState = ({address, port, refreshInterval}) => {
                     setMemoryData("N/A");
             });
 
-        }, refreshInterval) : 500;
+        }, iRefreshInterval) : 500;
 
         return () => clearInterval(interval);
 
@@ -59,10 +62,10 @@ const MemoryState = ({address, port, refreshInterval}) => {
             <Memory height="24" width="24" color={color} data-ivcs-server-img-attr="memory"/>
             <div className="ps-3 mt-1" data-ivcs-server-attr="memory">
                 <a data-tooltip-id={uuid}>{memoryData}</a>
-                <Tooltip id={uuid} place="bottom">
+                <Tooltip id={uuid} place="bottom" key={30}>
                     {memoryDataTooltip === undefined ? "N/A" : memoryDataTooltip.map(data => {
                         return(
-                            <div>
+                            <div key={data.value.metric}>
                                 {data.value.metric}: {data.value.value}GB
                             </div>
                         );

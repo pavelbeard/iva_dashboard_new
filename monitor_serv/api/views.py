@@ -86,8 +86,9 @@ class NetworkDataAPIView(PromQueryMixin, BaseDataView, APIView):
     data_handler_class = NetworkDataHandler
 
     def get(self, request, prom_target_address):
-        context = json.dumps(self.get_context_data(request, prom_target_address))
-        return JsonResponse(data=context, status=HTTPStatus.OK, safe=False)
+        # context = json.dumps(self.get_context_data(request, prom_target_address))
+        context = requests.get(f"http://{prom_target_address}/api/v1/query?query={request.GET['query']}")
+        return JsonResponse(data=context.json(), status=HTTPStatus.OK, safe=False)
 
 
 class SslCerDataAPIView(TemplateView, APIView):

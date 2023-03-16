@@ -9,6 +9,9 @@ const CpuState = ({address, port, refreshInterval}) => {
     const [cpuDataTooltip, setCpuDataTooltip] = useState();
     const [cpuCoresCount, setCpuCoresCount] = useState();
     const [color, setColor] = useState("#000000");
+    const [iRefreshInterval, setIRefreshInterval] = useState(300);    //innerRefreshInterval
+
+
 
     useEffect(() => {
         const interval = address && port ? setInterval(() => {
@@ -40,6 +43,7 @@ const CpuState = ({address, port, refreshInterval}) => {
                             cpuLoad = 0;
                             setColor("#16b616")
 
+                        setIRefreshInterval(refreshInterval);
                         setCpuDataTooltip(parsedData[0].value.data);
                         setCpuData(cpuLoad.toFixed(2) + "%");
                     }
@@ -49,7 +53,7 @@ const CpuState = ({address, port, refreshInterval}) => {
                 setCpuData("N/A")
 
             });
-        }, refreshInterval) : 500;
+        }, iRefreshInterval) : 500;
 
         return () => clearInterval(interval);
 
@@ -62,12 +66,12 @@ const CpuState = ({address, port, refreshInterval}) => {
             <Cpu height="24" width="24" color={color} data-ivcs-server-img-attr="cpu"/>
             <div className="ps-3 mt-1" data-ivcs-server-attr="cpu">
                 <a data-tooltip-id={uuid}>{cpuData}</a>
-                <Tooltip id={uuid} place="bottom">
+                <Tooltip id={uuid} place="bottom" key={20}>
                     <div>{cpuCoresCount === undefined ? "" : `CPU Cores: ${cpuCoresCount}`}</div>
                     {cpuDataTooltip === undefined ? "N/A" : cpuDataTooltip.map(
                         data => {
                             return(
-                                <div>
+                                <div key={data.mode}>
                                     {data.mode}: {data.value}
                                 </div>
                             )

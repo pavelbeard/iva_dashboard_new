@@ -38,15 +38,14 @@ const Dashboard = () => {
                 <div className="ps-2 pe-2">
                     <h4 className="text-center pt-2 pb-2">Мониторинг серверов</h4>
                     <div className="col-md-6 w-100 cards">
-                        {data.map((target, i=0) => {
+                        {data.map(target => {
                             const card = <ServerCard
-                                key={i}
+                                key={target.address}
                                 id={target.id}
                                 address={target.address}
                                 port={target.port}
                                 refreshInterval={refreshInterval}
                             />;
-                            i++;
                             return (card);
                         })}
                     </div>
@@ -55,12 +54,12 @@ const Dashboard = () => {
                     <h4 className="text-center pt-2 pb-2">Мониторинг ВКС IVA</h4>
                     <div className="col-md-6 w-100 cards">
                         <CheckSSLCert key={1000023} refreshInterval={refreshInterval}/>
-                        <ServerCard/>
-                        <ServerCard/>
-                        <ServerCard/>
-                        <ServerCard/>
-                        <ServerCard/>
-                        <ServerCard/>
+                        {/*<ServerCard/>*/}
+                        {/*<ServerCard/>*/}
+                        {/*<ServerCard/>*/}
+                        {/*<ServerCard/>*/}
+                        {/*<ServerCard/>*/}
+                        {/*<ServerCard/>*/}
                     </div>
                 </div>
             </div>

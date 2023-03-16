@@ -10,15 +10,17 @@ import {v4} from "uuid";
 
 const ServerCard = ({id, address, port, refreshInterval}) => {
 
+
+
     return (
         <div className="dashboard-card" id={id}>
-            <ServerState key={2484242} address={address} port={port} refreshInterval={refreshInterval}/>
+            <ServerState key={12} address={address} port={port} refreshInterval={refreshInterval}/>
             <div className="server">
-                <CpuState key={434873} address={address} port={port} refreshInterval={refreshInterval}/>
-                <MemoryState key={34658767} address={address} port={port} refreshInterval={refreshInterval}/>
-                <DeviceSsdState key={3435786} address={address} port={port} refreshInterval={refreshInterval}/>
-                <AppsState key={354867}/>
-                <NetworkState key={3424030} address={address} port={port} refreshInterval={refreshInterval}/>
+                <CpuState key={13} address={address} port={port} refreshInterval={refreshInterval}/>
+                <MemoryState key={14} address={address} port={port} refreshInterval={refreshInterval}/>
+                <DeviceSsdState key={15} address={address} port={port} refreshInterval={refreshInterval}/>
+                <AppsState key={16}/>
+                <NetworkState key={17} address={address} port={port} refreshInterval={refreshInterval}/>
             </div>
         </div>
     );

@@ -10,8 +10,9 @@ from dashboard.models import DashboardSettings
 class PromDataHandler(ABC):
     GIBIBYTES = 1073741824
 
-    def __init__(self, data):
+    def __init__(self, data, key):
         self.data = data
+        self.key = key
 
     @abstractmethod
     def get_handled_data(self):
@@ -19,8 +20,8 @@ class PromDataHandler(ABC):
 
 
 class CpuDataHandler(PromDataHandler, ABC):
-    def __init__(self, data):
-        super().__init__(data)
+    def __init__(self, data, key):
+        super().__init__(data, key)
 
     def get_handled_data(self):
         result = self.data.get('data').get('result')
@@ -46,9 +47,9 @@ class CpuDataHandler(PromDataHandler, ABC):
         return {"data": handled_result, "cpuLoad": cpu_load}
 
 
-class RamDataHandler(PromDataHandler):
-    def __init__(self, data):
-        super().__init__(data)
+class RamDataHandler(PromDataHandler, ABC):
+    def __init__(self, data, key):
+        super().__init__(data, key)
 
     def get_handled_data(self):
         for i in self.data.get('data').get('result'):
@@ -57,37 +58,45 @@ class RamDataHandler(PromDataHandler):
             return {"metric": metric, "value": value}
 
 
-class FilesystemDataHandler(PromDataHandler):
-    def __init__(self, data):
-        super().__init__(data)
+class FilesystemDataHandler(PromDataHandler, ABC):
+    def __init__(self, data, key):
+        super().__init__(data, key)
 
     def get_handled_data(self):
         handled_result = []
 
         for i in self.data.get('data').get('result'):
-            tmp = i['value']
-            i['value'] = "{:.2f}".format(float(tmp[1]) / self.GIBIBYTES)
+            i['metric']['__name__'] = self.key
+            i['value'] = "{:.2f}".format(float(i['value'][1]) / self.GIBIBYTES)
             handled_result.append(i)
 
         return handled_result
 
 
-class NetworkDataHandler(PromDataHandler):
-    def __init__(self, data):
-        super().__init__(data)
+class AppDataHandler(PromDataHandler, ABC):
+    def __iter__(self, data, key):
+        super().__init__(data, key)
+
+    def get_handled_data(self):
+        pass
+
+
+class NetworkDataHandler(PromDataHandler, ABC):
+    def __init__(self, data, key):
+        super().__init__(data, key)
 
     def get_handled_data(self):
         handled_result = []
 
         for i in self.data.get('data').get('result'):
-            if i.get('metric').get('__name__') == 'node_network_info':
-                tmp = i['value'][1]
-                i['value'] = tmp
+            if i.get('metric').get("__name__").__contains__("bytes"):
+                i['value'] = "{:.2f}".format((float(i['value'][1]) * 8) / 1024)
                 handled_result.append(i)
             else:
-                tmp = i['value']
-                i['value'] = "{:.2f}".format((float(tmp[1]) * 8) / 1024)
+                i['value'] = i['value'][1]
                 handled_result.append(i)
+
+            i['metric']['__name__'] = self.key
 
         return handled_result
 

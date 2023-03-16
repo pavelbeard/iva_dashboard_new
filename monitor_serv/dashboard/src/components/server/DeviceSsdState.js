@@ -8,6 +8,7 @@ const DeviceSsdState = ({address, port, refreshInterval}) => {
     const [deviceSsdUsedSpace, setDeviceSsdUsedSpace] = useState("N/A");
     const [deviceSsdTooltip, setDeviceSsdTooltip] = useState();
     const [color, setColor] = useState("#000000");
+    const [iRefreshInterval, setIRefreshInterval] = useState(300);    //innerRefreshInterval
 
     useEffect(() => {
         const interval = address && port ? setInterval(() => {
@@ -35,6 +36,7 @@ const DeviceSsdState = ({address, port, refreshInterval}) => {
                         else
                             setColor("#ff0000")
 
+                        setIRefreshInterval(refreshInterval);
                         setDeviceSsdUsedSpace(ssdUsedSpacePrc.toFixed(2) + "%");
                         setDeviceSsdTooltip(parsedData);
 
@@ -45,7 +47,7 @@ const DeviceSsdState = ({address, port, refreshInterval}) => {
                     setDeviceSsdUsedSpace("N/A")
             });
 
-        }, refreshInterval) : 500;
+        }, iRefreshInterval) : 500;
 
         return () => clearInterval(interval);
     });
@@ -57,13 +59,12 @@ const DeviceSsdState = ({address, port, refreshInterval}) => {
             <DeviceSsd height="24" width="24" color={color} data-ivcs-server-img-attr="filespace"/>
             <div className="ps-3 mt-1" data-ivcs-server-attr="filespace">
                 <a data-tooltip-id={uuid}>{deviceSsdUsedSpace}</a>
-                <Tooltip id={uuid} place="bottom">
-                    <div>
-                        {/*style={{maxHeight: "200px", overflowY: "auto"}}*/}
+                <Tooltip id={uuid} place="bottom" key={40}>
+                    {/*style={{maxHeight: "200px", overflowY: "auto"}}*/}
                         {deviceSsdTooltip === undefined ? "N/A" : deviceSsdTooltip.map(i => {
                         return(
-                            <div>
-                                <div>{i.label}</div>
+                            <div key={i.value[0].metric.__name__}>
+                                <div>{i.value[0].metric.__name__}</div>
                                 <table className="mb-2">
                                     <thead>
                                     <tr>
@@ -76,7 +77,7 @@ const DeviceSsdState = ({address, port, refreshInterval}) => {
                                     <tbody>
                                     {i.value.map(v => {
                                         return(
-                                            <tr>
+                                            <tr key={v.metric.mountpoint}>
                                                 <td>{v.metric.device}</td>
                                                 <td>{v.metric.fstype}</td>
                                                 <td>{v.metric.mountpoint}</td>
@@ -88,7 +89,7 @@ const DeviceSsdState = ({address, port, refreshInterval}) => {
                                 </table>
                             </div>
                         )
-                    })}</div>
+                    })}
                 </Tooltip>
             </div>
         </div>

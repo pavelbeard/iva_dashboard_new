@@ -14,7 +14,7 @@ class TestMixins(TestCase):
     def setUp(self) -> None:
         self.CPU_DATA = {"querylist": json.dumps([
             {"label": "cpuData", "query": "query?query=(sum(irate(node_cpu_seconds_total[1h])) "
-                      "without (cpu) * 100) / count(node_cpu_seconds_total) without (cpu)"},
+                                          "without (cpu) * 100) / count(node_cpu_seconds_total) without (cpu)"},
             {"label": "cpuCores", "query": "query?query=count(node_cpu_seconds_total{mode='idle'}) without (cpu, mode)"}
         ])}
 
@@ -43,6 +43,17 @@ class TestMixins(TestCase):
             {"label": "packetsTX", "query": "query?query=node_network_transmit_packets_total"},
             {"label": "netState", "query": "query?query=node_network_info"},
         ])}
+
+        self.ENCODED_NET_DATA = {"query": 'label_keep(('
+                                          + 'alias(node_network_receive_errs_total, "RX errors"),'
+                                          + 'alias(node_network_transmit_errs_total, "TX errors")' +
+                                          '), "__name__", "device")'}
+        self.THROUGHPUT = {
+            "query": 'label_keep(('
+                     + 'alias((rate(node_network_receive_bytes_total) * 8 / 1024), "RX"),'
+                     + 'alias((rate(node_network_transmit_bytes_total) * 8 / 1024), "TX")'
+                     + '), "__name__", "device")'
+        }
 
     def test_response_data_mixin(self):
         response = self.client.get(reverse(
@@ -79,10 +90,21 @@ class TestMixins(TestCase):
 
     def test_network_data(self):
         response = self.client.get(reverse(
-            "api:net_data", args=("127.0.0.1:9121", )),
+            "api:net_data", args=("127.0.0.1:9121",)),
             data=self.NET_DATA
         )
         pprint(json.loads(response.content), indent=2, width=140, depth=5)
         self.assertEqual(response.status_code, HTTPStatus.OK)
         self.assertTrue(isinstance(response.content, bytes))
 
+    def test_encoded_network_data(self):
+        from urllib.parse import quote
+        self.THROUGHPUT['query'] = quote(self.THROUGHPUT['query'], safe='~@#$&()*!+=:;,?/\'')
+
+        response = self.client.get(reverse(
+            "api:net_data", args=("127.0.0.1:9101",)),
+            data=self.THROUGHPUT
+        )
+        pprint(json.loads(response.content), indent=2, width=140, depth=5)
+        self.assertEqual(response.status_code, HTTPStatus.OK)
+        self.assertTrue(isinstance(response.content, bytes))
