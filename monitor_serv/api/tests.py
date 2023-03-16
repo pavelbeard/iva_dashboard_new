@@ -1,6 +1,7 @@
 import json
 from http import HTTPStatus
 from pprint import pprint
+from urllib.parse import quote
 
 from django.test import TestCase
 from django.urls import reverse
@@ -55,6 +56,16 @@ class TestMixins(TestCase):
                      + '), "__name__", "device")'
         }
 
+        self.ROOT_SPACE = {
+            "query": 'query?query=label_keep'
+                     '(label_match('
+                     '(alias('
+                     '(node_filesystem_size_bytes-node_filesystem_free_bytes) / 1073741824, "Used"),'
+                     ' alias((node_filesystem_free_bytes-node_filesystem_avail_bytes) / 1073741824, "Reserved"),'
+                     ' alias(node_filesystem_avail_bytes / 1073741824, "Free")), "mountpoint", "/|/etc/hosts"),'
+                     ' "__name__", "device")'
+        }
+
     def test_response_data_mixin(self):
         response = self.client.get(reverse(
             "api:cpu_data",
@@ -98,7 +109,6 @@ class TestMixins(TestCase):
         self.assertTrue(isinstance(response.content, bytes))
 
     def test_encoded_network_data(self):
-        from urllib.parse import quote
         self.THROUGHPUT['query'] = quote(self.THROUGHPUT['query'], safe='~@#$&()*!+=:;,?/\'')
 
         response = self.client.get(reverse(
@@ -108,3 +118,14 @@ class TestMixins(TestCase):
         pprint(json.loads(response.content), indent=2, width=140, depth=5)
         self.assertEqual(response.status_code, HTTPStatus.OK)
         self.assertTrue(isinstance(response.content, bytes))
+
+    def test_encoded_filesystem_data(self):
+        self.ROOT_SPACE['query'] = quote(self.ROOT_SPACE['query'], safe='~@#$&()*!+=:;,?/\'')
+        response = self.client.get(reverse(
+            "api:filesystem_data", args=("127.0.0.1:9101",)),
+            data=self.ROOT_SPACE
+        )
+        pprint(json.loads(response.content), indent=2, width=140, depth=5)
+        self.assertEqual(response.status_code, HTTPStatus.OK)
+        self.assertTrue(isinstance(response.content, bytes))
+

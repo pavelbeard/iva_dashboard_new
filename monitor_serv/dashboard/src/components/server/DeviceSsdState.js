@@ -12,21 +12,23 @@ const DeviceSsdState = ({address, port, refreshInterval}) => {
 
     useEffect(() => {
         const interval = address && port ? setInterval(() => {
-            const querylist = JSON.stringify([
-                {label: "totalSpace", query: "query?query=node_filesystem_size_bytes"},
-                {label: "usedSpace", query: "query?query=node_filesystem_size_bytes-node_filesystem_free_bytes"},
-                {label: "reservedSpace", query: "query?query=node_filesystem_free_bytes-node_filesystem_avail_bytes"},
-                {label: "freeSpace", query: "query?query=node_filesystem_avail_bytes"},
-            ]);
+            const query = 'query?query=label_keep(' +
+                'label_match(' +
+                '(alias(node_filesystem_size_bytes / 1073741824, "Total"),' +
+                'alias((node_filesystem_size_bytes-node_filesystem_free_bytes) / 1073741824, "Used"), ' +
+                'alias((node_filesystem_free_bytes-node_filesystem_avail_bytes) / 1073741824, "Reserved"), ' +
+                'alias(node_filesystem_avail_bytes / 1073741824, "Free")), ' +
+                '"mountpoint", "/|/etc/hosts"), "__name__", "device")';
 
             const host = `${address}:${port}`;
-            const url = `/api/v1/filesystem_data/${host}`;
-            axios.get(url, {params: {querylist: querylist}})
+            const url = `/api/v1/prom_data/${host}`;
+            axios.get(url, {params: {query: encodeURI(query)}})
                 .then(response => {
                     if (response.data) {
-                        const parsedData = JSON.parse(response.data);
-                        const totalSpace = parseFloat(parsedData[0].value[0].value);
-                        const freeSpace = parseFloat(parsedData[3].value[0].value);
+                        setDeviceSsdTooltip(response.data)
+
+                        const totalSpace = parseFloat(response.data.data.result[2].value[1]);
+                        const freeSpace = parseFloat(response.data.data.result[0].value[1]);
                         const ssdUsedSpacePrc = (1 - (freeSpace / totalSpace)) * 100;
 
                         if (0 <= ssdUsedSpacePrc && ssdUsedSpacePrc < 50.0)
@@ -38,8 +40,6 @@ const DeviceSsdState = ({address, port, refreshInterval}) => {
 
                         setIRefreshInterval(refreshInterval);
                         setDeviceSsdUsedSpace(ssdUsedSpacePrc.toFixed(2) + "%");
-                        setDeviceSsdTooltip(parsedData);
-
                     }
                 }).catch(err => {
                     setColor("#000000");
@@ -60,36 +60,27 @@ const DeviceSsdState = ({address, port, refreshInterval}) => {
             <div className="ps-3 mt-1" data-ivcs-server-attr="filespace">
                 <a data-tooltip-id={uuid}>{deviceSsdUsedSpace}</a>
                 <Tooltip id={uuid} place="bottom" key={40}>
-                    {/*style={{maxHeight: "200px", overflowY: "auto"}}*/}
-                        {deviceSsdTooltip === undefined ? "N/A" : deviceSsdTooltip.map(i => {
-                        return(
-                            <div key={i.value[0].metric.__name__}>
-                                <div>{i.value[0].metric.__name__}</div>
-                                <table className="mb-2">
-                                    <thead>
-                                    <tr>
-                                        <th>Device</th>
-                                        <th>Fstype</th>
-                                        <th>Mountpoint</th>
-                                        <th>Value</th>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Metric</th>
+                                <th>Device</th>
+                                <th>Value</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {deviceSsdTooltip === undefined ? "N/A" : deviceSsdTooltip.data.result.map(i => {
+                                return(
+                                    <tr key={i.metric.__name__}>
+                                        <td>{i.metric.__name__}</td>
+                                        <td>{i.metric.device}</td>
+                                        <td>{parseFloat(i.value[1]).toFixed()}GB</td>
                                     </tr>
-                                    </thead>
-                                    <tbody>
-                                    {i.value.map(v => {
-                                        return(
-                                            <tr key={v.metric.mountpoint}>
-                                                <td>{v.metric.device}</td>
-                                                <td>{v.metric.fstype}</td>
-                                                <td>{v.metric.mountpoint}</td>
-                                                <td>{v.value}GB</td>
-                                            </tr>
-                                        )
-                                    })}
-                                    </tbody>
-                                </table>
-                            </div>
-                        )
-                    })}
+                                )
+                            })}
+                        </tbody>
+                    </table>
+
                 </Tooltip>
             </div>
         </div>

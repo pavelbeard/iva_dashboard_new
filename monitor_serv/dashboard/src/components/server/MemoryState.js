@@ -13,23 +13,23 @@ const MemoryState = ({address, port, refreshInterval}) => {
 
     useEffect(() => {
         const host = `${address}:${port}`;
-        const url = `/api/v1/ram_data/${host}`;
+        const url = `/api/v1/prom_data/${host}`;
         const interval = address && port ? setInterval(() => {
-            const querylist = JSON.stringify([
-                {label: "memTotal", query: "query?query=node_memory_MemTotal_bytes"},
-                {label: "buffers", query: "query?query=node_memory_Buffers_bytes"},
-                {label: "slab", query: "query?query=node_memory_Slab_bytes"},
-                {label: "memFree", query: "query?query=node_memory_MemFree_bytes"},
-                {label: "memAvail", query: "query?query=node_memory_MemAvailable_bytes"},
-                {label: "cached", query: "query?query=node_memory_Cached_bytes"},
-            ]);
-            axios.get(url, {params: {querylist: querylist}})
+            const query = 'query?query=label_keep(('
+                        + 'alias(node_memory_MemTotal_bytes / 1073741824, "Total"),'
+                        + 'alias(node_memory_Buffers_bytes / 1073741824, "Buffered"),'
+                        + 'alias(node_memory_Slab_bytes / 1073741824, "Slab"),'
+                        + 'alias(node_memory_MemFree_bytes / 1073741824, "Free"),'
+                        + 'alias(node_memory_MemAvailable_bytes / 1073741824, "Available"),'
+                        + 'alias(node_memory_Cached_bytes / 1073741824, "Cached")'
+                        + '), "__name__")';
+
+            axios.get(url, {params: {query: query}})
                 .then(response => {
                     if (response.data) {
-                        const parsedData = JSON.parse(response.data);
                         const availMemPrc = (1 - (
-                            parseFloat(parsedData[4].value.value)
-                            / parseFloat(parsedData[0].value.value))) * 100
+                            parseFloat(response.data.data.result[0].value[1])
+                            / parseFloat(response.data.data.result[5].value[1]))) * 100
 
                         if (0 <= availMemPrc && availMemPrc < 50.0)
                             setColor("#16b616");
@@ -39,7 +39,7 @@ const MemoryState = ({address, port, refreshInterval}) => {
                             setColor("#ff0000")
 
                         setIRefreshInterval(refreshInterval);
-                        setMemoryDataTooltip(parsedData);
+                        setMemoryDataTooltip(response.data);
                         setMemoryData(availMemPrc.toFixed(2) + "%");
 
                     }
@@ -63,13 +63,24 @@ const MemoryState = ({address, port, refreshInterval}) => {
             <div className="ps-3 mt-1" data-ivcs-server-attr="memory">
                 <a data-tooltip-id={uuid}>{memoryData}</a>
                 <Tooltip id={uuid} place="bottom" key={30}>
-                    {memoryDataTooltip === undefined ? "N/A" : memoryDataTooltip.map(data => {
-                        return(
-                            <div key={data.value.metric}>
-                                {data.value.metric}: {data.value.value}GB
-                            </div>
-                        );
-                    })}
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Metric</th>
+                                <th>Value</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {memoryDataTooltip === undefined ? "N/A" : memoryDataTooltip.data.result.map(i => {
+                                return(
+                                    <tr key={i.metric.__name__}>
+                                        <td>{i.metric.__name__}</td>
+                                        <td>{parseFloat(i.value[1]).toFixed(2)}GB</td>
+                                    </tr>
+                                )
+                            })}
+                        </tbody>
+                    </table>
                 </Tooltip>
             </div>
         </div>

@@ -9,7 +9,7 @@ from django.views.generic import TemplateView
 from rest_framework.generics import ListAPIView
 from rest_framework.views import APIView
 
-from api.logic import CpuDataHandler, RamDataHandler, FilesystemDataHandler, get_ssl_cert, NetworkDataHandler
+from api.logic import get_ssl_cert
 from api.mixins import PromQueryMixin
 from api.serializers import TargetSerializer, PromQLSerializer, BackendSettingsSerializer
 from common.mixins import EmptyQueryCheckMixin
@@ -53,41 +53,13 @@ class PromTargetAPIView(APIView):
         return JsonResponse(data=json_response, safe=False, status=HTTPStatus.OK)
 
 
-class CpuDataAPIView(PromQueryMixin, BaseDataView, APIView):
-    data_handler_class = CpuDataHandler
+class PromQlView(BaseDataView, APIView):
+    @staticmethod
+    def create_url(prom_target, query):
+        return f'http://{prom_target}/api/v1/{query}'
 
     def get(self, request, prom_target_address):
-        context = json.dumps(self.get_context_data(request, prom_target_address))
-        return JsonResponse(data=context, status=HTTPStatus.OK, safe=False)
-
-
-class RamDataAPIView(PromQueryMixin, BaseDataView, APIView):
-    data_handler_class = RamDataHandler
-
-    def get(self, request, prom_target_address):
-        context = json.dumps(self.get_context_data(request, prom_target_address))
-        return JsonResponse(data=context, status=HTTPStatus.OK, safe=False)
-
-
-class FilespaceDataAPIView(PromQueryMixin, BaseDataView, APIView):
-    data_handler_class = FilesystemDataHandler
-
-    def get(self, request, prom_target_address):
-        context = json.dumps(self.get_context_data(request, prom_target_address))
-        return JsonResponse(data=context, status=HTTPStatus.OK, safe=False)
-
-
-class AppsDataAPIView(PromQueryMixin,  BaseDataView, APIView):
-    def get(self, *args, **kwargs):
-        pass
-
-
-class NetworkDataAPIView(PromQueryMixin, BaseDataView, APIView):
-    data_handler_class = NetworkDataHandler
-
-    def get(self, request, prom_target_address):
-        # context = json.dumps(self.get_context_data(request, prom_target_address))
-        context = requests.get(f"http://{prom_target_address}/api/v1/query?query={request.GET['query']}")
+        context = requests.get(self.create_url(prom_target_address, request.GET['query']))
         return JsonResponse(data=context.json(), status=HTTPStatus.OK, safe=False)
 
 

@@ -19,7 +19,7 @@ const ServerCard = ({id, address, port, refreshInterval}) => {
                 <CpuState key={13} address={address} port={port} refreshInterval={refreshInterval}/>
                 <MemoryState key={14} address={address} port={port} refreshInterval={refreshInterval}/>
                 <DeviceSsdState key={15} address={address} port={port} refreshInterval={refreshInterval}/>
-                <AppsState key={16}/>
+                <AppsState key={16} address={address} port={port} refreshInterval={refreshInterval}/>
                 <NetworkState key={17} address={address} port={port} refreshInterval={refreshInterval}/>
             </div>
         </div>
