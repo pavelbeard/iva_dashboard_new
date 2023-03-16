@@ -84,12 +84,12 @@ const CheckSSLCert = ({refreshInterval}) => {
             <div className="iva">
                 <div className="mt-3">
                     <div>Провайдер:</div>
-                    <div className="mt-1 pe-1 iva-left-part">{sslIssuer === undefined ? "N/A" : sslIssuer}</div>
+                    <div className="mt-1 pe-2 iva-left-part">{sslIssuer === undefined ? "N/A" : sslIssuer}</div>
                     <div>Выдан:</div>
-                    <div className="mt-1 pe-1 iva-left-part">{sslCertValidFrom === undefined ? "N/A" :
+                    <div className="mt-1 pe-2 iva-left-part">{sslCertValidFrom === undefined ? "N/A" :
                         sslCertValidFrom}</div>
                     <div>Действует до:</div>
-                    <div className="mt-1 pe-1">{sslCertValidTo === undefined ? "N/A" :
+                    <div className="mt-1 pe-2">{sslCertValidTo === undefined ? "N/A" :
                         sslCertValidTo}</div>
                 </div>
             </div>
