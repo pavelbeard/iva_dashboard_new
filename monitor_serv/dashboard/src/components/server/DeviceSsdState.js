@@ -10,6 +10,9 @@ const DeviceSsdState = ({address, port, refreshInterval}) => {
     const [color, setColor] = useState("#000000");
     const [iRefreshInterval, setIRefreshInterval] = useState(300);    //innerRefreshInterval
 
+    //disk io
+    const [deviceSsdIO, setDeviceSsdIO] = useState();
+
     useEffect(() => {
         const interval = address && port ? setInterval(() => {
             const query = 'query?query=label_keep(' +
@@ -19,6 +22,11 @@ const DeviceSsdState = ({address, port, refreshInterval}) => {
                 'alias((node_filesystem_free_bytes-node_filesystem_avail_bytes) / 1073741824, "Reserved"), ' +
                 'alias(node_filesystem_avail_bytes / 1073741824, "Free")), ' +
                 '"mountpoint", "/|/etc/hosts"), "__name__", "device")';
+
+            const query1 = 'query?query=' +
+                'label_keep(' +
+                '(alias(rate(node_disk_read_bytes_total) / 1048576, "Reads"),' +
+                'alias(rate(node_disk_written_bytes_total) / 1048576, "Writes")), "__name__", "device")'
 
             const host = `${address}:${port}`;
             const url = `/api/v1/prom_data/${host}`;
@@ -47,6 +55,13 @@ const DeviceSsdState = ({address, port, refreshInterval}) => {
                     setDeviceSsdUsedSpace("N/A")
             });
 
+            axios.get(url, {params: {query: encodeURI(query1)}})
+                .then(response => {
+                    if (response.data) {
+                        setDeviceSsdIO(response.data);
+                    }
+                })
+
         }, iRefreshInterval) : 500;
 
         return () => clearInterval(interval);
@@ -60,6 +75,28 @@ const DeviceSsdState = ({address, port, refreshInterval}) => {
             <div className="ps-3 mt-1" data-ivcs-server-attr="filespace">
                 <a data-tooltip-id={uuid}>{deviceSsdUsedSpace}</a>
                 <Tooltip id={uuid} place="bottom" key={40}>
+                    <div>IO Operations</div>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Metric</th>
+                                <th>Device</th>
+                                <th>Value</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        {deviceSsdIO === undefined ? "N/A" : deviceSsdIO.data.result.map(i => {
+                            return(
+                                <tr key={i.metric.__name__ + "|" + i.metric.device}>
+                                    <td>{i.metric.__name__}</td>
+                                    <td>{i.metric.device}</td>
+                                    <td>{parseFloat(i.value[1]).toFixed(2)}MB/s</td>
+                                </tr>
+                            )
+                        })}
+                        </tbody>
+                    </table>
+                    <div className="mt-2">Space stats</div>
                     <table>
                         <thead>
                             <tr>
