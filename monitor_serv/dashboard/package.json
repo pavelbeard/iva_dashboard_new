@@ -30,6 +30,8 @@
   "dependencies": {
     "bootstrap": "^5.2.3",
     "bootstrap-icons": "^1.10.3",
+    "chartjs": "^0.3.24",
+    "chartjs-plugin-datasource-prometheus": "^1.1.0",
     "cors": "^2.8.5",
     "http": "^0.0.1-security",
     "react-bootstrap-icons": "^1.10.2",

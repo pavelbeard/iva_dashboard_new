@@ -10,20 +10,24 @@ const Dashboard = () => {
     const [refreshInterval, _] = useState(3000);
 
     const getTargets = () => {
-        axios("/api/v1/targets")
-            .then(response => {
-                setData(response.data);
-            }).catch(err => {
+        try {
+            axios("/api/v1/targets")
+                .then(response => {
+                    setData(response.data);
+                }).catch(err => {
                 console.log(err);
                 setData([]);
-            });
-    };
 
+            });
+        } catch (e) {
+            console.log(e);
+            setData([]);
+        }
+    };
 
     useEffect(() => {
         getTargets();
         const interval1 = setInterval(getTargets, refreshInterval);
-
         return () => clearInterval(interval1);
 
     }, []);
