@@ -44,7 +44,7 @@ const Dashboard = () => {
                     <div className="col-md-6 w-100 cards">
                         {data.map(target => {
                             const card = <ServerCard
-                                key={target.address}
+                                key={target.address + ":" + target.port}
                                 id={target.id}
                                 address={target.address}
                                 port={target.port}

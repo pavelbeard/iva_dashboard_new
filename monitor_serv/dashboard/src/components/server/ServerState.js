@@ -7,44 +7,32 @@ import {v4} from "uuid";
 
 import './Server.css';
 
-const ServerState = ({address, port, refreshInterval}) => {
+const ServerState = ({host, refreshInterval, targetHealth}) => {
     const [targetInfo, setTargetInfo] = useState([])
-    const [nodeStatus, setNodeStatus] = useState("N/A");
+    const [targetStatus, setTargetStatus] = useState("N/A");
     const [color, setColor] = useState("#000000");
     const [iRefreshInterval, setIRefreshInterval] = useState(300);    //innerRefreshInterval
 
-    const setDefault = () => {
-        setNodeStatus("DOWN")
-        setTargetInfo([])
-        setColor("#ff2d16")
-        setIRefreshInterval(5000);
-    }
-
-
     useEffect(() => {
-        try {
-            const host = `${address}:${port}`;
+        const interval = setInterval(() => {
+            const url = `/api/v1/prom_targets/${host}`;
+            axios(url).then(response => {
+                if (response?.data?.data?.activeTargets) {
+                    setTargetStatus("UP");
 
-            const interval = address && port ? setInterval(() => {
-                const url = `/api/v1/prom_targets/${host}`;
-                axios(url).then(response => {
-                    setNodeStatus("UP");
-                    setTargetInfo(response.data);
+                    const __targetInfo__ = response.data.data.activeTargets;
+
+                    setTargetInfo(__targetInfo__);
                     setColor("#16b616")
                     setIRefreshInterval(refreshInterval);
+                }
 
-                }).catch(err => {
-                    console.log(err);
-                    setDefault();
-                });
-            }, iRefreshInterval) : 5000;
+            });
 
-            return () => clearInterval(interval);
-        } catch (e) {
-            console.log(e);
-            setDefault();
-        }
-    }, [])
+        }, iRefreshInterval);
+
+        return () => clearInterval(interval);
+    }, []);
 
     const uuid = v4();
 
@@ -54,16 +42,15 @@ const ServerState = ({address, port, refreshInterval}) => {
                 <Server height="32" width="32" color={color} data-ivcs-server-img-attr="server"/>
             </div>
             <div className="text-center mt-2" data-ivcs-server-attr="status">
-                {nodeStatus === undefined ? "N/A" : nodeStatus}
+                {targetStatus}
             </div>
             <div className="text-center mt-2" data-ivcs-server-attr="address">
-                {address === undefined && port === undefined ? "N/A" : `${address}:${port}`}
+                {host}
             </div>
             <div className="text-center mt-2" data-ivcs-server-attr="targetInfo">
                 <a data-tooltip-id={uuid}>Target info</a>
                 <Tooltip id={uuid} place="bottom" key={10}>
-                    {targetInfo.data === undefined ? "N/A"
-                        : targetInfo.data.activeTargets.map(ti => {
+                    {targetInfo.map(ti => {
                         return(
                             <div key={ti.labels.instance}>
                                 <div>Label: {ti.labels.instance}</div>

@@ -4,56 +4,42 @@ import {Tooltip} from "react-tooltip";
 import {v4} from "uuid";
 import axios from "axios";
 
-const AppsState = ({address, port, refreshInterval}) => {
+const AppsState = ({host, refreshInterval, targetHealth}) => {
     const [appsCount, setAppsCount] = useState("N/A");
-    const [appsDataTooltip, setAppsDataTooltip] = useState();
+    const [appsDataTooltip, setAppsDataTooltip] = useState([]);
     const [color, setColor] = useState("#000000");
     const [iRefreshInterval, setIRefreshInterval] = useState(300);
 
-    const setDefault = () => {
-        setAppsCount("N/A");
-        setAppsDataTooltip(undefined);
-        setColor("#000000");
-        setIRefreshInterval(5000);
-    };
-
-
     useEffect(() => {
-        try {
-            const interval = address && port ? setInterval(() => {
-                const query = 'query?query=label_keep(alias(sum by (instance) ' +
-                    '(namedprocess_namegroup_num_procs), "Process count"), "__name__")';
-                const url = `http://${address}:${port}/api/v1/${query}`;
+        const interval = setInterval(() => {
+            const query = 'query?query=label_keep(alias(sum by (instance) ' +
+                '(namedprocess_namegroup_num_procs), "Process count"), "__name__")';
+            const url = `/api/v1/prom_data/${host}`;
 
-                axios.get(url, {params: {query: encodeURI(query)}})
-                    .then(response => {
-                        if (response.data) {
-                            setAppsDataTooltip(response.data);
+            axios.get(url, {params: {query: encodeURI(query)}})
+                .then(response => {
+                    if (response?.data?.data?.result) {
+                        const __appsDataTooltip__ = response.data.data.result;
 
-                            const __appsCount__ = parseInt(response.data.data.result[0].value[1]);
+                        setAppsDataTooltip(__appsDataTooltip__);
 
-                            if (0 <= __appsCount__ && __appsCount__ < 100)
-                                setColor("#16b616");
-                            else if (100 <= __appsCount__ && __appsCount__ < 400)
-                                setColor("#ff9900");
-                            else
-                                setColor("#ff0000");
+                        const __appsCount__ = parseInt(__appsDataTooltip__[0].value[1]);
 
-                            setAppsCount(response.data.data.result[0].value[1]);
-                            setIRefreshInterval(refreshInterval);
-                        }
-                    }).catch(err => {
-                    console.log(err);
-                    setDefault();
-                })
+                        if (0 <= __appsCount__ && __appsCount__ < 100)
+                            setColor("#16b616");
+                        else if (100 <= __appsCount__ && __appsCount__ < 400)
+                            setColor("#ff9900");
+                        else
+                            setColor("#ff0000");
 
-            }, iRefreshInterval) : 500;
+                        setAppsCount(__appsDataTooltip__[0]?.value[1]);
+                        setIRefreshInterval(refreshInterval);
+                    }
+                });
 
-            return () => clearInterval(interval);
-        } catch (e) {
-            console.log(e);
-            setDefault();
-        }
+        }, iRefreshInterval);
+
+        return () => clearInterval(interval);
     }, []);
 
     const uuid = v4();
@@ -71,8 +57,7 @@ const AppsState = ({address, port, refreshInterval}) => {
                             </tr>
                         </thead>
                         <tbody>
-                            {appsDataTooltip === undefined || appsDataTooltip.data === undefined ? "N/A"
-                                : appsDataTooltip.data.result.map(i => {
+                            {appsDataTooltip.map(i => {
                                 return(
                                     <tr key={i.metric.__name__}>
                                         <td>{i.value[1]}</td>

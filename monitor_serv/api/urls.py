@@ -6,6 +6,7 @@ app_name = "api"
 
 urlpatterns = (
     path('targets/', views.TargetAPIView.as_view(),  name="targets"),
+    path('target_test/<str:prom_target_address>', views.ping_prom_target, name="target_test"),
     path('queries/', views.PromQlAPIView.as_view(),  name="queries"),
     path('settings/', views.BackendSettingsAPIView.as_view(),  name="settings"),
     path('ssl_test/', views.SslCerDataAPIView.as_view(),  name="ssl_test"),

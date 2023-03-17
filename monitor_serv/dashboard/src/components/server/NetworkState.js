@@ -4,51 +4,36 @@ import axios from "axios";
 import {v4} from "uuid";
 import {Tooltip} from "react-tooltip";
 
-const NetworkState = ({address, port, refreshInterval}) => {
+const NetworkState = ({host, refreshInterval, targetHealth}) => {
     const [netStatus, setNetStatus] = useState("N/A");
-    const [netStatusTooltip, setNetStatusTooltip] = useState();
-    const [netDataTooltip, setNetDataTooltip] = useState();
+    const [netDataTooltip, setNetDataTooltip] = useState([]);
     const [color, setColor] = useState("#000000");
     const [iRefreshInterval, setIRefreshInterval] = useState(1000);    //innerRefreshInterval
 
-    const setDefault = () => {
-        setNetDataTooltip(undefined);
-        setNetStatusTooltip(undefined);
-        setNetStatus("N/A");
-        setColor("#000000");
-        setIRefreshInterval(5000);
-    };
-
     useEffect(() => {
-        try {
-            const interval = address && port ? setInterval(() => {
-                const query = 'query?query=label_keep(('
-                    + 'alias((rate(node_network_receive_bytes_total) * 8 / 1024), "RX"),'
-                    + 'alias((rate(node_network_transmit_bytes_total) * 8 / 1024), "TX")'
-                    + '), "__name__", "device")'
+        const interval = setInterval(() => {
+            const query = 'query?query=label_keep(('
+                + 'alias((rate(node_network_receive_bytes_total) * 8 / 1024), "RX"),'
+                + 'alias((rate(node_network_transmit_bytes_total) * 8 / 1024), "TX")'
+                + '), "__name__", "device")'
 
-                const host = `${address}:${port}`;
-                const url = `/api/v1/prom_data/${host}`;
-                axios.get(url, {params: {query: encodeURI(query)}})
-                    .then(response => {
-                        if (response.data && response.data.error === undefined) {
-                            setNetStatus("UP");
-                            setNetDataTooltip(response.data);
-                            setColor("#16b616")
-                            setIRefreshInterval(refreshInterval);
-                        }
-                    }).catch(err => {
-                    console.log(err);
-                    setDefault();
+            const url = `/api/v1/prom_data/${host}`;
+            axios.get(url, {params: {query: encodeURI(query)}})
+                .then(response => {
+                    if (response?.data?.data?.result) {
+                        setNetStatus("UP");
+
+                        const __netDataTooltip__ = response.data.data.result;
+
+                        setNetDataTooltip(__netDataTooltip__);
+                        setColor("#16b616")
+                        setIRefreshInterval(refreshInterval);
+                    }
                 });
-            }, iRefreshInterval) : 5000;
+        }, iRefreshInterval);
 
-            return () => clearInterval(interval);
-        } catch (e) {
-            console.log(e);
-            setDefault();
-        }
-    }, [])
+        return () => clearInterval(interval);
+    }, []);
 
     const uuid = v4();
 
@@ -68,8 +53,7 @@ const NetworkState = ({address, port, refreshInterval}) => {
                                 </tr>
                             </thead>
                             <tbody>
-                                {netDataTooltip === undefined || netDataTooltip.data === undefined  ? "N/A"
-                                    : netDataTooltip.data.result.map(i => {
+                                {netDataTooltip.map(i => {
                                      return(
                                          <tr key={i.metric.__name__ + "|" + i.metric.device}>
                                              <td>{i.metric.__name__}</td>
@@ -78,7 +62,7 @@ const NetworkState = ({address, port, refreshInterval}) => {
                                          </tr>
                                      )
                                 })}
-                            </tbody>
+                  !          </tbody>
                         </table>
                     </div>
                 </Tooltip>
