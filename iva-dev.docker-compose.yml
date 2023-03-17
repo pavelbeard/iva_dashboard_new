@@ -6,7 +6,7 @@ services:
     build:
       context: .
       dockerfile: iva-dev.monitor_nginx.Dockerfile
-    container_name: monitor-nginx-v1.0
+    container_name: test-monitor-nginx-v1.0
     volumes:
       - static_files:/home/monitor-server-app/web/staticfiles
     networks:
@@ -26,7 +26,7 @@ services:
 
   monitor-postgres:
     image: pavelbeard/monitor-postgres:v1.0
-    container_name: monitor-postgres-v1.0
+    container_name: test-monitor-postgres-v1.0
     env_file:
       - env/iva-dev.postgres.env
     networks:
