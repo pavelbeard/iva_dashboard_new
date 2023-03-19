@@ -37,22 +37,9 @@ class IndexView(AppVersionMixin, DevCredentialsMixin, RedirectView, TemplateView
             return self.render_to_response(self.get_context_data())
 
 
-class DashboardView(AppVersionMixin, ListView):
+class DashboardView(AppVersionMixin, TemplateView):
     template_name = "1_dashboard.html"
 
-    def get_queryset(self):
-        return models.Target.objects.all()
 
-    def get_context_data(self, *, object_list=None, **kwargs):
-        context = super().get_context_data(**kwargs)
-
-        targets = []
-        for target in self.get_queryset():
-            targets.append({
-                "address": "{}:{}".format(target.address, target.port),
-                "element_id": "{}{}".format(target.address.replace('.', ''), target.port),
-                "data_target_id": target.id
-            })
-
-        context["targets"] = targets
-        return context
+class TargetDetail(TemplateView):
+    pass

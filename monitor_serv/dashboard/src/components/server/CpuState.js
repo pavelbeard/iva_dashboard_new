@@ -3,6 +3,7 @@ import {Cpu} from "react-bootstrap-icons";
 import axios from "axios";
 import {v4} from "uuid";
 import {Tooltip} from "react-tooltip";
+import * as query from '../queries'
 
 const CpuState = ({host, refreshInterval, targetHealth}) => {
     const [cpuLoad, setCpuLoad] = useState("N/A");
@@ -14,16 +15,9 @@ const CpuState = ({host, refreshInterval, targetHealth}) => {
 
     useEffect(() => {
         const interval = setInterval(async () => {
-            const query1 = 'query?query=sum by (mode,instance) ' +
-                '(label_keep(rate(node_cpu_seconds_total), "mode")) * 100 / ' +
-                'distinct(label_value(node_cpu_seconds_total, "cpu"))';
-
-            const query2 = 'query?query=label_keep(alias(count(node_cpu_seconds_total{mode="idle"}) ' +
-                'without (cpu, mode), "Cpu cores"), "__name__", "device")';
-
             const url = `/api/v1/prom_data/${host}`;
 
-            axios.get(url, {params: {query: encodeURI(query1)}})
+            axios.get(url, {params: {query: encodeURI(query.system.cpuData)}})
                 .then(response => {
                     if (response?.data?.data?.result) {
                         const __cpuDataTooltip__ = response.data.data.result;
@@ -48,7 +42,7 @@ const CpuState = ({host, refreshInterval, targetHealth}) => {
                     console.log(err);
             });
 
-            axios.get(url, {params: {query: encodeURI(query2)}})
+            axios.get(url, {params: {query: encodeURI(query.system.cpuCores)}})
                 .then(response => {
                     if (response.data) {
                         const __cpuCoresData__ = response.data.data.result;

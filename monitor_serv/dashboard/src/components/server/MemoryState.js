@@ -3,6 +3,7 @@ import {Memory} from "react-bootstrap-icons";
 import axios from "axios";
 import {v4} from "uuid";
 import {Tooltip} from "react-tooltip";
+import * as query from '../queries';
 
 const MemoryState = ({host, refreshInterval, targetHealth}) => {
     const [memoryStatus, setMemoryStatus] = useState("N/A");
@@ -13,16 +14,8 @@ const MemoryState = ({host, refreshInterval, targetHealth}) => {
     useEffect(() => {
         const interval = setInterval(() => {
             const url = `/api/v1/prom_data/${host}`;
-            const query = 'query?query=label_keep(('
-                + 'alias(node_memory_MemTotal_bytes / 1073741824, "Total"),'
-                + 'alias(node_memory_Buffers_bytes / 1073741824, "Buffered"),'
-                + 'alias(node_memory_Slab_bytes / 1073741824, "Slab"),'
-                + 'alias(node_memory_MemFree_bytes / 1073741824, "Free"),'
-                + 'alias(node_memory_MemAvailable_bytes / 1073741824, "Available"),'
-                + 'alias(node_memory_Cached_bytes / 1073741824, "Cached")'
-                + '), "__name__")';
 
-            axios.get(url, {params: {query: query}})
+            axios.get(url, {params: {query: query.system.memory}})
                 .then(response => {
                     if (response?.data?.data?.result) {
                         const __memoryDataTooltip__ = response.data.data.result;

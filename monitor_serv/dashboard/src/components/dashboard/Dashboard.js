@@ -3,6 +3,7 @@ import ServerCard from "../card/ServerCard";
 import axios from "axios";
 import CheckSSLCert from "../iva/CheckSSLCert";
 import {v4} from "uuid";
+import PropTypes from "prop-types";
 
 
 const Dashboard = () => {
@@ -70,5 +71,9 @@ const Dashboard = () => {
         </section>
     );
 }
+
+Dashboard.propTypes = {
+    window: PropTypes.func
+};
 
 export default Dashboard;

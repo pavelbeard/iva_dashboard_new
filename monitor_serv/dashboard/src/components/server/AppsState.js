@@ -3,6 +3,7 @@ import {AppIndicator} from "react-bootstrap-icons";
 import {Tooltip} from "react-tooltip";
 import {v4} from "uuid";
 import axios from "axios";
+import * as query from '../queries'
 
 const AppsState = ({host, refreshInterval, targetHealth}) => {
     const [appsCount, setAppsCount] = useState("N/A");
@@ -12,11 +13,9 @@ const AppsState = ({host, refreshInterval, targetHealth}) => {
 
     useEffect(() => {
         const interval = setInterval(() => {
-            const query = 'query?query=label_keep(alias(sum by (instance) ' +
-                '(namedprocess_namegroup_num_procs), "Process count"), "__name__")';
             const url = `/api/v1/prom_data/${host}`;
 
-            axios.get(url, {params: {query: encodeURI(query)}})
+            axios.get(url, {params: {query: encodeURI(query.modules.processCount)}})
                 .then(response => {
                     if (response?.data?.data?.result) {
                         const __appsDataTooltip__ = response.data.data.result;

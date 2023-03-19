@@ -3,6 +3,7 @@ import {Ethernet} from "react-bootstrap-icons";
 import axios from "axios";
 import {v4} from "uuid";
 import {Tooltip} from "react-tooltip";
+import * as query from '../queries';
 
 const NetworkState = ({host, refreshInterval, targetHealth}) => {
     const [netStatus, setNetStatus] = useState("N/A");
@@ -12,13 +13,8 @@ const NetworkState = ({host, refreshInterval, targetHealth}) => {
 
     useEffect(() => {
         const interval = setInterval(() => {
-            const query = 'query?query=label_keep(('
-                + 'alias((rate(node_network_receive_bytes_total) * 8 / 1024), "RX"),'
-                + 'alias((rate(node_network_transmit_bytes_total) * 8 / 1024), "TX")'
-                + '), "__name__", "device")'
-
             const url = `/api/v1/prom_data/${host}`;
-            axios.get(url, {params: {query: encodeURI(query)}})
+            axios.get(url, {params: {query: encodeURI(query.network.throughput)}})
                 .then(response => {
                     if (response?.data?.data?.result) {
                         setNetStatus("UP");
@@ -62,7 +58,7 @@ const NetworkState = ({host, refreshInterval, targetHealth}) => {
                                          </tr>
                                      )
                                 })}
-                  !          </tbody>
+                            </tbody>
                         </table>
                     </div>
                 </Tooltip>

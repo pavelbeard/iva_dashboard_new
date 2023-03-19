@@ -3,6 +3,7 @@ import {DeviceSsd} from "react-bootstrap-icons";
 import {v4} from "uuid";
 import {Tooltip} from "react-tooltip";
 import axios from "axios";
+import * as query from '../queries';
 
 const DeviceSsdState = ({host, refreshInterval, targetHealth}) => {
     const [deviceSsdUsedSpace, setDeviceSsdUsedSpace] = useState("N/A");
@@ -15,21 +16,8 @@ const DeviceSsdState = ({host, refreshInterval, targetHealth}) => {
 
     useEffect(() => {
         const interval = setInterval(() => {
-            const query = 'query?query=label_keep(' +
-                'label_match(' +
-                '(alias(node_filesystem_size_bytes / 1073741824, "Total"),' +
-                'alias((node_filesystem_size_bytes-node_filesystem_free_bytes) / 1073741824, "Used"), ' +
-                'alias((node_filesystem_free_bytes-node_filesystem_avail_bytes) / 1073741824, "Reserved"), ' +
-                'alias(node_filesystem_avail_bytes / 1073741824, "Free")), ' +
-                '"mountpoint", "/|/etc/hosts"), "__name__", "device")';
-
-            const query1 = 'query?query=' +
-                'label_keep(' +
-                '(alias(rate(node_disk_read_bytes_total) / 1048576, "Reads"),' +
-                'alias(rate(node_disk_written_bytes_total) / 1048576, "Writes")), "__name__", "device")'
-
             const url = `/api/v1/prom_data/${host}`;
-            axios.get(url, {params: {query: encodeURI(query)}})
+            axios.get(url, {params: {query: encodeURI(query.disk.rootSpace)}})
                 .then(response => {
                     if (response?.data?.data?.result) {
                         const __deviceSsdTooltip__ = response.data.data.result;
@@ -52,7 +40,7 @@ const DeviceSsdState = ({host, refreshInterval, targetHealth}) => {
                     }
                 });
 
-            axios.get(url, {params: {query: encodeURI(query1)}})
+            axios.get(url, {params: {query: encodeURI(query.disk.io)}})
                 .then(response => {
                     if (response?.data?.data?.result) {
                         const __deviceSsdIO__ = response.data.data.result;

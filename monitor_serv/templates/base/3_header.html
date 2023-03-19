@@ -17,6 +17,7 @@
             <div class="navbar-nav">
                 {% if user.is_authenticated %}
                     <a href="{% url "dashboard:targets" %}" class="nav-link">Инфопанель</a>
+                    <a href="{% url 'dashboard:target_detail' %}" class="nav-link">Детализация</a>
                     {% if user.is_staff %}
                         <a href="{% url "admin:index" %}" class="nav-link pe-5">Панель админа</a>
                     {% endif %}

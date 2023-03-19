@@ -7,7 +7,7 @@ import {v4} from "uuid";
 
 import './Server.css';
 
-const ServerState = ({host, refreshInterval, targetHealth}) => {
+const ServerState = ({host, refreshInterval, onClick}) => {
     const [targetInfo, setTargetInfo] = useState([])
     const [targetStatus, setTargetStatus] = useState("N/A");
     const [color, setColor] = useState("#000000");

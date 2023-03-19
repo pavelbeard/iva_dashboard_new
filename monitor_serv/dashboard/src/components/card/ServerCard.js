@@ -37,29 +37,23 @@ const ServerCard = ({id, address, port, refreshInterval}) => {
             <div className="dashboard-card" id={id}>
                 <ServerState key={12}
                              host={host}
-                             refreshInterval={refreshInterval}
-                             targetHealth={targetHealth}/>
+                             refreshInterval={refreshInterval}/>
                 <div className="server">
                     <CpuState key={13}
                               host={host}
-                              refreshInterval={refreshInterval}
-                              targetHealth={targetHealth}/>
+                              refreshInterval={refreshInterval}/>
                     <MemoryState key={14}
                                  host={host}
-                                 refreshInterval={refreshInterval}
-                                 targetHealth={targetHealth}/>
+                                 refreshInterval={refreshInterval}/>
                     <DeviceSsdState key={15}
                                     host={host}
-                                    refreshInterval={refreshInterval}
-                                    targetHealth={targetHealth}/>
+                                    refreshInterval={refreshInterval}/>
                     <AppsState key={16}
                                host={host}
-                               refreshInterval={refreshInterval}
-                               targetHealth={targetHealth}/>
+                               refreshInterval={refreshInterval}/>
                     <NetworkState key={17}
                                   host={host}
-                                  refreshInterval={refreshInterval}
-                                  targetHealth={targetHealth}/>
+                                  refreshInterval={refreshInterval}/>
                 </div>
             </div>
         );
