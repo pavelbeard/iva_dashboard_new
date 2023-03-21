@@ -1,7 +1,7 @@
 from common.admin import admin_url_resolver
 from django.contrib import admin
 
-from dashboard.models import Target, DashboardSettings, PromQL
+from dashboard.models import Target, DashboardSettings
 
 
 # Register your models here.
@@ -12,11 +12,6 @@ class TargetAdmin(admin.ModelAdmin):
     list_display = tuple('id address port'.split())
 
 
-@admin.register(PromQL)
-class PromQLAdmin(admin.ModelAdmin):
-    list_display = tuple('id query'.split())
-
-
 @admin.register(DashboardSettings)
 class BackendSettingsAdmin(admin.ModelAdmin):
-    list_display = tuple('id refresh_interval'.split())
+    list_display = tuple('id address_for_check_ssl port'.split())

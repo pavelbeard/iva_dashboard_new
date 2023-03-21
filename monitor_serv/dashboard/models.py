@@ -19,27 +19,14 @@ class Target(models.Model):
         unique_together = ("address", "port")
 
 
-class PromQL(models.Model):
-    query = fields.TextField()
-
-    fk_target = models.ForeignKey(Target, related_name='fk_target', on_delete=models.CASCADE, null=False)
-
-    def __str__(self):
-        return f"query for [{self.fk_target.address}]={self.query}"
-
-
 class DashboardSettings(models.Model):
-    refresh_interval = fields.SmallIntegerField(default=5)
     address_for_check_ssl = fields.TextField()
     port = fields.SmallIntegerField()
-    protocol = fields.CharField(max_length=10)
 
     def __str__(self):
-        return f"dashboard refresh interval: {self.refresh_interval}"
+        return f"dashboard settings {self.id}"
 
-
-# class Settings(models.Model):
-#     refresh_interval = fields.SmallIntegerField(null=False, verbose_name="Порт сервера:")
-#
-#     def __str__(self):
-#         return f"dashboard refresh interval: {self.refresh_interval}"
+    class Meta:
+        verbose_name = 'настройки дашборда'
+        verbose_name_plural = 'настройки дашборда'
+        app_label = 'dashboard'

@@ -1,87 +1,94 @@
-from abc import abstractmethod
-from http import HTTPStatus
-
 import requests
-from django.http import JsonResponse
-from django.views.generic import TemplateView
-from rest_framework.generics import ListAPIView
+from rest_framework import status
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from api.logic import get_ssl_cert
-from api.serializers import TargetSerializer, PromQLSerializer, BackendSettingsSerializer
-from common.mixins import EmptyQueryCheckMixin
-from dashboard.models import Target, PromQL, DashboardSettings
 
 
 # Create your views here.
 
-class BaseDataView(TemplateView):
-    data_handler_class = None
-
-    @abstractmethod
-    def get(self, *args, **kwargs):
-        pass
-
-
-class TargetAPIView(EmptyQueryCheckMixin, ListAPIView):
-    model = Target
-    serializer_class = TargetSerializer
-
-
-class PromQlAPIView(EmptyQueryCheckMixin, ListAPIView):
-    model = PromQL
-    serializer_class = PromQLSerializer
-
-
-class BackendSettingsAPIView(EmptyQueryCheckMixin, ListAPIView):
-    model = DashboardSettings
-    serializer_class = BackendSettingsSerializer
-
 
 class PromTargetAPIView(APIView):
-    def get(self, request, prom_target_address):
+    # authentication_classes = (IsAuthenticated,)
+
+    def get(self, request):
+        host = request.GET.get('host')
         try:
-            url = f"http://{prom_target_address}/api/v1/targets?state=any"
+            url = f"http://{host}/api/v1/targets?state=any"
             response = requests.get(url)
-            json_response = response.json()
-            return JsonResponse(data=json_response, safe=False, status=HTTPStatus.OK)
+            return Response(data=response.json(), status=status.HTTP_200_OK)
         except requests.exceptions.ConnectionError:
-            return JsonResponse(data={"status": f"no connection with {prom_target_address}"}, status=HTTPStatus.OK)
+            return Response(
+                data={"status": f"no connection with {host}"},
+                status=status.HTTP_503_SERVICE_UNAVAILABLE
+            )
 
 
-def ping_prom_target(request, prom_target_address):
-    try:
-        url = f"http://{prom_target_address}"
-        response = requests.get(url)
-        if not response.status_code > 400:
-            return JsonResponse(data={"status": "success"})
-    except requests.exceptions.ConnectionError:
-        return JsonResponse(data={"status": f"no connection with {prom_target_address}"}, status=HTTPStatus.OK)
+class TargetHealth(APIView):
+    # authentication_classes = (IsAuthenticated,)
+
+    def get(self, request):
+        host = request.GET.get('host')
+
+        try:
+            url = f"http://{host}"
+            response = requests.get(url)
+            if not response.status_code > 400:
+                return Response(data={"status": "success"}, status=status.HTTP_200_OK)
+        except requests.exceptions.ConnectionError:
+            return Response(
+                data={"status": f"no connection with {host}"},
+                status=status.HTTP_503_SERVICE_UNAVAILABLE
+            )
 
 
-class PromQlView(BaseDataView, APIView):
+class PromQlView(APIView):
+    # authentication_classes = (IsAuthenticated,)
+
     @staticmethod
     def create_url(prom_target, query):
         return f'http://{prom_target}/api/v1/{query}'
 
-    def get(self, request, prom_target_address):
+    def get(self, request):
+        query = request.GET.get('query')
+        host = request.GET.get('host')
+        query_range = request.GET.get('query_range')
+        start = request.GET.get('start')
+        end = request.GET.get('end')
+        step = request.GET.get('step')
+
+        boolean_true_list = ['True', 'true']
+
+        query_type = "query_range?query" if query_range in boolean_true_list else "query?query"
+
+        completed_query = f"{query_type}={query}"
+
+        if start:
+            completed_query += f"&{start}"
+        if end:
+            completed_query += f"&{end}"
+        if step:
+            completed_query += f"&{step}"
+
         try:
-            context = requests.get(self.create_url(prom_target_address, request.GET['query']))
-            return JsonResponse(data=context.json(), status=HTTPStatus.OK, safe=False)
+            context = requests.get(self.create_url(host, completed_query))
+            return Response(data=context.json(), status=status.HTTP_200_OK)
         except requests.exceptions.ConnectionError:
-            return JsonResponse(
-                data={"status": f"no connection with {prom_target_address}"},
-                status=HTTPStatus.OK)
+            return Response(data={"status": f"no connection with {host}"})
 
 
-class SslCerDataAPIView(TemplateView, APIView):
+class SslCertDataAPIView(APIView):
+    # authentication_classes = (IsAuthenticated,)
+
     def get(self, request, **kwargs):
         try:
             ssl_data = get_ssl_cert()
-            return JsonResponse(data=ssl_data, status=HTTPStatus.OK, safe=False)
+            return Response(data=ssl_data, status=status.HTTP_200_OK)
         except ConnectionError:
-            return JsonResponse(data={"status": "no connection with server"},
-                                status=HTTPStatus.NOT_ACCEPTABLE, safe=False)
+            return Response(data={"status": "no connection with server"},
+                            status=status.HTTP_503_SERVICE_UNAVAILABLE)
         except AttributeError:
-            return JsonResponse(data={"status": "unexpected error"},
-                                status=HTTPStatus.INTERNAL_SERVER_ERROR, safe=False)
+            return Response(data={"status": "unexpected error"},
+                            status=status.HTTP_500_INTERNAL_SERVER_ERROR)

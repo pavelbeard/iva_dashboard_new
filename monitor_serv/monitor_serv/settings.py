@@ -10,6 +10,7 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/4.1/ref/settings/
 """
 import os
+from datetime import timedelta
 from pathlib import Path
 
 from django.contrib.messages import constants as messages
@@ -52,17 +53,18 @@ INSTALLED_APPS = [
     'crispy_bootstrap5',
     'rest_framework',
     'corsheaders',
+    'rest_framework_simplejwt.token_blacklist',
 ]
 
 MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware',
+    'django.middleware.common.CommonMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'django.middleware.common.CommonMiddleware',
-    'corsheaders.middleware.CorsMiddleware',
 ]
 
 ROOT_URLCONF = 'monitor_serv.urls'
@@ -72,9 +74,6 @@ TEMPLATES = [
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
         'DIRS': [
             BASE_DIR / 'templates',
-            BASE_DIR / 'dashboard/src/templates/dashboard',
-            BASE_DIR / 'dashboard_users/templates/dashboard_users',
-            BASE_DIR / 'dashboard_ivcs/templates/dashboard_ivcs',
         ]
         ,
         'APP_DIRS': True,
@@ -169,19 +168,7 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/4.1/howto/static-files/
 
 STATIC_URL = 'static/'
-STATIC_ROOT = BASE_DIR / "staticfiles"
-
-STATICFILES_FINDERS = (
-    'django.contrib.staticfiles.finders.FileSystemFinder',
-    'django.contrib.staticfiles.finders.AppDirectoriesFinder',
-)
-
-STATICFILES_DIRS = (
-    os.path.join(BASE_DIR, "static"),
-    os.path.join(BASE_DIR, "dashboard", "src"),
-    os.path.join(BASE_DIR, "dashboard_users", "static"),
-    os.path.join(BASE_DIR, "dashboard_ivcs", "static"),
-)
+STATIC_ROOT = BASE_DIR / 'staticfiles'
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.1/ref/settings/#default-auto-field
@@ -200,45 +187,32 @@ AUTH_USER_MODEL = "dashboard_users.CustomUser"
 
 ENCRYPTION_KEY = os.getenv('ENCRYPTION_KEY', b'Thm1rA590U9IBSMMIlKWgBSPwbP30nz4keJR6N4RXjI=')
 
-CRISPY_ALLOWED_TEMPLATE_PACKS = "bootstrap5"
-CRISPY_TEMPLATE_PACK = "bootstrap5"
-
-MESSAGE_TAGS = {
-    messages.DEBUG: 'alert-secondary',
-    messages.INFO: 'alert-info',
-    messages.SUCCESS: 'alert-success',
-    messages.WARNING: 'alert-warning',
-    messages.ERROR: 'alert-danger',
-}
-
-MAIL_TO_DEV = os.getenv("MAIL_TO_DEV", "borodinpa@css.rzd")
-CALL_TO_DEV = os.getenv("CALL_TO_DEV", "77619")
+#
+# MAIL_TO_DEV = os.getenv("MAIL_TO_DEV", "borodinpa@css.rzd")
+# CALL_TO_DEV = os.getenv("CALL_TO_DEV", "77619")
 
 DATETIME_FORMAT = "%d/%m/%y %H:%M:%S"
 
-if not DEBUG:
-    REST_FRAMEWORK = {
-        'DEFAULT_RENDERER_CLASSES': (
-            'rest_framework.renderers.JSONRenderer'
-        )
-    }
+REST_FRAMEWORK = {
+    'DEFAULT_PARSER_CLASSES': [
+        'rest_framework.parsers.JSONParser'
+    ],
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework_simplejwt.authentication.JWTAuthentication'
+    ]
+}
 
-# CORS_ALLOWED_ORIGINS_REGEXES = (
-#     r"http:\/\/(localhost|127.0.0.1):(8000|8004|8040|10011)",
+if not DEBUG:
+    REST_FRAMEWORK.update({
+        'DEFAULT_RENDERER_CLASSES': (
+            'rest_framework.renderers.JSONRenderer',
+        )
+    })
+
+# CORS_ALLOWED_ORIGIN_REGEXES = (
+#     "http:\/\/(localhost|(2|10|127).0.(0|96).11):(80|300[0-9])",
 # )
-CORS_ALLOWED_ORIGINS = [
-    "http://127.0.0.1:10011",
-    "http://localhost:10011",
-    "http://localhost:3000",
-    "http://127.0.0.1:8000",
-    "http://localhost:8000",
-    "http://2.0.96.1:8000",
-    "http://2.0.96.1:8004",
-    "http://1.0.96.49:8000",
-    "http://1.0.96.49:8004",
-    "http://1.0.96.50:8000",
-    "http://1.0.96.50:8004",
-]
+CORS_ALLOW_ALL_ORIGINS = True
 CORS_ALLOW_METHODS = (
     "DELETE",
     "GET",
@@ -247,9 +221,21 @@ CORS_ALLOW_METHODS = (
     "POST",
     "PUT",
 )
-CORS_ALLOW_HEADERS = ('content-disposition', 'accept-encoding',
-                      'content-type', 'accept', 'origin', 'Authorization',
-                      'access-control-allow-methods')
-CORS_ALLOW_CREDENTIALS = True
+CORS_ALLOW_HEADERS = (
+    "accept",
+    "accept-encoding",
+    "authorization",
+    "content-type",
+    "dnt",
+    "origin",
+    "user-agent",
+    "x-csrftoken",
+    "x-requested-with",
+)
 
-APP_VERSION = "v0.8.64"
+SIMPLE_JWT = {
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=10),
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=1),
+    'ROTATE_REFRESH_TOKENS': True,
+    'BLACKLIST_AFTER_ROTATION': True,
+}

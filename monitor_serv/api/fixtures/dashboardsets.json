@@ -1,1 +1,1 @@
-[{"model": "dashboard.dashboardsettings", "pk": 1, "fields": {"refresh_interval": 5, "address_for_check_ssl": "google.com", "port": 443, "protocol": "https"}}]
+[{"model": "dashboard.dashboardsettings", "pk": 1, "fields": {"address_for_check_ssl": "127.0.0.1", "port": 10111}}]

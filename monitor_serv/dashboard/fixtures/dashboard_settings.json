@@ -1,0 +1,1 @@
+[{"model": "dashboard.dashboardsettings", "pk": 1, "fields": {"scraper_url": "http://localhost:8001/api/monitor/metrics/targets/all", "scraper_url_health_check": "http://localhost:8001/api/monitor/metrics/targets/all", "scrape_interval": 15}}]

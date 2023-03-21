@@ -52,11 +52,31 @@ services:
         max_attempts: 3
         window: 120s
 
+  monitor-server-frontend:
+    build:
+      context: .
+      dockerfile: prod.monitor_serv_frontend.Dockerfile
+    container_name: monitor-server-frontend-v1.1
+    env_file:
+      - env/prod.monitor-serv-frontend.env
+    ports:
+      - "3000:3000"
+    networks:
+      iva_dashboard_net:
+        ipv4_address: 10.0.96.11
+    restart: on-failure
+    deploy:
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+        window: 120s
+
   monitor-server:
     build:
       context: .
       dockerfile: prod.monitor_serv.Dockerfile
-    container_name: monitor-server-v1.8
+    container_name: monitor-server-v1.11
     env_file:
       - env/prod.monitor-serv.env
     entrypoint: ["python3.11", "/home/monitor-server-app/web/entrypoint.py"]
