@@ -21,7 +21,7 @@ services:
     build:
       context: monitor_serv_frontend
       dockerfile: iva-dev.monitor_serv_frontend.Dockerfile
-    container_name: test-monitor-server-frontend-v1.2
+    container_name: test-monitor-server-frontend-v0.2
     ports:
       - "8004:80"
     networks:
@@ -41,7 +41,7 @@ services:
     build:
       context: .
       dockerfile: monitor_serv/iva-dev.monitor_serv.Dockerfile
-    container_name: test-monitor-server-v1.10
+    container_name: test-monitor-server-v0.1
     env_file:
       - env/iva-dev.monitor-serv.env
     entrypoint: ["python3.11", "/home/monitor-server-app/web/entrypoint.py"]

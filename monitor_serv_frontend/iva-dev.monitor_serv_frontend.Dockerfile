@@ -15,7 +15,7 @@ FROM nginx:1.23.3-alpine
 
 COPY --from=build /react-frontend/build /usr/share/nginx/html
 RUN rm /etc/nginx/conf.d/default.conf
-COPY nginx/test.nginx.conf /etc/nginx/conf.d/nginx.conf
+COPY ./nginx/iva-dev.nginx.conf /etc/nginx/conf.d/nginx.conf
 
 EXPOSE 80
 

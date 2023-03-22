@@ -18,8 +18,10 @@ services:
         window: 120s
 
   monitor-server-frontend:
-    image: test-monitor-server-frontend-v0.1
-    container_name: test-monitor-server-frontend-v0.1
+    image: pavelbeard/monitor-server-frontend:v0.2
+    container_name: test-monitor-server-frontend-v0.2
+    volumes:
+      - static_files:/home/monitor-server-app/web/staticfiles
     ports:
       - "8004:80"
     networks:
@@ -39,7 +41,7 @@ services:
     build:
       context: .
       dockerfile: monitor_serv/iva-dev.monitor_serv.Dockerfile
-    container_name: test-monitor-server-v1.10
+    container_name: test-monitor-server-v0.1
     env_file:
       - env/iva-dev.monitor-serv.env
     entrypoint: ["python3.11", "/home/monitor-server-app/web/entrypoint.py"]
