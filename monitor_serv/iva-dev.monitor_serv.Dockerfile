@@ -1,13 +1,13 @@
-FROM pavelbeard/monitor-server:v1.11
+FROM pavelbeard/monitor-server:v0.1
 
 ENV APP_HOME=/home/monitor-server-app/web
 WORKDIR $APP_HOME
 
 USER root
 
-COPY monitor_serv $APP_HOME
+COPY . $APP_HOME
 
-EXPOSE 8000
+EXPOSE 8004
 
 RUN chown -R monitor:monitor $APP_HOME; chmod u+rwx -R $APP_HOME
 USER monitor

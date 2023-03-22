@@ -48,9 +48,6 @@ INSTALLED_APPS = [
     'dashboard_ivcs',
     'dashboard_users',
     # pip apps
-    'widget_tweaks',
-    'crispy_forms',
-    'crispy_bootstrap5',
     'rest_framework',
     'corsheaders',
     'rest_framework_simplejwt.token_blacklist',
@@ -167,7 +164,7 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.1/howto/static-files/
 
-STATIC_URL = 'static/'
+STATIC_URL = '/backend/static/'
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 
 # Default primary key field type
@@ -179,9 +176,6 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 CSRF_TRUSTED_ORIGINS = os.getenv('CSRF_TRUSTED_ORIGINS', default="http://*localhost:8004").split(" ")
 
 CONN_HEALTH_CHECKS = True
-
-LOGIN_REDIRECT_URL = reverse_lazy("dashboard:targets")
-LOGOUT_REDIRECT_URL = reverse_lazy("dashboard:index")
 
 AUTH_USER_MODEL = "dashboard_users.CustomUser"
 
@@ -210,7 +204,7 @@ if not DEBUG:
     })
 
 # CORS_ALLOWED_ORIGIN_REGEXES = (
-#     "http:\/\/(localhost|(2|10|127).0.(0|96).11):(80|300[0-9])",
+#     "http:\/\/(localhost|(2|10|127).0.(0|96).11):(80|[38]00[0-9])",
 # )
 CORS_ALLOW_ALL_ORIGINS = True
 CORS_ALLOW_METHODS = (
@@ -239,3 +233,5 @@ SIMPLE_JWT = {
     'ROTATE_REFRESH_TOKENS': True,
     'BLACKLIST_AFTER_ROTATION': True,
 }
+
+APP_VERSION = "v0.8.64"

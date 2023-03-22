@@ -4,8 +4,6 @@ services:
   monitor-postgres:
     image: pavelbeard/monitor-postgres:v1.0
     container_name: monitor-postgres-v1.0
-    env_file:
-      - env/prod.monitor-postgres.env
     networks:
       iva_dashboard_net.prod:
     restart: on-failure
@@ -17,8 +15,12 @@ services:
         window: 120s
 
   monitor-server-frontend:
-    image: monitor-server-frontend-v0.1
+    build:
+      context: monitor_serv_frontend
+      dockerfile: prod.monitor_serv_frontend.Dockerfile
     container_name: monitor-server-frontend-v0.1
+    env_file:
+      - env/prod.monitor-serv-frontend.env
     ports:
       - "8040:80"
     networks:

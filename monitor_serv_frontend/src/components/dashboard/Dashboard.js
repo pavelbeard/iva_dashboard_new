@@ -1,7 +1,7 @@
 import React, {useEffect, useState} from "react";
 import ServerCard from "../card/ServerCard";
 import CheckSSLCert from "../iva/CheckSSLCert";
-import {getData} from "../base";
+import {API_URL, getData} from "../base";
 
 
 const Dashboard = () => {
@@ -10,7 +10,7 @@ const Dashboard = () => {
 
     const getTargets = async () => {
         try {
-            const url = `${process.env.REACT_APP_BACKEND_URL}/api/targets/all`;
+            const url = `${API_URL}/api/targets/all`;
             const data = await getData(url);
 
             if (data) {

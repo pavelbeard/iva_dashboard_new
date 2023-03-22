@@ -7,14 +7,14 @@ import DeviceSsdState from "../server/DeviceSsdState";
 import AppsState from "../server/AppsState";
 import NetworkState from "../server/NetworkState";
 import {ServerDown} from "../server/ServerDown";
-import {getData} from "../base";
+import {getData, API_URL} from "../base";
 
 const ServerCard = ({id, address, port, refreshInterval}) => {
     const [targetHealth, setTargetHealth] = useState(false);
     const host = `${address}:${port}`;
 
     const getTargetHealth = async () => {
-        const urlRequest = `${process.env.REACT_APP_BACKEND_URL}/api/v1/target_test`
+        const urlRequest = `${API_URL}/api/v1/target_test`
             + `?host=${host}`;
         const data = await getData(urlRequest);
 

@@ -4,7 +4,7 @@ import subprocess
 PYTHON_NAME = "python3.11" if os.name == "posix" else "python"
 WIN_APP_HOME = os.path.join("D:\\", "Pycharm", "work-projects", "iva_dashboard", "monitor_serv")
 MONITOR_SERVER_ADDRESS = os.getenv('MONITOR_SERVER_ADDRESS', "2.0.96.1")
-MONITOR_SERVER_PORT = os.getenv('MONITOR_SERVER_PORT', 8000)
+MONITOR_SERVER_PORT = os.getenv('MONITOR_SERVER_PORT', 8004)
 
 
 def call_django_command(args, post_args: list | tuple):

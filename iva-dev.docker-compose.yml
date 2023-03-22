@@ -1,29 +1,6 @@
 version: '3.9'
 
 services:
-
-  monitor-nginx:
-    build:
-      context: .
-      dockerfile: iva-dev.monitor_nginx.Dockerfile
-    container_name: test-monitor-nginx-v1.0
-    volumes:
-      - static_files:/home/monitor-server-app/web/staticfiles
-    networks:
-      iva_dashboard_net:
-        ipv4_address: 2.0.96.3
-    ports:
-      - "8004:80"
-    depends_on:
-      - monitor-server
-    restart: on-failure
-    deploy:
-      restart_policy:
-        condition: on-failure
-        delay: 5s
-        max_attempts: 3
-        window: 120s
-
   monitor-postgres:
     image: pavelbeard/monitor-postgres:v1.0
     container_name: test-monitor-postgres-v1.0
@@ -41,18 +18,16 @@ services:
         window: 120s
 
   monitor-server-frontend:
-    build:
-      context: .
-      dockerfile: iva-dev.monitor_serv.Dockerfile
-    container_name: test-monitor-server-frontend-v1.1
-    env_file:
-      - env/iva-dev.monitor-serv-frontend.env
+    image: test-monitor-server-frontend-v0.1
+    container_name: test-monitor-server-frontend-v0.1
     ports:
-      - "3000:3000"
+      - "8004:80"
     networks:
       iva_dashboard_net:
         ipv4_address: 2.0.96.11
     restart: on-failure
+    depends_on:
+      - monitor-server
     deploy:
       restart_policy:
         condition: on-failure
@@ -63,7 +38,7 @@ services:
   monitor-server:
     build:
       context: .
-      dockerfile: iva-dev.monitor_serv.Dockerfile
+      dockerfile: monitor_serv/iva-dev.monitor_serv.Dockerfile
     container_name: test-monitor-server-v1.10
     env_file:
       - env/iva-dev.monitor-serv.env

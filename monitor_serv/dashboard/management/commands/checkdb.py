@@ -55,7 +55,6 @@ class Command(BaseCommand):
 
         if conn:
             self.stdout.write(self.style.SUCCESS(f"Successful connection to {database} database!"))
-            subprocess.Popen(["uvicorn", "monitor_serv:asgi.application", "--host", "0.0.0.0", "--port", "8000"])
         else:
             self.stdout.write(self.style.ERROR(f"The database {database} isn't responding after {att} connection "
                                                f"attempts"))

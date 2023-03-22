@@ -43,6 +43,7 @@ export function Header() {
                     <div className="navbar-nav">
                         <a href="/targets" className="nav-item nav-link">Инфопанель</a>
                         <a href="/targets/detail" className="nav-item nav-link">Детализация</a>
+                        <a href="/admin" className="nav-item nav-link">Панель админа</a>
                     </div>
                 </div>
 

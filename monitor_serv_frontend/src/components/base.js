@@ -1,13 +1,13 @@
 import axios from "axios";
 
-export const URL = `${process.env.REACT_APP_BACKEND_URL}/api/v1/prom_data`;
+export const API_URL = process.env.REACT_APP_BACKEND_URL || "http://127.0.0.1:10111";
+export const URL = `${API_URL}/api/v1/prom_data`;
+export const APP_VERSION = "v0.8.64";
 
 export const HEADERS = {
     'Accept': 'application/json, text/plain, */*',
     "Content-Type": "application/json"
 };
-
-// {method: "GET", headers: HEADERS }
 
 export function getData(url) {
     return axios.get(url)

@@ -1,8 +1,0 @@
-.ivcs {
-    grid-template-columns: 200px;
-    height: 100px;
-}
-
-.ivcs > div {
-    border: .2px solid rgba(0, 0, 0, 0.84);
-}

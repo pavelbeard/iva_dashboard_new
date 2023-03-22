@@ -6,7 +6,7 @@ import {Tooltip} from 'react-tooltip';
 import {v4} from "uuid";
 
 import './Server.css';
-import {getData} from "../base";
+import {API_URL, getData} from "../base";
 
 const ServerState = ({host, refreshInterval, onClick}) => {
     const [targetInfo, setTargetInfo] = useState([])
@@ -14,7 +14,7 @@ const ServerState = ({host, refreshInterval, onClick}) => {
     const [color, setColor] = useState("#000000");
 
     const setTargetStatusCallback = async () => {
-        const urlRequest = `${process.env.REACT_APP_BACKEND_URL}/api/v1/prom_targets`
+        const urlRequest = `${API_URL}/api/v1/prom_targets`
             + `?host=${host}`;
 
         const data = await getData(urlRequest);
