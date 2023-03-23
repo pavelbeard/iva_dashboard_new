@@ -5,3 +5,7 @@ a.nav-item.nav-link {
 a.nav-item.nav-link:hover {
     color: #fff;
 }
+
+.d-flex.flex-row.align-items-center {
+    width: 400px;
+}

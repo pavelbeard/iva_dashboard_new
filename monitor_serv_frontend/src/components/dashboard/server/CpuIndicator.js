@@ -3,10 +3,11 @@ import {Cpu} from "react-bootstrap-icons";
 import axios from "axios";
 import {v4} from "uuid";
 import {Tooltip} from "react-tooltip";
-import * as query from '../queries'
-import {getData, URL} from "../base";
+import * as query from '../../queries'
+import {getData, URL} from "../../../base";
+import './ScrollableTooltip.css';
 
-const CpuState = ({host, refreshInterval, targetHealth}) => {
+const CpuIndicator = ({host, refreshInterval, targetHealth}) => {
     const [cpuLoad, setCpuLoad] = useState("N/A");
     const [cpuDataTooltip, setCpuDataTooltip] = useState([]);
     const [cpuCoresCount, setCpuCoresCount] = useState(0);
@@ -72,34 +73,37 @@ const CpuState = ({host, refreshInterval, targetHealth}) => {
 
     }, []);
 
+    const [isOpen, setIsOpen] = useState(false);
+
     const uuid = v4()
 
     return(
         <div className="d-flex flex-row justify-content-start mt-3">
             <Cpu height="24" width="24" color={color} data-ivcs-server-img-attr="cpu"/>
             <div className="ps-3 mt-1" data-ivcs-server-attr="cpu">
-                <a data-tooltip-id={uuid}>{cpuLoad}</a>
-                <Tooltip id={uuid} place="bottom" key={20}>
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>{cpuCoresLabel}</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td>{cpuCoresCount}</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>mode</th>
-                                <th>value</th>
-                            </tr>
-                        </thead>
-                        <tbody>
+                <a data-tooltip-id={uuid} onMouseEnter={() => setIsOpen(true)}>{cpuLoad}</a>
+                <div onMouseLeave={() => setIsOpen(false)}>
+                    <Tooltip id={uuid} place="bottom" key={20}  isOpen={isOpen}>
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>{cpuCoresLabel}</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>{cpuCoresCount}</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>mode</th>
+                                    <th>value</th>
+                                </tr>
+                            </thead>
+                            <tbody>
                             {cpuDataTooltip.map(i => {
                                 return (
                                     <tr key={i.metric.mode}>
@@ -108,12 +112,13 @@ const CpuState = ({host, refreshInterval, targetHealth}) => {
                                     </tr>
                                 )
                             })}
-                        </tbody>
-                    </table>
-                </Tooltip>
+                            </tbody>
+                        </table>
+                    </Tooltip>
+                </div>
             </div>
         </div>
     );
 };
 
-export default CpuState;
+export default CpuIndicator;

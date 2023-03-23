@@ -1,0 +1,10 @@
+.react-tooltip {
+    max-height: 200px;
+    overflow-y: auto;
+    pointer-events: auto !important;
+
+    &:hover {
+        visibility: visible !important;
+        opacity: 1 !important;
+    }
+}

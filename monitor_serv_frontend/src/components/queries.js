@@ -39,6 +39,7 @@ export const disk = {
 }
 
 export const modules = {
+    states: 'namedprocess_namegroup_states',
     cpuUsage: '',
     memoryResident: '',
     diskRead: '',

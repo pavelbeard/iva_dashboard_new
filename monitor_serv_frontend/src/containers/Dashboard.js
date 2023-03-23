@@ -1,12 +1,14 @@
 import React, {useEffect, useState} from "react";
-import ServerCard from "../card/ServerCard";
-import CheckSSLCert from "../iva/CheckSSLCert";
+import ServerCard from "../components/dashboard/card/ServerCard";
+import CheckSSLCert from "../components/dashboard/iva/CheckSSLCert";
 import {API_URL, getData} from "../base";
+import './Dashboard.css';
 
 
-const Dashboard = () => {
+const Dashboard = ({appRefreshInterval}) => {
+    document.title = "Инфопанель | Главная";
+
     const [data, setData] = useState([]);
-    const [refreshInterval, _] = useState(5000);
 
     const getTargets = async () => {
         try {
@@ -24,12 +26,13 @@ const Dashboard = () => {
     };
 
     const getTargetsImmediately = () => {
+        console.log(appRefreshInterval)
         setTimeout(getTargets, 0);
     }
 
     useEffect(() => {
         getTargetsImmediately();
-        const interval1 = setInterval(getTargetsImmediately, refreshInterval);
+        const interval1 = setInterval(getTargetsImmediately, appRefreshInterval);
         return () => clearInterval(interval1);
 
     }, []);
@@ -46,7 +49,7 @@ const Dashboard = () => {
                                 id={target.id}
                                 address={target.address}
                                 port={target.port}
-                                refreshInterval={refreshInterval}
+                                refreshInterval={appRefreshInterval}
                             />;
                             return (card);
                         })}
@@ -55,7 +58,7 @@ const Dashboard = () => {
                 <div className="ps-2 pe-2">
                     <h4 className="text-center pt-2 pb-2">Мониторинг ВКС IVA</h4>
                     <div className="col-md-6 w-100 cards">
-                        <CheckSSLCert key={1000023} refreshInterval={refreshInterval}/>
+                        <CheckSSLCert key={1000023} refreshInterval={appRefreshInterval}/>
                         {/*<ServerCard/>*/}
                         {/*<ServerCard/>*/}
                         {/*<ServerCard/>*/}

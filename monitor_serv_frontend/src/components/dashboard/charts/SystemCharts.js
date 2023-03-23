@@ -1,5 +1,8 @@
-import React from "react";
-import {system} from '../queries';
+import React, {useEffect, useRef} from "react";
+import {system} from '../../queries';
+import Chart from 'chart.js/auto'
+import {chartConfig} from "../../../base";
+import {ChartComponent} from "./ChartComponent";
 
 const chartGroups = [
     {
@@ -30,7 +33,23 @@ const chartGroups = [
 ]
 
 export default function SystemCharts() {
+    const chartRef = useRef();
+
+    const createChart = () => {
+        const chart = new Chart(chartRef.current.getContext('2d'), chartConfig);
+
+        return chart;
+    }
+
+    useEffect(() => {
+        const chart = createChart();
+        return () => chart.destroy();
+    }, [])
+
     return(
-        <div>TEST</div>
+        <div className="container-fluid d-flex flex-column justify-content-center p-md-5"
+             style={{maxHeight:"500px", overflowY: "auto"}}>
+            <ChartComponent />
+        </div>
     )
 }

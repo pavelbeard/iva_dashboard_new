@@ -38,7 +38,7 @@ if __name__ == '__main__':
     pre_args = [
         PYTHON_NAME, os.path.join(os.getenv('APP_HOME', WIN_APP_HOME), "manage.py"),
     ]
-    result1 = check_db(pre_args, post_args= ["checkdb", "--database"], database="default")
+    result1 = check_db(pre_args, post_args=["checkdb", "--database"], database="default")
     # result2 = check_db(pre_args, post_args=["checkdb", "--database"], database="ivcs") \
     #     if os.getenv('CHECK_IVCS', False) else True
     result2 = True
@@ -55,5 +55,3 @@ if __name__ == '__main__':
              "--host", MONITOR_SERVER_ADDRESS, "--port", MONITOR_SERVER_PORT)
         )
         run_server.communicate()
-
-

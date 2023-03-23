@@ -1,13 +1,13 @@
 import React, {useEffect, useState} from "react";
 import './Card.css';
-import ServerState from '../server/ServerState';
-import CpuState from "../server/CpuState";
-import MemoryState from "../server/MemoryState";
-import DeviceSsdState from "../server/DeviceSsdState";
-import AppsState from "../server/AppsState";
-import NetworkState from "../server/NetworkState";
+import ServerIndicator from '../server/ServerIndicator';
+import CpuIndicator from "../server/CpuIndicator";
+import MemoryIndicator from "../server/MemoryIndicator";
+import DeviceSsdIndicator from "../server/DeviceSsdIndicator";
+import AppIndicator from "../server/AppIndicator";
+import NetworkIndicator from "../server/NetworkIndicator";
 import {ServerDown} from "../server/ServerDown";
-import {getData, API_URL} from "../base";
+import {getData, API_URL} from "../../../base";
 
 const ServerCard = ({id, address, port, refreshInterval}) => {
     const [targetHealth, setTargetHealth] = useState(false);
@@ -40,13 +40,13 @@ const ServerCard = ({id, address, port, refreshInterval}) => {
     else
         return (
             <div className="dashboard-card" id={id}>
-                <ServerState key={12} host={host} refreshInterval={refreshInterval}/>
+                <ServerIndicator key={12} host={host} refreshInterval={refreshInterval}/>
                 <div className="server">
-                    <CpuState key={13} host={host} refreshInterval={refreshInterval}/>
-                    <MemoryState key={14} host={host} refreshInterval={refreshInterval}/>
-                    <DeviceSsdState key={15} host={host} refreshInterval={refreshInterval}/>
-                    <AppsState key={16} host={host} refreshInterval={refreshInterval}/>
-                    <NetworkState key={17} host={host} refreshInterval={refreshInterval}/>
+                    <CpuIndicator key={13} host={host} refreshInterval={refreshInterval}/>
+                    <MemoryIndicator key={14} host={host} refreshInterval={refreshInterval}/>
+                    <DeviceSsdIndicator key={15} host={host} refreshInterval={refreshInterval}/>
+                    <AppIndicator key={16} host={host} refreshInterval={refreshInterval}/>
+                    <NetworkIndicator key={17} host={host} refreshInterval={refreshInterval}/>
                 </div>
             </div>
         );

@@ -21,6 +21,7 @@ from django.views import generic
 urlpatterns = (
     path('admin/', admin.site.urls),
     path('api/v1/', include('api.urls')),
+    path('api/auth/', include('rest_framework.urls')),
     path('api/targets/', include('dashboard.urls')),
     path('api/users/', include('dashboard_users.urls')),
     path('accounts/', include('django.contrib.auth.urls')),

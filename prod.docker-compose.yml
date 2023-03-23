@@ -19,6 +19,10 @@ services:
   monitor-server-frontend:
     image: monitor-server-frontend-v0.1
     container_name: monitor-server-frontend-v0.1
+    env_file:
+      - env/prod.monitor-serv-frontend.env
+    volumes:
+      - static_files.prod:/home/monitor-server-app/web
     ports:
       - "8040:80"
     networks:
@@ -40,7 +44,7 @@ services:
       - env/prod.monitor-serv.env
     entrypoint: ["python3.11", "/home/monitor-server-app/web/entrypoint.py"]
     volumes:
-      - static_files:/home/monitor-server-app/web/staticfiles
+      - static_files.prod:/home/monitor-server-app/web
     networks:
       iva_dashboard_net.prod:
     depends_on:
@@ -58,6 +62,6 @@ networks:
     driver: bridge
 
 volumes:
-  postgres_files:
-  static_files:
+  postgres_files.prod:
+  static_files.prod:
 

@@ -22,7 +22,16 @@ def get_ssl_cert():
     except ssl.SSLError:
         return dict(
             ChainMap(
-                dict(issuer=dict(organizationName="SSLCert is expired or \nnot verified")),
-                dict(validFrom="1970-01-01 00:00:00"),
-                dict(validTo="1970-01-01 00:00:00"))
+                dict(issuer=dict(organizationName="N/A")),
+                dict(validFrom=""),
+                dict(validTo=""),
+                dict(errors="Сертификат просрочен"))
+        )
+    except AttributeError as e:
+        return dict(
+            ChainMap(
+                dict(issuer=dict(organizationName="N/A")),
+                dict(validFrom=""),
+                dict(validTo=""),
+                dict(errors="Не найден адрес хостинга сертификата"))
         )

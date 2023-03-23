@@ -2,7 +2,23 @@ import React, {useEffect, useState} from "react";
 import './Header.css';
 // import Charts from "./dashboard/Charts";
 
-export function Header() {
+export function Header({refreshIntervalCallback}) {
+    const authLinks = (
+        <>
+            <a href="/logout" className="nav-item nav-link">Выйти</a>
+            <a href="/targets" className="nav-item nav-link">Инфопанель</a>
+            <a href="/targets/charts" className="nav-item nav-link">Графики</a>
+            <a href="/admin" className="nav-item nav-link">Панель админа</a>
+        </>
+    );
+
+    const guestLinks = (
+        <>
+            <a href="/login" className="nav-item nav-link">Войти</a>
+            <a href="/register" className="nav-item nav-link">Регистрация</a>
+        </>
+    );
+
     const [isNavCollapsed, setIsNavCollapsed] = useState(true);
 
     const navbarCollapsed = () => setIsNavCollapsed(!isNavCollapsed);
@@ -40,13 +56,22 @@ export function Header() {
                 </button>
 
                 <div className={`${isNavCollapsed ? 'collapse' : ''}  navbar-collapse`} id="dashboardContent">
-                    <div className="navbar-nav">
-                        <a href="/targets" className="nav-item nav-link">Инфопанель</a>
-                        <a href="/targets/detail" className="nav-item nav-link">Детализация</a>
-                        <a href="/admin" className="nav-item nav-link">Панель админа</a>
+                    <div className="navbar-nav me-lg-4">
+                        {/*{iaAuthenticated ? authLinks : guestLinks}*/}
+                        {authLinks}
+                    </div>
+                    <div className="d-flex flex-row align-items-center">
+                        <label htmlFor="selectRefreshInterval" className="text-white">Интервал обновления:</label>
+                        <select id="selectRefreshInterval"
+                                onChange={refreshIntervalCallback.bind(this)}
+                                className="form-select form-select-sm ms-2">
+                            <option value="5000">5 секунд</option>
+                            <option value="10000">10 секунд</option>
+                            <option value="15000">15 секунд</option>
+                            <option value="30000">30 секунд</option>
+                        </select>
                     </div>
                 </div>
-
             </div>
         </nav>
     )

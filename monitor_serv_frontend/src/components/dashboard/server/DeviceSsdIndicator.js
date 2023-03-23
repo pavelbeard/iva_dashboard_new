@@ -2,10 +2,11 @@ import React, {useEffect, useState} from "react";
 import {DeviceSsd} from "react-bootstrap-icons";
 import {v4} from "uuid";
 import {Tooltip} from "react-tooltip";
-import * as query from '../queries';
-import {getData, URL} from "../base";
+import * as query from '../../queries';
+import {getData, URL} from "../../../base";
+import './ScrollableTooltip.css';
 
-const DeviceSsdState = ({host, refreshInterval, targetHealth}) => {
+const DeviceSsdIndicator = ({host, refreshInterval, targetHealth}) => {
     const [deviceSsdUsedSpace, setDeviceSsdUsedSpace] = useState("N/A");
     const [deviceSsdTooltip, setDeviceSsdTooltip] = useState([]);
     const [color, setColor] = useState("#000000");
@@ -68,14 +69,17 @@ const DeviceSsdState = ({host, refreshInterval, targetHealth}) => {
         return () => clearInterval(interval);
     }, []);
 
+    const [isOpen, setIsOpen] = useState(false);
+
     const uuid = v4();
 
     return(
         <div className="d-flex flex-row justify-content-start mt-1">
             <DeviceSsd height="24" width="24" color={color} data-ivcs-server-img-attr="filespace"/>
             <div className="ps-3 mt-1" data-ivcs-server-attr="filespace">
-                <a data-tooltip-id={uuid}>{deviceSsdUsedSpace}</a>
-                <Tooltip id={uuid} place="bottom" key={40}>
+                <a data-tooltip-id={uuid} onMouseEnter={() => setIsOpen(true)}>{deviceSsdUsedSpace}</a>
+                <div onMouseLeave={() => setIsOpen(false)}>
+                    <Tooltip id={uuid} place="bottom" key={40} isOpen={isOpen}>
                     <div>IO Operations</div>
                     <table>
                         <thead>
@@ -87,7 +91,7 @@ const DeviceSsdState = ({host, refreshInterval, targetHealth}) => {
                         </thead>
                         <tbody>
                         {deviceSsdIO.map(i => {
-                            return(
+                            return (
                                 <tr key={i.metric.__name__ + "|" + i.metric.device}>
                                     <td>{i.metric.__name__}</td>
                                     <td>{i.metric.device}</td>
@@ -98,17 +102,17 @@ const DeviceSsdState = ({host, refreshInterval, targetHealth}) => {
                         </tbody>
                     </table>
                     <div className="mt-2">Space stats</div>
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Metric</th>
-                                <th>Device</th>
-                                <th>Value</th>
-                            </tr>
-                        </thead>
-                        <tbody>
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Metric</th>
+                                    <th>Device</th>
+                                    <th>Value</th>
+                                </tr>
+                            </thead>
+                            <tbody>
                             {deviceSsdTooltip.map(i => {
-                                return(
+                                return (
                                     <tr key={i.metric.__name__}>
                                         <td>{i.metric.__name__}</td>
                                         <td>{i.metric.device}</td>
@@ -116,13 +120,13 @@ const DeviceSsdState = ({host, refreshInterval, targetHealth}) => {
                                     </tr>
                                 )
                             })}
-                        </tbody>
-                    </table>
-
-                </Tooltip>
+                            </tbody>
+                        </table>
+                    </Tooltip>
+                </div>
             </div>
         </div>
     );
 };
 
-export default DeviceSsdState;
+export default DeviceSsdIndicator;

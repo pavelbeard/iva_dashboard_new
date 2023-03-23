@@ -1,17 +1,21 @@
 import requests
+from django.utils.decorators import method_decorator
+from django.views.decorators.csrf import ensure_csrf_cookie
 from rest_framework import status
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from api.logic import get_ssl_cert
+
+csrf_ensure = method_decorator(ensure_csrf_cookie)
 
 
 # Create your views here.
 
 
 class PromTargetAPIView(APIView):
-    # authentication_classes = (IsAuthenticated,)
+    permission_classes = (AllowAny,)
 
     def get(self, request):
         host = request.GET.get('host')
@@ -27,7 +31,7 @@ class PromTargetAPIView(APIView):
 
 
 class TargetHealth(APIView):
-    # authentication_classes = (IsAuthenticated,)
+    permission_classes = (AllowAny,)
 
     def get(self, request):
         host = request.GET.get('host')
@@ -45,7 +49,7 @@ class TargetHealth(APIView):
 
 
 class PromQlView(APIView):
-    # authentication_classes = (IsAuthenticated,)
+    permission_classes = (AllowAny,)
 
     @staticmethod
     def create_url(prom_target, query):
@@ -80,7 +84,7 @@ class PromQlView(APIView):
 
 
 class SslCertDataAPIView(APIView):
-    # authentication_classes = (IsAuthenticated,)
+    permission_classes = (AllowAny,)
 
     def get(self, request, **kwargs):
         try:
@@ -92,3 +96,11 @@ class SslCertDataAPIView(APIView):
         except AttributeError:
             return Response(data={"status": "unexpected error"},
                             status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+class GetCSRF(APIView):
+    permission_classes = (AllowAny, )
+
+    @csrf_ensure
+    def get(self, request):
+        return Response({"status": "success csrf set"}, status=status.HTTP_200_OK)

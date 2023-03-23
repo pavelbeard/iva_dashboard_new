@@ -3,10 +3,10 @@ import {Memory} from "react-bootstrap-icons";
 import axios from "axios";
 import {v4} from "uuid";
 import {Tooltip} from "react-tooltip";
-import * as query from '../queries';
-import {getData, URL} from "../base";
+import * as query from '../../queries';
+import {getData, URL} from "../../../base";
 
-const MemoryState = ({host, refreshInterval, targetHealth}) => {
+const MemoryIndicator = ({host, refreshInterval, targetHealth}) => {
     const [memoryStatus, setMemoryStatus] = useState("N/A");
     const [memoryDataTooltip, setMemoryDataTooltip] = useState([]);
     const [color, setColor] = useState("#000000");
@@ -48,36 +48,39 @@ const MemoryState = ({host, refreshInterval, targetHealth}) => {
 
     }, []);
 
+    const [isOpen, setIsOpen] = useState(false);
+
     const uuid = v4();
 
     return(
         <div className="d-flex flex-row justify-content-start mt-1">
             <Memory height="24" width="24" color={color} data-ivcs-server-img-attr="memory"/>
             <div className="ps-3 mt-1" data-ivcs-server-attr="memory">
-                <a data-tooltip-id={uuid}>{memoryStatus}</a>
-                <Tooltip id={uuid} place="bottom" key={30}>
-                    <table>
-                        <thead>
+                <a data-tooltip-id={uuid} onMouseEnter={() => setIsOpen(true)}>{memoryStatus}</a>
+                <div onMouseLeave={() => setIsOpen(false)}>
+                    <Tooltip id={uuid} place="bottom" key={30} isOpen={isOpen}>
+                        <table>
+                            <thead>
                             <tr>
                                 <th>Metric</th>
                                 <th>Value</th>
                             </tr>
-                        </thead>
-                        <tbody>
+                            </thead>
+                            <tbody>
                             {memoryDataTooltip.map(i => {
-                                return(
+                                return (
                                     <tr key={i.metric.__name__}>
                                         <td>{i.metric.__name__}</td>
                                         <td>{parseFloat(i.value[1]).toFixed(2)}GB</td>
                                     </tr>
                                 )
                             })}
-                        </tbody>
-                    </table>
-                </Tooltip>
+                            </tbody>
+                        </table>
+                    </Tooltip></div>
             </div>
         </div>
     );
 };
 
-export default MemoryState;
+export default MemoryIndicator;

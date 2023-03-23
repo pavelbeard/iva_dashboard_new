@@ -1,10 +1,13 @@
 import React from "react";
-import {AppIndicator, Cpu, DeviceSsd, Ethernet, Memory, Server} from "react-bootstrap-icons";
+import {AppIndicator, X, Cpu, DeviceSsd, Ethernet, Memory, Server} from "react-bootstrap-icons";
 
 export const ServerDown = ({host}) => {
     return(
         <div className="dashboard-card" key={host}>
             <div className="server">
+                <div className="ms-1 mt-1">
+                    <div><X width="20" height="20"/></div>
+                </div>
                 <div className="d-flex flex-row justify-content-center mt-3">
                     <Server height="32" width="32" color={'#ff0000'} data-ivcs-server-img-attr="server"/>
                 </div>
