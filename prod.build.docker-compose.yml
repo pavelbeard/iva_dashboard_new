@@ -18,11 +18,9 @@ services:
     build:
       context: monitor_serv_frontend
       dockerfile: prod.monitor_serv_frontend.Dockerfile
-    container_name: monitor-server-frontend-v0.1
+    container_name: monitor-server-frontend-v0.2
     volumes:
       - static_files.prod:/home/monitor-server-app/web
-    env_file:
-      - env/prod.monitor-serv-frontend.env
     ports:
       - "8040:80"
     networks:

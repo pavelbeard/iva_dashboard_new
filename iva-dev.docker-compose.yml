@@ -20,8 +20,6 @@ services:
   monitor-server-frontend:
     image: pavelbeard/monitor-server-frontend:v0.2
     container_name: test-monitor-server-frontend-v0.2
-    env_file:
-      - env/iva-dev.monitor-serv-frontend.env
     volumes:
       - static_files.iva-dev:/home/monitor-server-app/web
     ports:
