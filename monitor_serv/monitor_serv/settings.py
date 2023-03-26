@@ -173,18 +173,17 @@ STATIC_ROOT = BASE_DIR / 'staticfiles'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # Custom const variables
-CSRF_TRUSTED_ORIGINS = os.getenv('CSRF_TRUSTED_ORIGINS',
-                                 default="http://*localhost:8004 http://*localhost:3001").split(" ")
+CSRF_TRUSTED_ORIGINS = os.getenv(
+    'CSRF_TRUSTED_ORIGINS',
+    default="http://*localhost:8004 http://*localhost:3000 http://*localhost:3001 http://*127.0.0.1:3000 "
+            "http://*127.0.0.1:3001"
+).split()
 
 CONN_HEALTH_CHECKS = True
 
 AUTH_USER_MODEL = "dashboard_users.CustomUser"
 
 ENCRYPTION_KEY = os.getenv('ENCRYPTION_KEY', b'Thm1rA590U9IBSMMIlKWgBSPwbP30nz4keJR6N4RXjI=')
-
-#
-# MAIL_TO_DEV = os.getenv("MAIL_TO_DEV", "borodinpa@css.rzd")
-# CALL_TO_DEV = os.getenv("CALL_TO_DEV", "77619")
 
 DATETIME_FORMAT = "%d/%m/%y %H:%M:%S"
 
@@ -207,10 +206,13 @@ if not DEBUG:
         )
     })
 
-# CORS_ALLOWED_ORIGIN_REGEXES = (
-#     "http:\/\/(localhost|(2|10|127).0.(0|96).11):(80|[38]00[0-9])",
-# )
-CORS_ALLOW_ALL_ORIGINS = True
+    CORS_ALLOWED_ORIGIN_REGEXES = (
+        "http:\/\/(localhost|(1|2|10|127).0.(0|96).(11|49|50)):(80|[38]00[0-9])",
+    )
+
+if DEBUG:
+    CORS_ALLOW_ALL_ORIGINS = True
+
 CORS_ALLOW_METHODS = (
     "DELETE",
     "GET",
@@ -231,11 +233,13 @@ CORS_ALLOW_HEADERS = (
     "x-requested-with",
 )
 
-SIMPLE_JWT = {
-    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=10),
-    'REFRESH_TOKEN_LIFETIME': timedelta(days=1),
-    'ROTATE_REFRESH_TOKENS': True,
-    'BLACKLIST_AFTER_ROTATION': True,
-}
+CORS_ALLOW_CREDENTIALS = True
+
+# SIMPLE_JWT = {
+#     'ACCESS_TOKEN_LIFETIME': timedelta(minutes=10),
+#     'REFRESH_TOKEN_LIFETIME': timedelta(days=1),
+#     'ROTATE_REFRESH_TOKENS': True,
+#     'BLACKLIST_AFTER_ROTATION': True,
+# }
 
 APP_VERSION = "v0.8.64"

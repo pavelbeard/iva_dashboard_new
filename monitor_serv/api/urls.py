@@ -7,13 +7,12 @@ app_name = "api"
 
 urlpatterns = (
     # get
-    path('sslcert', views.SslCertDataAPIView.as_view()),
+    path('sslcert', views.SslCertDataView.as_view()),
     # path('token', jwt_views.TokenObtainPairView.as_view()),
     # path('token/refresh', jwt_views.TokenRefreshView.as_view()),
     path('target_test', views.TargetHealth.as_view()),
-    path('prom_targets', views.PromTargetAPIView.as_view()),
+    path('prom_targets', views.PromTargetView.as_view()),
     path('prom_data', views.PromQlView.as_view()),
-
     path('csrf_cookie', views.GetCSRF.as_view()),
 )
 

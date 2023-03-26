@@ -8,13 +8,11 @@ from rest_framework.views import APIView
 
 from api.logic import get_ssl_cert
 
-csrf_ensure = method_decorator(ensure_csrf_cookie)
-
 
 # Create your views here.
 
 
-class PromTargetAPIView(APIView):
+class PromTargetView(APIView):
     permission_classes = (AllowAny,)
 
     def get(self, request):
@@ -83,7 +81,7 @@ class PromQlView(APIView):
             return Response(data={"status": f"no connection with {host}"})
 
 
-class SslCertDataAPIView(APIView):
+class SslCertDataView(APIView):
     permission_classes = (AllowAny,)
 
     def get(self, request, **kwargs):
@@ -98,9 +96,9 @@ class SslCertDataAPIView(APIView):
                             status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
+@method_decorator(ensure_csrf_cookie, name="dispatch")
 class GetCSRF(APIView):
-    permission_classes = (AllowAny, )
+    permission_classes = (AllowAny,)
 
-    @csrf_ensure
     def get(self, request):
         return Response({"status": "success csrf set"}, status=status.HTTP_200_OK)

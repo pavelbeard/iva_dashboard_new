@@ -3,15 +3,16 @@ import {Link} from "react-router-dom";
 
 const Home = () => (
     <div className="container">
-        <div className="mt-5 p-5 bg-light">
-            <h1 className="display-4">Добро пожаловать в Инфопанель IVA VIP</h1>
+        <div className="mt-5 p-5 bg-danger bg-opacity-10">
+            <h1 className="display-6">Добро пожаловать в Инфопанель IVA MCU</h1>
+            <hr className='my-4' />
+            <p className="mt-2">Мониторинг медиа- и головных серверов системы ВКС IVA</p>
+            <div className="d-flex">
+                <a className="btn btn-primary" href="/login">Войти</a>
+                <a className="ms-2 btn btn-secondary" href="/register">Регистрация</a>
+            </div>
         </div>
-        <p className='lead'>
-            This is a wonderful application with session authentication in React and Django.
-        </p>
-        <hr className='my-4' />
-        <p>Нажмите ссылку ниже, чтобы войти в Инфопанель.</p>
-        <Link className='btn btn-primary btn-lg' to='/login'>Login</Link>
+
     </div>
 );
 

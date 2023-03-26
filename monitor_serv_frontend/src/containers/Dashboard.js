@@ -5,7 +5,7 @@ import {API_URL, getData} from "../base";
 import './Dashboard.css';
 
 
-const Dashboard = ({appRefreshInterval}) => {
+const Dashboard = ({appRefreshInterval=5000}) => {
     document.title = "Инфопанель | Главная";
 
     const [data, setData] = useState([]);

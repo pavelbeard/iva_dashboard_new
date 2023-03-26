@@ -1,14 +1,9 @@
 import axios from "axios";
 import env from 'react-dotenv';
 
-export const API_URL = env.REACT_APP_BACKEND_URL || "http://127.0.0.1:10111";
+export const API_URL = env?.REACT_APP_BACKEND_URL || "http://127.0.0.1:10111";
 export const URL = `${API_URL}/api/v1/prom_data`;
-export const APP_VERSION = env.REACT_APP_VERSION || "v0.8.64";
-
-export const HEADERS = {
-    'Accept': 'application/json, text/plain, */*',
-    "Content-Type": "application/json"
-};
+export const APP_VERSION = env?.REACT_APP_VERSION || "v0.8.71";
 
 const ONE_HOUR_IN_MS = 1 * 60 * 60 * 1000;
 const REFRESH_INTERVAL_MS = 2 * 1000;

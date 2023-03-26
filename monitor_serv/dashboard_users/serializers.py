@@ -1,48 +1,36 @@
 from django.contrib.auth import get_user_model, authenticate
-from django.contrib.auth.hashers import check_password
 from django.contrib.auth.password_validation import validate_password
 from django.utils.translation import gettext_lazy as _
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
-
 
 from dashboard_users.models import CustomUser
 
 
 class CustomUserSerializer(serializers.ModelSerializer):
     class Meta:
-        model = CustomUser
-        fields = ('id', 'username', 'first_name', 'last_name', 'email', 'date_joined')
+        model = get_user_model()
+        fields = ('username', 'first_name', 'last_name', 'email', 'password', 'date_joined')
 
 
 class CreateUserSerializer(serializers.ModelSerializer):
+    password2 = serializers.CharField(
+        max_length=255, label="Confirm password", write_only=True
+    )
+
     class Meta:
         model = get_user_model()
-        fields = ('username', 'first_name', 'last_name', 'email', 'password')
-
-    def create(self, validated_data):
-        user = CustomUser.objects.create_user(
-            username=validated_data['username'],
-            first_name=validated_data['first_name'],
-            last_name=validated_data['last_name'],
-            email=validated_data['email'],
-            password=validated_data['password'],
-        )
-
-        return user
-
-
-class UserSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = get_user_model()
-        fields = ('username', 'first_name', 'last_name', 'email', 'password')
+        fields = ('username', 'first_name', 'last_name', 'email', 'password', 'password2')
 
     def validate(self, data):
-        user = CustomUser(**data)
         password = data.get('password')
+        password_confirmation = data.pop('password2')
 
         try:
-            validate_password(password, user)
+            if password != password_confirmation:
+                raise ValidationError('passwords are not match')
+
+            validate_password(password, user=CustomUser(**data))
         except ValidationError as e:
             serializer_errors = serializers.as_serializer_error(e)
             raise ValidationError(
@@ -58,9 +46,24 @@ class UserSerializer(serializers.ModelSerializer):
             last_name=validated_data['last_name'],
             email=validated_data['email'],
             password=validated_data['password'],
+            is_active=False
         )
 
         return user
+
+
+class UpdateUserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = get_user_model()
+        fields = ('username', 'first_name', 'last_name', 'email')
+
+    def update(self, instance, validated_data):
+        instance.username = validated_data.get('username', instance.username)
+        instance.first_name = validated_data.get('first_name', instance.first_name)
+        instance.last_name = validated_data.get('last_name', instance.last_name)
+        instance.email = validated_data.get('email', instance.email)
+        instance.save()
+        return instance
 
 
 class LoginUserSerializer(serializers.ModelSerializer):
@@ -83,6 +86,10 @@ class LoginUserSerializer(serializers.ModelSerializer):
         password = data.get('password')
 
         if username and password:
+            if not CustomUser.objects.filter(username=username).first().is_active:
+                msg = _("Пользователь не активирован.")
+                raise ValidationError(msg, code="authorization")
+
             user = authenticate(
                 password=password,
                 username=username
@@ -90,9 +97,6 @@ class LoginUserSerializer(serializers.ModelSerializer):
 
             if not user:
                 msg = _("Пользователь не найден либо неправильные данные пользователя.")
-                raise ValidationError(msg, code="authorization")
-            if not user.is_active:
-                msg = _("Пользователь не активирован.")
                 raise ValidationError(msg, code="authorization")
 
         else:

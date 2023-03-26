@@ -1,50 +1,29 @@
-import {Header} from "./containers/Header";
-import 'bootstrap/dist/css/bootstrap.css';
 import {BrowserRouter as Router, Route, Routes} from 'react-router-dom'
+
+import Layout from './hocs/Layout';
+import Home from './containers/Home';
+import RegisterPage from "./containers/RegisterPage";
+import LoginPage from "./containers/LoginPage";
 import Dashboard from "./containers/Dashboard";
-import Charts from "./components/dashboard/Charts";
-import {Footer} from "./containers/Footer";
-import {RegisterPage} from "./components/auth/RegisterPage";
-import {LoginPage} from "./components/auth/LoginPage";
-import {useEffect, useState} from "react";
-import Home from "./containers/Home";
+import {Provider} from "react-redux";
+import store from "./store";
 
-function App() {
-    const [refreshInterval, setRefreshInterval] = useState(5000);
+import 'bootstrap/dist/css/bootstrap.css';
 
-    const authComponents = (
-        <>
-            <Route path="/targets" element={<Dashboard appRefreshInterval={refreshInterval}/>}/>
-            <Route path="/targets/charts" element={<Charts/>}/>
-        </>
-    );
-
-    const guestComponents = (
-        <>
-            <Route path="/" element={<Home/>}></Route>
-            <Route path="/register" element={<RegisterPage/>}/>
-            <Route path="/login" element={<LoginPage/>}/>
-        </>
-    );
-
-    const refreshIntervalCallback = e => {
-        setRefreshInterval(e.target.value);
-    }
-
-    useEffect(() => {
-
-    }, [refreshInterval])
-
-    return (
+const App = () => (
+    <Provider store={store}>
         <Router>
-            <Header refreshIntervalCallback={refreshIntervalCallback}/>
+            <Layout>
                 <Routes>
-                    {guestComponents}
-                    {authComponents}
+                    <Route path="/" element={<Home/>}/>
+                    <Route path="/register" element={<RegisterPage/>}/>
+                    <Route path="/login" element={<LoginPage/>}/>
+                    <Route path="/dashboard" element={<Dashboard/>}/>
                 </Routes>
-            <Footer/>
+            </Layout>
         </Router>
-    );
-}
+    </Provider>
+);
+
 
 export default App;
