@@ -104,15 +104,17 @@ const authSlice = createSlice({
     name: 'auth',
     initialState,
     reducers: {},
-    extraReducers: {
+    extraReducers: (builder) => {
         // login
-        [loginAsync.pending]: (state) => {
+        builder
+        .addCase(loginAsync.pending, (state) => {
             state.isLoading = true;
             state.isAuthenticated = false;
-        },
-        [loginAsync.fulfilled]: (state, {payload}) => {
+            state.successMessage = [];
             state.loginErrors = [];
-
+            state.errorMessage = ''
+        })
+        .addCase(loginAsync.fulfilled, (state, {payload}) => {
             if (payload?.non_field_errors) {
                 payload.non_field_errors.forEach(error => {
                     state.loginErrors.push(error)
@@ -125,18 +127,19 @@ const authSlice = createSlice({
             }
 
             state.isLoading = false;
-        },
-        [loginAsync.rejected]: (state, {payload}) => {
+        })
+        .addCase(loginAsync.rejected, (state, {payload}) => {
             state.isLoading = false;
             state.errorMessage = "Что-то тут не так...";
-        },
+        })
         // register
-        [registerAsync.pending]:(state) => {
+        .addCase(registerAsync.pending,(state) => {
             state.isLoading = true;
-        },
-        [registerAsync.fulfilled]:  (state, {payload}) => {
             state.registerErrors = [];
-
+            state.successMessage = [];
+            state.errorMessage = ''
+        })
+        .addCase(registerAsync.fulfilled,  (state, {payload}) => {
             if (payload?.non_field_errors instanceof Array) {
                 payload.non_field_errors.forEach(error => {
                     state.registerErrors.push(error);
@@ -173,47 +176,42 @@ const authSlice = createSlice({
             }
 
             state.isLoading = false;
-        },
-        [registerAsync.rejected]: (state, {payload}) => {
+        })
+        .addCase(registerAsync.rejected, (state, {payload}) => {
             state.isLoading = false;
             state.isRegister =  false;
             state.errorMessage = "Что-то тут не так...";
-        },
+        })
         // check auth
-        [checkAuthenticationAsync.pending]: (state) => {
+        .addCase(checkAuthenticationAsync.pending, (state) => {
             state.isLoading = true;
-        },
-        [checkAuthenticationAsync.fulfilled]: (state, {payload}) => {
-            if (payload === "success") {
-                state.successMessage = payload;
-                state.isAuthenticated = true;
-            } else {
-                state.errorMessage = payload;
-                state.isAuthenticated = false;
-            }
+        })
+        .addCase(checkAuthenticationAsync.fulfilled, (state, {payload}) => {
+            state.isAuthenticated = payload === "success";
             state.isLoading = false;
-        },
-        [checkAuthenticationAsync.rejected]: (state, {payload}) => {
+        })
+        .addCase(checkAuthenticationAsync.rejected, (state, {payload}) => {
             state.isLoading = false;
-            state.errorMessage = payload;
-        },
+        })
         // logout
-        [logoutAsync.pending]: (state) => {
+        .addCase(logoutAsync.pending, (state) => {
                 state.isLoading = true;
-            },
-        [logoutAsync.fulfilled]: (state, {payload}) => {
+                state.successMessage = [];
+                state.errorMessage = '';
+            })
+        .addCase(logoutAsync.fulfilled, (state, {payload}) => {
             if (payload.success) {
                 state.successMessage.push(payload.success);
             } else {
-                state.errorMessage.push("Что-то тут не так...");
+                state.errorMessage = "Что-то тут не так...";
             }
             state.isAuthenticated = false;
             state.isLoading = false;
-        },
-        [logoutAsync.rejected]: (state, {payload}) => {
+        })
+        .addCase(logoutAsync.rejected, (state, {payload}) => {
             state.isLoading = false;
             state.errorMessage = "Что-то тут не так...";
-        },
+        })
     }
 });
 

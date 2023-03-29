@@ -9,8 +9,8 @@ const refreshIntervalSlice = createSlice({
     initialState,
     reducers: {
         changeRefreshInterval(state, {payload}) {
-            sessionStorage.setItem('refreshInterval', parseInt(payload));
-            state.refreshInterval = sessionStorage.getItem('refreshInterval');
+            localStorage.setItem('refreshInterval', parseInt(payload));
+            state.refreshInterval = localStorage.getItem('refreshInterval');
         }
     }
 });

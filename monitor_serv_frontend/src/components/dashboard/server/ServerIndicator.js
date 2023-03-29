@@ -1,5 +1,4 @@
 import React, {useEffect, useState} from "react";
-import './ServerIndicator.css';
 import {Server, ArrowRepeat} from "react-bootstrap-icons";
 import 'react-tooltip/dist/react-tooltip.css';
 import {Tooltip} from 'react-tooltip';
@@ -13,7 +12,7 @@ const ServerIndicator = ({host}) => {
     const [targetStatus, setTargetStatus] = useState("N/A");
     const [color, setColor] = useState("#000000");
     const refreshInterval = useSelector(state => {
-        const interval = sessionStorage.getItem('refreshInterval');
+        const interval = localStorage.getItem('refreshInterval');
         if (interval !== null)
             return interval;
         else
@@ -65,7 +64,7 @@ const ServerIndicator = ({host}) => {
 
     return(
         <div className="server">
-            <div className="ms-1 mt-1">
+            <div className="ms-1 mt-1" style={{width: "20px"}}>
                 <div style={{
                     transform: `rotate(${rotateDeg}deg)`,
                     transition: 'transform 500ms ease',

@@ -1,6 +1,5 @@
 import React from "react";
-import {Link} from "react-router-dom";
-import {useSelector} from "react-redux";
+    import {useSelector} from "react-redux";
 
 const Home = () => {
     document.title = "Инфопанель | Добро пожаловать в Инфопанель IVA MCU";
@@ -26,7 +25,8 @@ const Home = () => {
                     <a className="ms-2 btn btn-secondary" href="/register">Регистрация</a>
                 </div>
             </div>
-            {successMessage.length !== 0 ? alertBlock : ""}
+            {typeof successMessage.map === "function" ?
+                successMessage.length !== 0 ? alertBlock : "" : ""}
         </div>
     );
 };

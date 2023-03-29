@@ -13,7 +13,7 @@ import {useSelector} from "react-redux";
 const ServerCard = ({id, address, port}) => {
     const [targetHealth, setTargetHealth] = useState(false);
     const refreshInterval = useSelector(state => {
-        const interval = sessionStorage.getItem('refreshInterval')
+        const interval = localStorage.getItem('refreshInterval')
         if (interval !== null)
             return interval;
         else

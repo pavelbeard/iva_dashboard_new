@@ -12,7 +12,7 @@ const DeviceSsdIndicator = ({host}) => {
     const [deviceSsdTooltip, setDeviceSsdTooltip] = useState([]);
     const [color, setColor] = useState("#000000");
     const refreshInterval = useSelector(state => {
-        const interval = sessionStorage.getItem('refreshInterval')
+        const interval = localStorage.getItem('refreshInterval')
         if (interval !== null)
             return interval;
         else

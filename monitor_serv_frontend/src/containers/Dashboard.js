@@ -11,7 +11,7 @@ const Dashboard = () => {
 
     const [data, setData] = useState([]);
     const refreshInterval = useSelector(state => {
-        const interval = sessionStorage.getItem('refreshInterval')
+        const interval = localStorage.getItem('refreshInterval')
         if (interval !== null)
             return interval;
         else

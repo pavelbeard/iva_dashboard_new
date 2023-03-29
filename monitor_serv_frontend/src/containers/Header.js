@@ -3,6 +3,7 @@ import {Link, NavLink} from "react-router-dom";
 import {useDispatch, useSelector} from "react-redux";
 import {logoutAsync} from "../slices/authSlice";
 import {changeRefreshInterval} from "../slices/refreshIntervalSlice";
+import {API_URL} from "../base";
 
 const Header = () => {
     const {isAuthenticated} = useSelector(state => state.auth);
@@ -22,7 +23,7 @@ const Header = () => {
             <NavLink to="/" className="nav-item nav-link">Главная</NavLink>
             <NavLink to="/dashboard" className="nav-item nav-link">Инфопанель</NavLink>
             <NavLink to="/charts" className="nav-item nav-link">Графики</NavLink>
-            <NavLink to="/admin" className="nav-item nav-link">Админ-панель</NavLink>
+            <a href={`${API_URL}/admin`} className="nav-item nav-link">Админ-панель</a>
             <a onClick={logout} href="#!" className="nav-item nav-link">Выйти</a>
         </>
     );
