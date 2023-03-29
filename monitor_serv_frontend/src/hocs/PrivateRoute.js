@@ -1,15 +1,15 @@
-import {Route, Navigate} from "react-router-dom";
-import {connect} from "react-redux";
+import {Navigate} from "react-router-dom";
+import {useSelector} from "react-redux";
 
-const PrivateRoute = ({component: Component, isAuth, ...rest}) => (
-    <Route
-        {...rest}
-        render={props => isAuth ? <Component {...props} /> : <Navigate to="/login" />}
-    />
-);
+const PrivateRoute = ({component}) => {
+    const isAuthenticated = useSelector(state => state
+        .auth
+        .isAuthenticated
+    );
 
-const mapStateToProps = state => ({
-    isAuth: state.auth.isAuth
-})
+    return(
+        isAuthenticated ? component : <Navigate to="/login" />
+    );
+};
 
-export default connect(mapStateToProps, {})(PrivateRoute);
+export default PrivateRoute;

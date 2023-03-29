@@ -7,7 +7,7 @@ import * as query from '../../queries'
 import {getData, URL} from "../../../base";
 import './ScrollableTooltip.css';
 
-const CpuIndicator = ({host, refreshInterval, targetHealth}) => {
+const CpuIndicator = ({host, refreshInterval}) => {
     const [cpuLoad, setCpuLoad] = useState("N/A");
     const [cpuDataTooltip, setCpuDataTooltip] = useState([]);
     const [cpuCoresCount, setCpuCoresCount] = useState(0);
@@ -71,7 +71,7 @@ const CpuIndicator = ({host, refreshInterval, targetHealth}) => {
         const interval = setInterval(setDataImmediately, refreshInterval);
         return () => clearInterval(interval);
 
-    }, []);
+    }, [refreshInterval]);
 
     const [isOpen, setIsOpen] = useState(false);
 

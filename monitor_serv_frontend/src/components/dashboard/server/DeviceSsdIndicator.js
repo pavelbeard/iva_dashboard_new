@@ -67,7 +67,7 @@ const DeviceSsdIndicator = ({host, refreshInterval, targetHealth}) => {
         setDataImmediately();
         const interval = setInterval(setDataImmediately, refreshInterval);
         return () => clearInterval(interval);
-    }, []);
+    }, [refreshInterval]);
 
     const [isOpen, setIsOpen] = useState(false);
 

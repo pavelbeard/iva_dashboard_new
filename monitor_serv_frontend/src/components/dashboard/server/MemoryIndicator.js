@@ -46,7 +46,7 @@ const MemoryIndicator = ({host, refreshInterval, targetHealth}) => {
         const interval = setInterval(setDataImmediately, refreshInterval);
         return () => clearInterval(interval);
 
-    }, []);
+    }, [refreshInterval]);
 
     const [isOpen, setIsOpen] = useState(false);
 

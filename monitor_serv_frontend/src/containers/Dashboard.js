@@ -35,7 +35,7 @@ const Dashboard = ({appRefreshInterval=5000}) => {
         const interval1 = setInterval(getTargetsImmediately, appRefreshInterval);
         return () => clearInterval(interval1);
 
-    }, []);
+    }, [appRefreshInterval]);
 
     return(
         <section className="flex-shrink-0 overflow-auto">

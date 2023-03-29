@@ -1,19 +1,18 @@
-from django.contrib.auth import login, logout, authenticate
-from django.contrib.sessions.models import Session
-from django.db import IntegrityError
+from http import HTTPStatus
+
+from django.contrib.auth import login, logout
 from django.utils.decorators import method_decorator
-from django.views.decorators.csrf import csrf_protect, ensure_csrf_cookie
+from django.views.decorators.csrf import csrf_protect
+
 from rest_framework import status
 from rest_framework.generics import ListAPIView
-from rest_framework.permissions import IsAuthenticated, AllowAny
+from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from rest_framework.authentication import SessionAuthentication
-from rest_framework_simplejwt.authentication import JWTAuthentication
 
 from dashboard_users.mixins import UserSessionMixin
 from dashboard_users.models import CustomUser
-from dashboard_users.serializers import CustomUserSerializer, CustomUserSerializer, LoginUserSerializer, \
+from dashboard_users.serializers import CustomUserSerializer, LoginUserSerializer, \
     CreateUserSerializer, UpdateUserSerializer
 
 csrf_protect_method = method_decorator(csrf_protect, name="dispatch")
@@ -23,30 +22,29 @@ csrf_protect_method = method_decorator(csrf_protect, name="dispatch")
 class UsersView(ListAPIView):
     queryset = CustomUser.objects.all()
     serializer_class = CustomUserSerializer
-    permission_classes = (AllowAny,)
-    authentication_classes = (SessionAuthentication,)
 
 
-# @method_decorator(csrf_protect, name="dispatch")
-@csrf_protect_method
 class CheckAuthentication(APIView):
-    permission_classes = (AllowAny,)
+    permission_classes = (AllowAny, )
 
     def get(self, request):
         user = self.request.user
 
-        is_auth = user.is_authenticated
-
-        if is_auth:
-            return Response({"isAuthenticated": "success"})
-        return Response({"isAuthenticated": "error"})
+        try:
+            user = CustomUser.objects.get(id=user.id)
+            if user.is_authenticated:
+                return Response({"isAuthenticated": "success"}, status.HTTP_200_OK)
+        except CustomUser.DoesNotExist:
+            return Response({"isAuthenticated": "error"}, HTTPStatus.UNAUTHORIZED)
 
 
 # @method_decorator(csrf_protect, name="dispatch")
 @csrf_protect_method
 class RegisterView(APIView):
+    permission_classes = (AllowAny, )
+
     def post(self, request):
-        data = request.data
+        data = self.request.data
 
         serializer = CreateUserSerializer(data=data)
 
@@ -55,12 +53,13 @@ class RegisterView(APIView):
 
         user = serializer.create(serializer.validated_data)
         user = CustomUserSerializer(user)
-        return Response(user.data, status.HTTP_201_CREATED)
+        return Response({"success": "user created", "userData": user.data}, status.HTTP_201_CREATED)
 
 
-# @method_decorator(csrf_protect, name="dispatch")
 @csrf_protect_method
 class LoginUserView(APIView):
+    permission_classes = (AllowAny, )
+
     def post(self, request):
         data = self.request.data
 
@@ -77,21 +76,15 @@ class LoginUserView(APIView):
 
 # @method_decorator(csrf_protect, name="dispatch")
 @csrf_protect_method
-class LogoutView(UserSessionMixin, APIView):
-    permission_classes = (IsAuthenticated, )
-
+class LogoutView(APIView):
     def post(self, request):
-        # user_id = self.get_user_id_from_session(request)
-        # request['user'] = CustomUser.objects.get(id=user_id)
-        logout(request)
-        return Response({"success": "logout"})
+        logout(self.request)
+        return Response({"success": "you are logout"}, status.HTTP_200_OK)
 
 
-class UpdateUserView(UserSessionMixin, APIView):
-    permission_classes = (IsAuthenticated,)
-
+@csrf_protect_method
+class UpdateUserView(APIView):
     def put(self, request):
-        # user_id = self.get_user_id_from_session(request)
         user = self.request.user
         data = self.request.data
 
@@ -109,30 +102,30 @@ class UpdateUserView(UserSessionMixin, APIView):
 
 
 @csrf_protect_method
-class DeleteUserView(UserSessionMixin, APIView):
-    authentication_classes = (IsAuthenticated,)
-
+class DeleteUserView(APIView):
     def delete(self, request):
-        # user_id = self.get_user_id_from_session(request)
         user = self.request.user
 
         try:
             user = CustomUser.objects.get(id=user.id)
             user.delete()
-            return Response({"success": "user is deleted."})
+            return Response({"success": "user is deleted"}, status.HTTP_200_OK)
         except CustomUser.DoesNotExist:
-            return Response({"error": "user is not found"})
+            return Response({"error": "user is not found"}, status.HTTP_400_BAD_REQUEST)
 
 
-class RetrieveUserView(UserSessionMixin, APIView):
+@csrf_protect_method
+class RetrieveUserView(APIView):
     def get(self, request):
-        user_id = self.get_user_id_from_session(request)
+        user = self.request.user
 
-        user = CustomUser.objects.get(id=user_id)
-
-        if user.is_anonymous:
-            return Response({"error": "anonymous user"}, status.HTTP_400_BAD_REQUEST)
+        try:
+            user = CustomUser.objects.get(id=user.id)
+        except CustomUser.DoesNotExist:
+            return Response({"error": "user is not found or anonymous"}, status.HTTP_400_BAD_REQUEST)
 
         user = CustomUserSerializer(user)
+        user_data = user.data
+        del user_data['password']
 
-        return Response(user.data, status=status.HTTP_200_OK)
+        return Response(user_data, status=status.HTTP_200_OK)

@@ -1,16 +1,23 @@
-import React, {Fragment} from 'react';
+import React, {Fragment, useEffect} from 'react';
 import Header from "../containers/Header";
 import {Footer} from "../containers/Footer";
+import {checkAuthenticationAsync} from "../slices/authSlice";
+import {useDispatch} from "react-redux";
 
+const Layout = ({children}) => {
+    const dispatch = useDispatch();
 
-const Layout = ({children}) => (
-    <>
+    useEffect(() => {
+        dispatch(checkAuthenticationAsync());
+    }, [])
+
+    return (
         <Fragment>
-            <Header />
+            <Header/>
             {children}
-            <Footer />
+            <Footer/>
         </Fragment>
-    </>
-);
+    );
+};
 
-export default Layout
+export default Layout;

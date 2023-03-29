@@ -1,5 +1,5 @@
 import React, {useState} from "react";
-import SystemCharts from "./charts/SystemCharts";
+import SystemCharts from "../components/dashboard/charts/SystemCharts";
 
 function Charts() {
     document.title = "Инфопанель | Графики";

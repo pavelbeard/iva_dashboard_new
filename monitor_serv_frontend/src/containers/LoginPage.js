@@ -1,59 +1,72 @@
-import {useState} from "react";
-import {API_URL, getData, getResponse, postData} from "../base";
-import axios from "axios";
+import React, {useState} from "react";
+import CSRFToken from "../components/auth/CSRFToken";
+// import {login} from "../actions/auth"
+// import {connect} from "react-redux";
+import {Navigate} from "react-router-dom";
+import {loginAsync} from "../slices/authSlice";
+import {useDispatch, useSelector} from "react-redux";
 
 const LoginPage = () => {
     document.title = "Инфопанель | Вход в систему";
 
-    const [username, setUsername] = useState();
-    const [password, setPassword] = useState();
-    const [csrf, setCsrf] = useState();
+    const [formData, setFormData] = useState({
+        username: '',
+        password: '',
+    });
+    const {isAuthenticated} = useSelector(state => state.auth);
+    const dispatch = useDispatch();
 
-    const submitForm = async e => {
+    const {username, password} = formData;
+
+    const onChange = e => setFormData({...formData, [e.target.name]: e.target.value})
+
+    const onSubmit = e => {
         e.preventDefault();
 
-        const csrfUrlRequest = `${API_URL}/api/v1/csrf_cookie`;
-        const csrfCookie = await axios.get(csrfUrlRequest)
-            .then(response => {return response.headers});
-        setCsrf(csrfCookie);
-    };
-
-    const handleChange = e => {
-        const {id, value} = e.target;
-
-        if (id === 'username') {
-            setUsername(value);
-        }
-        if (id === 'password') {
-            setPassword(password);
-        }
+        dispatch(loginAsync({username, password}));
     }
 
+    if (isAuthenticated) {
+        return <Navigate to="/dashboard" />
+    }
 
     return(
         <div className="container mt-3">
             <h1 className="display-6">Вход в систему</h1>
             <hr className="my-1" />
-            <form onSubmit={submitForm}>
+            <form onSubmit={e => onSubmit(e)}>
+                <CSRFToken />
                 <div className="form-group">
-                    <label htmlFor="username">Имя пользователя:</label>
-                    <input type="text" id="username"
+                    <label htmlFor="" className="form-label">Имя пользователя:</label>
+                    <input type="text"
+                           name="username"
+                           onChange={e => onChange(e)}
                            value={username}
-                           onChange={handleChange} className="form-control"/>
+                           className="form-control"
+                           required
+                    />
                 </div>
                 <div className="form-group">
-                    <label htmlFor="password2">Пароль:</label>
-                    <input type="password" id="password2"
+                    <label htmlFor="" className="form-label">Пароль:</label>
+                    <input type="password"
+                           name="password"
+                           onChange={e => onChange(e)}
                            value={password}
-                           onChange={handleChange} className="form-control"/>
-
-                    <button type="submit" className="btn btn-primary mt-2">
-                        Войти
-                    </button>
+                           className="form-control"
+                           required
+                    />
                 </div>
+                <button type="submit" className="btn btn-primary mt-2">
+                    Войти
+                </button>
             </form>
         </div>
     )
 };
 
+// const mapStateToProps = state => ({
+//     isAuthenticated: state.auth.isAuthenticated
+// })
+
+// export default connect(mapStateToProps, {login})(LoginPage);
 export default LoginPage;

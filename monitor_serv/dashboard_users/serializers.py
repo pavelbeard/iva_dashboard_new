@@ -86,10 +86,6 @@ class LoginUserSerializer(serializers.ModelSerializer):
         password = data.get('password')
 
         if username and password:
-            if not CustomUser.objects.filter(username=username).first().is_active:
-                msg = _("Пользователь не активирован.")
-                raise ValidationError(msg, code="authorization")
-
             user = authenticate(
                 password=password,
                 username=username
@@ -97,6 +93,9 @@ class LoginUserSerializer(serializers.ModelSerializer):
 
             if not user:
                 msg = _("Пользователь не найден либо неправильные данные пользователя.")
+                raise ValidationError(msg, code="authorization")
+            elif not user.is_active:
+                msg = _("Пользователь не активирован.")
                 raise ValidationError(msg, code="authorization")
 
         else:

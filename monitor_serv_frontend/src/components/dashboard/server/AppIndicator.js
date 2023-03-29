@@ -15,7 +15,6 @@ const AppIndicator = ({host, refreshInterval, targetHealth}) => {
         const urlRequest = URL + `?query=${encodeURI(query.modules.states)}`
             + `&host=${host}`
             + `&query_range=false`;
-        // const data = await postData(url, body);
         const data = await getData(urlRequest);
 
         if (data) {

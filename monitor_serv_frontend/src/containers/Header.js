@@ -1,17 +1,20 @@
 import React, {useEffect, useState} from "react";
 import {Link, NavLink} from "react-router-dom";
-// import Charts from "./dashboard/Charts";
-
+import {useDispatch, useSelector} from "react-redux";
+import {logoutAsync} from "../slices/authSlice";
 const Header = () => {
-    const isAuthenticated = false;
+    const {isAuthenticated} = useSelector(state => state.auth);
+    const dispatch = useDispatch();
+
+    const logout = () => dispatch(logoutAsync());
 
     const authLinks = (
         <>
             <NavLink to="/" className="nav-item nav-link">Главная</NavLink>
             <NavLink to="/dashboard" className="nav-item nav-link">Инфопанель</NavLink>
             <NavLink to="/charts" className="nav-item nav-link">Графики</NavLink>
-            <NavLink to="/admin" className="nav-item nav-link">Панель админа</NavLink>
-            <NavLink to="/logout" className="nav-item nav-link">Выйти</NavLink>
+            <NavLink to="/admin" className="nav-item nav-link">Админ-панель</NavLink>
+            <a onClick={logout} href="#!" className="nav-item nav-link">Выйти</a>
         </>
     );
 
@@ -24,7 +27,7 @@ const Header = () => {
 
     const refreshIntervalControls = (
         <>
-            <label htmlFor="selectRefreshInterval" className="text-white">Интервал обновления:</label>
+            <label htmlFor="selectRefreshInterval" style={{width: "230px"}} className="text-white">Интервал обновления:</label>
             <select id="selectRefreshInterval"
                     // onChange={refreshIntervalCallback.bind(this)}
                     className="form-select form-select-sm ms-2">
