@@ -55,10 +55,11 @@ const RegisterPage = () => {
                 <CSRFToken />
                 <div className="d-flex flex-row">
                     <div className="form-group w-50">
-                        <label htmlFor="" className="form-label">Имя пользователя:</label>
+                        <label htmlFor="username" className="form-label">Имя пользователя:</label>
                         <input type="text"
                                className="form-control"
                                placeholder="Имя пользователя"
+                               id="username"
                                name="username"
                                onChange={e => onChange(e)}
                                value={username}
@@ -66,10 +67,11 @@ const RegisterPage = () => {
                         />
                     </div>
                     <div className="form-group ms-3 w-50">
-                        <label htmlFor="" className="form-label">E-mail:</label>
+                        <label htmlFor="email" className="form-label">E-mail:</label>
                         <input type="email"
                                className="form-control"
                                placeholder="E-mail"
+                               id="email"
                                name="email"
                                onChange={e => onChange(e)}
                                value={email}
@@ -79,10 +81,11 @@ const RegisterPage = () => {
                 </div>
                 <div className="d-flex flex-row">
                     <div className="form-group w-50">
-                        <label htmlFor="" className="form-label">Имя:</label>
+                        <label htmlFor="first_name" className="form-label">Имя:</label>
                         <input type="text"
                                className="form-control"
                                placeholder="Имя"
+                               id="first_name"
                                name="first_name"
                                onChange={e => onChange(e)}
                                value={first_name}
@@ -90,10 +93,11 @@ const RegisterPage = () => {
                         />
                     </div>
                     <div className="form-group ms-3 w-50">
-                        <label htmlFor="" className="form-label">Фамилия:</label>
+                        <label htmlFor="last_name" className="form-label">Фамилия:</label>
                         <input type="text"
                                className="form-control"
                                placeholder="Фамилия"
+                               id="last_name"
                                name="last_name"
                                onChange={e => onChange(e)}
                                value={last_name}
@@ -103,10 +107,11 @@ const RegisterPage = () => {
                 </div>
                 <div className="d-flex flex-row">
                     <div className="form-group w-50">
-                        <label htmlFor="" className="form-label">Пароль:</label>
+                        <label htmlFor="password" className="form-label">Пароль:</label>
                         <input type="password"
                                className="form-control"
                                placeholder="Пароль"
+                               id="password"
                                name="password"
                                onChange={e => onChange(e)}
                                value={password}
@@ -114,10 +119,11 @@ const RegisterPage = () => {
                         />
                     </div>
                     <div className="form-group ms-3 w-50">
-                        <label htmlFor="" className="form-label">Подтверждение:</label>
+                        <label htmlFor="password2" className="form-label">Подтверждение:</label>
                         <input type="password"
                                className="form-control"
                                placeholder="Подтверждение"
+                               id="password2"
                                name="password2"
                                onChange={e => onChange(e)}
                                value={password2}

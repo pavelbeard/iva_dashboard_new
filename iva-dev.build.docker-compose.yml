@@ -23,7 +23,7 @@ services:
       dockerfile: iva-dev.monitor_serv_frontend.Dockerfile
     container_name: test-monitor-server-frontend-v0.2
     volumes:
-      - static_files.iva-dev:/home/monitor-server-app/web
+      - static_files.iva-dev:/home/monitor-server-app/web/staticfiles
     ports:
       - "8004:80"
     networks:
@@ -48,7 +48,7 @@ services:
       - env/iva-dev.monitor-serv.env
     entrypoint: ["python3.11", "/home/monitor-server-app/web/entrypoint.py"]
     volumes:
-      - static_files.iva-dev:/home/monitor-server-app/web
+      - static_files.iva-dev:/home/monitor-server-app/web/staticfiles
     networks:
       iva_dashboard_net.iva-dev:
         ipv4_address: 2.0.96.1

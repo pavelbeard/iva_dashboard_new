@@ -1,4 +1,4 @@
-from django.contrib.auth import get_user_model, authenticate
+from django.contrib.auth import get_user_model
 from django.contrib.auth.password_validation import validate_password
 from django.utils.translation import gettext_lazy as _
 from rest_framework import serializers
@@ -28,7 +28,8 @@ class CreateUserSerializer(serializers.ModelSerializer):
 
         try:
             if password != password_confirmation:
-                raise ValidationError('passwords are not match')
+                msg = _("Пароли не совпадают.")
+                raise ValidationError(msg, code="password")
 
             validate_password(password, user=CustomUser(**data))
         except ValidationError as e:
@@ -85,23 +86,20 @@ class LoginUserSerializer(serializers.ModelSerializer):
         username = data.get('username')
         password = data.get('password')
 
-        if username and password:
-            user = authenticate(
-                password=password,
-                username=username
-            )
+        try:
+            user = CustomUser.objects.get(username=username)
 
-            active_user = CustomUser.objects.filter(username=username).first()
-            if active_user:
-                if not active_user.is_active:
+            if user.check_password(password):
+                if not user.is_active:
                     msg = _("Пользователь не активирован.")
                     raise ValidationError(msg, code="authorization")
-            elif not user:
-                msg = _("Пользователь не найден либо неправильные данные пользователя.")
+                else:
+                    data['user'] = user
+                    return data
+            else:
+                msg = _("Неправильные данные пользователя.")
                 raise ValidationError(msg, code="authorization")
-        else:
-            msg = _("Запрос должен содержать имя пользователя и пароль!")
-            raise ValidationError(msg, code="authorization")
 
-        data['user'] = user
-        return data
+        except CustomUser.DoesNotExist:
+            msg = _("Пользователь не найден.")
+            raise ValidationError(msg, code="authorization")

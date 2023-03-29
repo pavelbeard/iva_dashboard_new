@@ -20,7 +20,7 @@ services:
     image: pavelbeard/prod.monitor-server-frontend:v0.3
     container_name: prod.monitor-server-frontend-v0.3
     volumes:
-      - static_files.prod:/home/monitor-server-app/web
+      - static_files.prod:/home/monitor-server-app/web/staticfiles
     ports:
       - "8040:80"
     networks:
@@ -42,7 +42,7 @@ services:
       - env/prod.monitor-serv.env
     entrypoint: ["python3.11", "/home/monitor-server-app/web/entrypoint.py"]
     volumes:
-      - static_files.prod:/home/monitor-server-app/web
+      - static_files.prod:/home/monitor-server-app/web/staticfiles
     networks:
       iva_dashboard_net.prod:
     depends_on:

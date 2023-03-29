@@ -55,8 +55,9 @@ const LoginPage = () => {
             <form onSubmit={e => onSubmit(e)}>
                 <CSRFToken />
                 <div className="form-group">
-                    <label htmlFor="" className="form-label">Имя пользователя:</label>
+                    <label htmlFor="username" className="form-label">Имя пользователя:</label>
                     <input type="text"
+                           id="username"
                            name="username"
                            onChange={e => onChange(e)}
                            value={username}
@@ -65,8 +66,9 @@ const LoginPage = () => {
                     />
                 </div>
                 <div className="form-group">
-                    <label htmlFor="" className="form-label">Пароль:</label>
+                    <label htmlFor="password" className="form-label">Пароль:</label>
                     <input type="password"
+                           id="password"
                            name="password"
                            onChange={e => onChange(e)}
                            value={password}
