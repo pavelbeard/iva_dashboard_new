@@ -5,11 +5,19 @@ import {v4} from "uuid";
 import {Tooltip} from "react-tooltip";
 import * as query from '../../queries';
 import {getData, URL} from "../../../base";
+import {useSelector} from "react-redux";
 
-const MemoryIndicator = ({host, refreshInterval, targetHealth}) => {
+const MemoryIndicator = ({host}) => {
     const [memoryStatus, setMemoryStatus] = useState("N/A");
     const [memoryDataTooltip, setMemoryDataTooltip] = useState([]);
     const [color, setColor] = useState("#000000");
+    const refreshInterval = useSelector(state => {
+        const interval = sessionStorage.getItem('refreshInterval')
+        if (interval !== null)
+            return interval;
+        else
+            return state.refresh.refreshInterval;
+    });
 
     const setMemoryData = async () => {
         const urlRequest = URL + `?query=${encodeURI(query.system.memory)}`

@@ -26,7 +26,15 @@ const RegisterPage = () => {
     const onSubmit = e => {
         e.preventDefault();
         dispatch(registerAsync({username, first_name, last_name, email, password, password2}));
-    }
+    };
+
+    const alertBlock = (
+        <div className="alert alert-danger mt-4" role="alert">
+            {messages.map(message => {
+                return(<span key={message}>{message}</span>)
+            })}
+        </div>
+    );
 
     useEffect(() => {
         setMessages(registerErrors)
@@ -121,20 +129,7 @@ const RegisterPage = () => {
                         type="submit"
                         onSubmit={onSubmit}>Зарегистрироваться
                 </button>
-                <div className="form-group mt-4">
-                    <ul className="list-group-item-danger rounded">
-                        {/*{messages.map(message => {*/}
-                        {/*    return (*/}
-                        {/*        <li>message</li>*/}
-                        {/*    );*/}
-                        {/*})}*/}
-                        {messages ? messages.map(message => {
-                            return(<li>{message}</li>)
-                        })
-
-                        : ""}
-                    </ul>
-                </div>
+                {messages.length !== 0 ? alertBlock : ""}
             </form>
         </div>
     );

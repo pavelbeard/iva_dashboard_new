@@ -1,4 +1,4 @@
-import React, {useState} from "react";
+import React, {useEffect, useState} from "react";
 import CSRFToken from "../components/auth/CSRFToken";
 // import {login} from "../actions/auth"
 // import {connect} from "react-redux";
@@ -13,21 +13,39 @@ const LoginPage = () => {
         username: '',
         password: '',
     });
-    const {isAuthenticated} = useSelector(state => state.auth);
+    const [messages, setMessages] = useState([]);
+    const {isAuthenticated, successMessage, loginErrors} = useSelector(state => state.auth);
     const dispatch = useDispatch();
 
     const {username, password} = formData;
 
-    const onChange = e => setFormData({...formData, [e.target.name]: e.target.value})
+    const onChange = e => setFormData({...formData, [e.target.name]: e.target.value});
 
     const onSubmit = e => {
         e.preventDefault();
 
         dispatch(loginAsync({username, password}));
-    }
+    };
+
+    const alertBlock = (
+        <div className={`mt-4 alert alert-${successMessage.length !== 0 ? 'success' : 'danger'}`} role="alert">
+            {messages ? messages.map(message => {
+                return(<span key={message}>{message}</span>)
+            })
+            : ""}
+        </div>
+    );
+
+    useEffect(() => {
+        if (successMessage.length !== 0) {
+            setMessages(successMessage)
+        } else {
+            setMessages(loginErrors)
+        }
+    }, [loginErrors]);
 
     if (isAuthenticated) {
-        return <Navigate to="/dashboard" />
+        return <Navigate to="/dashboard" />;
     }
 
     return(
@@ -59,14 +77,10 @@ const LoginPage = () => {
                 <button type="submit" className="btn btn-primary mt-2">
                     Войти
                 </button>
+                {messages.length !== 0 ? alertBlock : ""}
             </form>
         </div>
     )
 };
 
-// const mapStateToProps = state => ({
-//     isAuthenticated: state.auth.isAuthenticated
-// })
-
-// export default connect(mapStateToProps, {login})(LoginPage);
 export default LoginPage;

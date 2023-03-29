@@ -1,8 +1,19 @@
 import React from "react";
 import {Link} from "react-router-dom";
+import {useSelector} from "react-redux";
 
 const Home = () => {
     document.title = "Инфопанель | Добро пожаловать в Инфопанель IVA MCU";
+
+    const successMessage = useSelector(state => state.auth.successMessage);
+
+    const alertBlock = (
+        <div className="mt-4 alert alert-success" role="alert">
+            {successMessage.map(message => {
+                return(<span key={message}>{message}</span>)
+            })}
+        </div>
+    );
 
     return (
         <div className="container">
@@ -15,6 +26,7 @@ const Home = () => {
                     <a className="ms-2 btn btn-secondary" href="/register">Регистрация</a>
                 </div>
             </div>
+            {successMessage.length !== 0 ? alertBlock : ""}
         </div>
     );
 };

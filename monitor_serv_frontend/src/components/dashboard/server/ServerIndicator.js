@@ -6,11 +6,19 @@ import {Tooltip} from 'react-tooltip';
 import {v4} from "uuid";
 import './Server.css';
 import {API_URL, getData} from "../../../base";
+import {useSelector} from "react-redux";
 
-const ServerIndicator = ({host, refreshInterval, onClick}) => {
+const ServerIndicator = ({host}) => {
     const [targetInfo, setTargetInfo] = useState([])
     const [targetStatus, setTargetStatus] = useState("N/A");
     const [color, setColor] = useState("#000000");
+    const refreshInterval = useSelector(state => {
+        const interval = sessionStorage.getItem('refreshInterval');
+        if (interval !== null)
+            return interval;
+        else
+            return state.refresh.refreshInterval;
+    });
 
     const [rotateDeg, setRotateDeg] = useState(360);
 
@@ -41,7 +49,6 @@ const ServerIndicator = ({host, refreshInterval, onClick}) => {
     };
 
     const setDataImmediately = () => {
-
         setTimeout(animateRefresh, 0);
         setTimeout(setTargetStatusCallback, 0);
     };

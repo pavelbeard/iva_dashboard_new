@@ -2,13 +2,13 @@ import thunk from 'redux-thunk';
 import {configureStore} from "@reduxjs/toolkit";
 import {combineReducers} from "redux";
 import authSlice from "./slices/authSlice";
-import profile from "./reducers/profile";
+import refreshIntervalSlice from "./slices/refreshIntervalSlice";
 
 const middleware = [thunk];
 
 const rootReducer = combineReducers({
     auth: authSlice,
-    profile
+    refresh: refreshIntervalSlice
 });
 
 const store = configureStore({

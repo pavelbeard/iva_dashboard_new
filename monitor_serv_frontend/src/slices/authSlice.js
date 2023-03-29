@@ -12,9 +12,10 @@ const initialState = {
     isAuthenticated: null,
     isLoading: null,
     isRegister: null,
-    successMessage: '',
+    successMessage: [],
     errorMessage: '',
-    registerErrors: []
+    registerErrors: [],
+    loginErrors: []
 };
 
 export const registerAsync = createAsyncThunk(
@@ -92,7 +93,7 @@ export const loginAsync = createAsyncThunk(
             const urlRequest = `${API_URL}/api/users/login`;
             const response = await axios.post(urlRequest, body, CONFIG);
 
-            return response.data.status;
+            return response.data;
         } catch (err) {
             return err.response.data;
         }
@@ -110,43 +111,64 @@ const authSlice = createSlice({
             state.isAuthenticated = false;
         },
         [loginAsync.fulfilled]: (state, {payload}) => {
+            state.loginErrors = [];
+
             if (payload?.non_field_errors) {
-                state.errorMessage = payload.non_field_errors[0];
+                payload.non_field_errors.forEach(error => {
+                    state.loginErrors.push(error)
+                });
+                state.isAuthenticated = false;
             }
-            else if (payload === 'success') {
+            else if (payload.success) {
                 state.isAuthenticated = true;
-                state.successMessage = payload;
+                state.successMessage.push(payload.success);
             }
 
             state.isLoading = false;
         },
         [loginAsync.rejected]: (state, {payload}) => {
             state.isLoading = false;
-            state.errorMessage = payload;
+            state.errorMessage = "Что-то тут не так...";
         },
         // register
         [registerAsync.pending]:(state) => {
             state.isLoading = true;
         },
         [registerAsync.fulfilled]:  (state, {payload}) => {
+            state.registerErrors = [];
+
             if (payload?.non_field_errors instanceof Array) {
-                state.registerErrors.push(payload.non_field_errors)
-                console.log(state.registerErrors)
+                payload.non_field_errors.forEach(error => {
+                    state.registerErrors.push(error);
+                });
             }
             else if (payload?.username instanceof Array) {
-                state.registerErrors.push(payload.username);
+                payload.username.forEach(error => {
+                    state.registerErrors.push(error);
+                });
             }
             else if (payload?.email instanceof Array) {
-                state.registerErrors.push(payload.email);
+                payload.email.forEach(error => {
+                    state.registerErrors.push(error);
+                });
             }
             else if (payload?.first_name instanceof Array) {
-                state.registerErrors.push(payload.first_name);
+                payload.first_name.forEach(error => {
+                    state.registerErrors.push(error);
+                });
             }
             else if (payload?.last_name instanceof Array) {
-                state.registerErrors.push(payload.last_name);
+                payload.last_name.forEach(error => {
+                    state.registerErrors.push(error);
+                });
+            }
+            else if (payload?.password instanceof Array) {
+                payload.password.forEach(error => {
+                    state.registerErrors.push(error);
+                });
             }
             else if (payload.success){
-                state.successMessage = payload;
+                state.successMessage.push(payload.success);
                 state.isRegister = true;
             }
 
@@ -155,7 +177,7 @@ const authSlice = createSlice({
         [registerAsync.rejected]: (state, {payload}) => {
             state.isLoading = false;
             state.isRegister =  false;
-            state.errorMessage = payload;
+            state.errorMessage = "Что-то тут не так...";
         },
         // check auth
         [checkAuthenticationAsync.pending]: (state) => {
@@ -180,17 +202,17 @@ const authSlice = createSlice({
                 state.isLoading = true;
             },
         [logoutAsync.fulfilled]: (state, {payload}) => {
-            if (payload === "success") {
-                state.successMessage = payload;
+            if (payload.success) {
+                state.successMessage.push(payload.success);
             } else {
-                state.errorMessage = payload;
+                state.errorMessage.push("Что-то тут не так...");
             }
             state.isAuthenticated = false;
             state.isLoading = false;
         },
         [logoutAsync.rejected]: (state, {payload}) => {
             state.isLoading = false;
-            state.errorMessage = payload;
+            state.errorMessage = "Что-то тут не так...";
         },
     }
 });

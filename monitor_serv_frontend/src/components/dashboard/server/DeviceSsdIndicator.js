@@ -5,14 +5,23 @@ import {Tooltip} from "react-tooltip";
 import * as query from '../../queries';
 import {getData, URL} from "../../../base";
 import './ScrollableTooltip.css';
+import {useSelector} from "react-redux";
 
-const DeviceSsdIndicator = ({host, refreshInterval, targetHealth}) => {
+const DeviceSsdIndicator = ({host}) => {
     const [deviceSsdUsedSpace, setDeviceSsdUsedSpace] = useState("N/A");
     const [deviceSsdTooltip, setDeviceSsdTooltip] = useState([]);
     const [color, setColor] = useState("#000000");
+    const refreshInterval = useSelector(state => {
+        const interval = sessionStorage.getItem('refreshInterval')
+        if (interval !== null)
+            return interval;
+        else
+            return state.refresh.refreshInterval;
+    });
 
     //disk io
     const [deviceSsdIO, setDeviceSsdIO] = useState([]);
+
 
     const setDeviceSsdData = async () => {
         const urlRequest = URL + `?query=${encodeURI(query.disk.rootSpace)}`

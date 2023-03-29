@@ -5,11 +5,19 @@ import {v4} from "uuid";
 import {Tooltip} from "react-tooltip";
 import * as query from '../../queries';
 import {getData, URL} from "../../../base";
+import {useSelector} from "react-redux";
 
-const NetworkIndicator = ({host, refreshInterval, targetHealth}) => {
+const NetworkIndicator = ({host}) => {
     const [netStatus, setNetStatus] = useState("N/A");
     const [netDataTooltip, setNetDataTooltip] = useState([]);
     const [color, setColor] = useState("#000000");
+    const refreshInterval = useSelector(state => {
+        const interval = sessionStorage.getItem('refreshInterval')
+        if (interval !== null)
+            return interval;
+        else
+            return state.refresh.refreshInterval;
+    });
 
     const getNetworkData = async () => {
         const urlRequest = URL + `?query=${encodeURI(query.network.throughput)}`

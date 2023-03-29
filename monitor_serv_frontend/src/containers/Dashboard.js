@@ -3,12 +3,20 @@ import ServerCard from "../components/dashboard/card/ServerCard";
 import CheckSSLCert from "../components/dashboard/iva/CheckSSLCert";
 import {API_URL, getData} from "../base";
 import './Dashboard.css';
+import {useSelector} from "react-redux";
 
 
-const Dashboard = ({appRefreshInterval=5000}) => {
+const Dashboard = () => {
     document.title = "Инфопанель | Главная";
 
     const [data, setData] = useState([]);
+    const refreshInterval = useSelector(state => {
+        const interval = sessionStorage.getItem('refreshInterval')
+        if (interval !== null)
+            return interval;
+        else
+            return state.refresh.refreshInterval;
+    });
 
     const getTargets = async () => {
         try {
@@ -26,16 +34,16 @@ const Dashboard = ({appRefreshInterval=5000}) => {
     };
 
     const getTargetsImmediately = () => {
-        console.log(appRefreshInterval)
+        console.log(refreshInterval)
         setTimeout(getTargets, 0);
     }
 
     useEffect(() => {
         getTargetsImmediately();
-        const interval1 = setInterval(getTargetsImmediately, appRefreshInterval);
+        const interval1 = setInterval(getTargetsImmediately, refreshInterval);
         return () => clearInterval(interval1);
 
-    }, [appRefreshInterval]);
+    }, [refreshInterval]);
 
     return(
         <section className="flex-shrink-0 overflow-auto">
@@ -49,7 +57,7 @@ const Dashboard = ({appRefreshInterval=5000}) => {
                                 id={target.id}
                                 address={target.address}
                                 port={target.port}
-                                refreshInterval={appRefreshInterval}
+
                             />;
                             return (card);
                         })}
@@ -58,7 +66,7 @@ const Dashboard = ({appRefreshInterval=5000}) => {
                 <div className="ps-2 pe-2">
                     <h4 className="text-center pt-2 pb-2">Мониторинг ВКС IVA</h4>
                     <div className="col-md-6 w-100 cards">
-                        <CheckSSLCert key={1000023} refreshInterval={appRefreshInterval}/>
+                        <CheckSSLCert key={1000023} refreshInterval={refreshInterval}/>
                         {/*<ServerCard/>*/}
                         {/*<ServerCard/>*/}
                         {/*<ServerCard/>*/}

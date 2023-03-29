@@ -5,11 +5,19 @@ import {v4} from "uuid";
 import * as query from '../../queries'
 import {getData, sum, URL} from "../../../base";
 import './ScrollableTooltip.css';
+import {useSelector} from "react-redux";
 
-const AppIndicator = ({host, refreshInterval, targetHealth}) => {
+const AppIndicator = ({host}) => {
     const [appsCount, setAppsCount] = useState("N/A");
     const [appsDataTooltip, setAppsDataTooltip] = useState([]);
     const [color, setColor] = useState("#000000");
+    const refreshInterval = useSelector(state => {
+        const interval = sessionStorage.getItem('refreshInterval')
+        if (interval !== null)
+            return interval;
+        else
+            return state.refresh.refreshInterval;
+    });
 
     const getAppsData = async () => {
         const urlRequest = URL + `?query=${encodeURI(query.modules.states)}`
@@ -63,7 +71,7 @@ const AppIndicator = ({host, refreshInterval, targetHealth}) => {
         setDataImmediately();
         const interval = setInterval(setDataImmediately, refreshInterval);
         return () => clearInterval(interval);
-    }, []);
+    }, [refreshInterval]);
 
     const [isOpen, setIsOpen] = useState(false);
 

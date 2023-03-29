@@ -2,6 +2,7 @@ from http import HTTPStatus
 
 from django.contrib.auth import login, logout
 from django.utils.decorators import method_decorator
+from django.utils.translation import gettext_lazy as _
 from django.views.decorators.csrf import csrf_protect
 
 from rest_framework import status
@@ -10,7 +11,6 @@ from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from dashboard_users.mixins import UserSessionMixin
 from dashboard_users.models import CustomUser
 from dashboard_users.serializers import CustomUserSerializer, LoginUserSerializer, \
     CreateUserSerializer, UpdateUserSerializer
@@ -53,7 +53,10 @@ class RegisterView(APIView):
 
         user = serializer.create(serializer.validated_data)
         user = CustomUserSerializer(user)
-        return Response({"success": "user created", "userData": user.data}, status.HTTP_201_CREATED)
+
+        msg = _("Вы успешно зарегистрированы, дождитесь активации учетной записи администратором.")
+
+        return Response({"success": msg, "userData": user.data}, status.HTTP_201_CREATED)
 
 
 @csrf_protect_method
@@ -71,7 +74,9 @@ class LoginUserView(APIView):
         user = serializer.validated_data['user']
         login(request, user)
 
-        return Response({"status": "success"}, status=status.HTTP_200_OK)
+        msg = _(f"Вы успешно вошли под именем: {user.username}")
+
+        return Response({"success": msg}, status=status.HTTP_200_OK)
 
 
 # @method_decorator(csrf_protect, name="dispatch")
@@ -79,7 +84,10 @@ class LoginUserView(APIView):
 class LogoutView(APIView):
     def post(self, request):
         logout(self.request)
-        return Response({"success": "you are logout"}, status.HTTP_200_OK)
+
+        msg = _("Удачного мониторинга без дашборда 🤣")
+
+        return Response({"success": msg}, status.HTTP_200_OK)
 
 
 @csrf_protect_method

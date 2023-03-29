@@ -6,13 +6,21 @@ import {Tooltip} from "react-tooltip";
 import * as query from '../../queries'
 import {getData, URL} from "../../../base";
 import './ScrollableTooltip.css';
+import {useSelector} from "react-redux";
 
-const CpuIndicator = ({host, refreshInterval}) => {
+const CpuIndicator = ({host}) => {
     const [cpuLoad, setCpuLoad] = useState("N/A");
     const [cpuDataTooltip, setCpuDataTooltip] = useState([]);
     const [cpuCoresCount, setCpuCoresCount] = useState(0);
     const [cpuCoresLabel, setCpuCoresLabel] = useState([]);
     const [color, setColor] = useState("#000000");
+    const refreshInterval = useSelector(state => {
+        const interval = sessionStorage.getItem('refreshInterval')
+        if (interval !== null)
+            return interval;
+        else
+            return state.refresh.refreshInterval;
+    });
 
     const setCpuData = async () => {
         const urlRequest = URL + `?query=${encodeURI(query.system.cpuData)}`

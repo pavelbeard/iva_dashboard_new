@@ -91,13 +91,14 @@ class LoginUserSerializer(serializers.ModelSerializer):
                 username=username
             )
 
-            if not user:
+            active_user = CustomUser.objects.filter(username=username).first()
+            if active_user:
+                if not active_user.is_active:
+                    msg = _("Пользователь не активирован.")
+                    raise ValidationError(msg, code="authorization")
+            elif not user:
                 msg = _("Пользователь не найден либо неправильные данные пользователя.")
                 raise ValidationError(msg, code="authorization")
-            elif not user.is_active:
-                msg = _("Пользователь не активирован.")
-                raise ValidationError(msg, code="authorization")
-
         else:
             msg = _("Запрос должен содержать имя пользователя и пароль!")
             raise ValidationError(msg, code="authorization")

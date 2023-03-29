@@ -1,10 +1,19 @@
-import React, {useEffect, useState} from "react";
+import React, {useState} from "react";
 import {Link, NavLink} from "react-router-dom";
 import {useDispatch, useSelector} from "react-redux";
 import {logoutAsync} from "../slices/authSlice";
+import {changeRefreshInterval} from "../slices/refreshIntervalSlice";
+
 const Header = () => {
     const {isAuthenticated} = useSelector(state => state.auth);
     const dispatch = useDispatch();
+    const defaultRefreshInterval = useSelector(state => {
+        const interval = sessionStorage.getItem('refreshInterval');
+        if (interval !== null)
+            return interval
+        else
+            return state.refresh.refreshInterval;
+    });
 
     const logout = () => dispatch(logoutAsync());
 
@@ -25,12 +34,21 @@ const Header = () => {
         </>
     );
 
+    const setRefreshInterval = e => {
+        dispatch(changeRefreshInterval(e.target.value));
+    };
+
     const refreshIntervalControls = (
         <>
-            <label htmlFor="selectRefreshInterval" style={{width: "230px"}} className="text-white">Интервал обновления:</label>
+            <label htmlFor="selectRefreshInterval" style={{width: "230px"}} className="text-white">
+                Интервал обновления:
+            </label>
             <select id="selectRefreshInterval"
-                    // onChange={refreshIntervalCallback.bind(this)}
-                    className="form-select form-select-sm ms-2">
+                    defaultValue={defaultRefreshInterval}
+                    onChange={e => setRefreshInterval(e)}
+                    className="form-select form-select-sm"
+                    style={{width: "110px"}}
+            >
                 <option value="5000">5 секунд</option>
                 <option value="10000">10 секунд</option>
                 <option value="15000">15 секунд</option>

@@ -8,9 +8,17 @@ import AppIndicator from "../server/AppIndicator";
 import NetworkIndicator from "../server/NetworkIndicator";
 import {ServerDown} from "../server/ServerDown";
 import {getData, API_URL} from "../../../base";
+import {useSelector} from "react-redux";
 
-const ServerCard = ({id, address, port, refreshInterval}) => {
+const ServerCard = ({id, address, port}) => {
     const [targetHealth, setTargetHealth] = useState(false);
+    const refreshInterval = useSelector(state => {
+        const interval = sessionStorage.getItem('refreshInterval')
+        if (interval !== null)
+            return interval;
+        else
+            return state.refresh.refreshInterval;
+    });
     const host = `${address}:${port}`;
 
     const getTargetHealth = async () => {
@@ -31,7 +39,7 @@ const ServerCard = ({id, address, port, refreshInterval}) => {
         checkTargetImmediately();
         const interval = setInterval(checkTargetImmediately, refreshInterval)
         return () => clearInterval(interval);
-    }, []);
+    }, [refreshInterval]);
 
     if (!targetHealth)
         return (
@@ -40,13 +48,13 @@ const ServerCard = ({id, address, port, refreshInterval}) => {
     else
         return (
             <div className="dashboard-card" id={id}>
-                <ServerIndicator key={12} host={host} refreshInterval={refreshInterval}/>
+                <ServerIndicator key={12} host={host} />
                 <div className="server">
-                    <CpuIndicator key={13} host={host} refreshInterval={refreshInterval}/>
-                    <MemoryIndicator key={14} host={host} refreshInterval={refreshInterval}/>
-                    <DeviceSsdIndicator key={15} host={host} refreshInterval={refreshInterval}/>
-                    <AppIndicator key={16} host={host} refreshInterval={refreshInterval}/>
-                    <NetworkIndicator key={17} host={host} refreshInterval={refreshInterval}/>
+                    <CpuIndicator key={13} host={host} />
+                    <MemoryIndicator key={14} host={host} />
+                    <DeviceSsdIndicator key={15} host={host} />
+                    <AppIndicator key={16} host={host} />
+                    <NetworkIndicator key={17} host={host} />
                 </div>
             </div>
         );
