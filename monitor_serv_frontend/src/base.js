@@ -3,7 +3,7 @@ import env from 'react-dotenv';
 
 export const API_URL = env?.REACT_APP_BACKEND_URL || "http://127.0.0.1:10111";
 export const URL = `${API_URL}/api/v1/prom_data`;
-export const APP_VERSION = env?.REACT_APP_VERSION || "v0.8.71";
+export const APP_VERSION = env?.REACT_APP_VERSION || "v0.8.80";
 
 export const CONFIG  = {
     headers: {
@@ -85,6 +85,13 @@ export function postData(url, body) {
             return await response.data;
         })
         .catch(async err => console.log(err));
+}
+
+export function fadeOut() {
+    return {
+        opacity: "0",
+        transition: "all 250ms linear 2s"
+    }
 }
 
 export function sum(arr) {

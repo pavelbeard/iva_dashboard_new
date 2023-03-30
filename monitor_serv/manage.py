@@ -25,8 +25,5 @@ def main():
         ) from exc
     execute_from_command_line(sys.argv)
 
-    # TODO: написать скрипт автоматически создающий суперпользователя
-
-
 if __name__ == '__main__':
     main()

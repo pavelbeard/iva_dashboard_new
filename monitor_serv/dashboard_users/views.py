@@ -38,7 +38,6 @@ class CheckAuthentication(APIView):
             return Response({"isAuthenticated": "error"}, HTTPStatus.UNAUTHORIZED)
 
 
-# @method_decorator(csrf_protect, name="dispatch")
 @csrf_protect_method
 class RegisterView(APIView):
     permission_classes = (AllowAny, )
@@ -53,9 +52,7 @@ class RegisterView(APIView):
 
         user = serializer.create(serializer.validated_data)
         user = CustomUserSerializer(user)
-
         msg = _("Вы успешно зарегистрированы, дождитесь активации учетной записи администратором.")
-
         return Response({"success": msg, "userData": user.data}, status.HTTP_201_CREATED)
 
 
@@ -73,20 +70,14 @@ class LoginUserView(APIView):
 
         user = serializer.validated_data['user']
         login(request, user)
-
-        msg = _(f"Вы успешно вошли под именем: {user.username}")
-
-        return Response({"success": msg}, status=status.HTTP_200_OK)
+        return Response({"success": user.username}, status=status.HTTP_200_OK)
 
 
-# @method_decorator(csrf_protect, name="dispatch")
 @csrf_protect_method
 class LogoutView(APIView):
     def post(self, request):
         logout(self.request)
-
         msg = _("Удачного мониторинга без дашборда 🤣")
-
         return Response({"success": msg}, status.HTTP_200_OK)
 
 
@@ -117,12 +108,13 @@ class DeleteUserView(APIView):
         try:
             user = CustomUser.objects.get(id=user.id)
             user.delete()
-            return Response({"success": "user is deleted"}, status.HTTP_200_OK)
+            msg = _("пользователь удален")
+            return Response({"success": msg}, status.HTTP_200_OK)
         except CustomUser.DoesNotExist:
-            return Response({"error": "user is not found"}, status.HTTP_400_BAD_REQUEST)
+            msg = _("user is not found")
+            return Response({"error": msg}, status.HTTP_400_BAD_REQUEST)
 
 
-@csrf_protect_method
 class RetrieveUserView(APIView):
     def get(self, request):
         user = self.request.user
@@ -130,10 +122,10 @@ class RetrieveUserView(APIView):
         try:
             user = CustomUser.objects.get(id=user.id)
         except CustomUser.DoesNotExist:
-            return Response({"error": "user is not found or anonymous"}, status.HTTP_400_BAD_REQUEST)
+            msg = _("anonymous")
+            return Response({"error": msg}, status.HTTP_400_BAD_REQUEST)
 
         user = CustomUserSerializer(user)
         user_data = user.data
         del user_data['password']
-
         return Response(user_data, status=status.HTTP_200_OK)

@@ -7,7 +7,16 @@ import {registerAsync} from "../slices/authSlice";
 const RegisterPage = () => {
     document.title = "Инфопанель | Регистрация";
 
-    const {isAuthenticated, isRegister, registerErrors} = useSelector(state => state.auth);
+    const {isRegister, registerErrors} = useSelector(state => state.auth);
+    const {isAuthenticated} = useSelector(state => {
+        const authState = localStorage.getItem('isAuthenticated') !== null;
+        if (authState) {
+            return localStorage.getItem('isAuthenticated');
+        }
+        else {
+            return state.auth
+        }
+    });
     const dispatch = useDispatch();
 
     const [formData, setFormData] = useState({

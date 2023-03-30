@@ -3,19 +3,38 @@ import {API_URL, CONFIG} from "../base";
 import Cookies from "js-cookie";
 import axios from "axios";
 
-CONFIG.headers = {
-    ...CONFIG.headers,
-    'X-CSRFToken': Cookies.get('csrftoken')
-};
-
 const initialState = {
     isAuthenticated: null,
+    asUser: '',
     isLoading: null,
     isRegister: null,
     successMessage: [],
     errorMessage: '',
     registerErrors: [],
     loginErrors: []
+};
+
+//region not used
+// export const getAuthenticatedUserAsync = createAsyncThunk(
+//     'auth/getAuthenticatedUserAsync',
+//     async (arg, thunkAPI) => {
+//         try {
+//             const urlRequest = `${API_URL}/api/users/me`;
+//             const response = await axios.get(urlRequest, CONFIG);
+//
+//             localStorage.setItem('asUser', response.data.username);
+//             return localStorage.getItem('asUser')
+//         } catch (err) {
+//             localStorage.setItem('asUser', err.response.data.error);
+//             return localStorage.getItem('asUser')
+//         }
+//     }
+// );
+//endregion
+
+CONFIG.headers = {
+    ...CONFIG.headers,
+    'X-CSRFToken': Cookies.get('csrftoken')
 };
 
 export const registerAsync = createAsyncThunk(
@@ -28,12 +47,6 @@ export const registerAsync = createAsyncThunk(
         password,
         password2
     }, thunkAPI) => {
-        CONFIG.headers = {
-            ...CONFIG.headers,
-            'X-CSRFToken': Cookies.get('csrftoken')
-        };
-
-
         const body = JSON.stringify({
             username,
             first_name,
@@ -67,20 +80,22 @@ export const logoutAsync = createAsyncThunk(
     }
 );
 
-export const checkAuthenticationAsync = createAsyncThunk(
-    'authSlice/checkAuthenticationAsync',
-    async (arg, thunkAPI) => {
-        try {
-            const urlRequest = `${API_URL}/api/users/authentication`;
-            const response = await axios.get(urlRequest, CONFIG);
-
-            return response.data.isAuthenticated;
-        } catch (err) {
-            // return "something went wrong";
-            console.log(err.response.status);
-        }
-    }
-);
+//region not used
+// export const checkAuthenticationAsync = createAsyncThunk(
+//     'authSlice/checkAuthenticationAsync',
+//     async (arg, thunkAPI) => {
+//         try {
+//             const urlRequest = `${API_URL}/api/users/authentication`;
+//             const response = await axios.get(urlRequest, CONFIG);
+//
+//             localStorage.setItem('isAuthenticated', response.data.isAuthenticated)
+//             return localStorage.getItem('isAuthenticated');
+//         } catch (err) {
+//             return false;
+//         }
+//     }
+// );
+//endregion
 
 export const loginAsync = createAsyncThunk(
     'authSlice/loginAsync',
@@ -103,116 +118,150 @@ export const loginAsync = createAsyncThunk(
 const authSlice = createSlice({
     name: 'auth',
     initialState,
-    reducers: {},
+    reducers: {
+        checkAuthentication(state) {
+            const authState = localStorage.getItem('isAuthenticated') !== null;
+            if(authState) {
+                state.isAuthenticated = localStorage.getItem('isAuthenticated');
+            }
+            else {
+                state.isAuthenticated = false;
+            }
+        },
+        setAsUser(state) {
+            const userState = localStorage.getItem('asUser') !== null;
+            if(userState) {
+                state.asUser = localStorage.getItem('asUser');
+            }
+            else {
+                state.asUser = '';
+            }
+        }
+    },
     extraReducers: (builder) => {
         // login
         builder
-        .addCase(loginAsync.pending, (state) => {
-            state.isLoading = true;
-            state.isAuthenticated = false;
-            state.successMessage = [];
-            state.loginErrors = [];
-            state.errorMessage = ''
-        })
-        .addCase(loginAsync.fulfilled, (state, {payload}) => {
-            if (payload?.non_field_errors) {
-                payload.non_field_errors.forEach(error => {
-                    state.loginErrors.push(error)
-                });
-                state.isAuthenticated = false;
-            }
-            else if (payload.success) {
-                state.isAuthenticated = true;
-                state.successMessage.push(payload.success);
-            }
-
-            state.isLoading = false;
-        })
-        .addCase(loginAsync.rejected, (state, {payload}) => {
-            state.isLoading = false;
-            state.errorMessage = "Что-то тут не так...";
-        })
-        // register
-        .addCase(registerAsync.pending,(state) => {
-            state.isLoading = true;
-            state.registerErrors = [];
-            state.successMessage = [];
-            state.errorMessage = ''
-        })
-        .addCase(registerAsync.fulfilled,  (state, {payload}) => {
-            if (payload?.non_field_errors instanceof Array) {
-                payload.non_field_errors.forEach(error => {
-                    state.registerErrors.push(error);
-                });
-            }
-            else if (payload?.username instanceof Array) {
-                payload.username.forEach(error => {
-                    state.registerErrors.push(error);
-                });
-            }
-            else if (payload?.email instanceof Array) {
-                payload.email.forEach(error => {
-                    state.registerErrors.push(error);
-                });
-            }
-            else if (payload?.first_name instanceof Array) {
-                payload.first_name.forEach(error => {
-                    state.registerErrors.push(error);
-                });
-            }
-            else if (payload?.last_name instanceof Array) {
-                payload.last_name.forEach(error => {
-                    state.registerErrors.push(error);
-                });
-            }
-            else if (payload?.password instanceof Array) {
-                payload.password.forEach(error => {
-                    state.registerErrors.push(error);
-                });
-            }
-            else if (payload.success){
-                state.successMessage.push(payload.success);
-                state.isRegister = true;
-            }
-
-            state.isLoading = false;
-        })
-        .addCase(registerAsync.rejected, (state, {payload}) => {
-            state.isLoading = false;
-            state.isRegister =  false;
-            state.errorMessage = "Что-то тут не так...";
-        })
-        // check auth
-        .addCase(checkAuthenticationAsync.pending, (state) => {
-            state.isLoading = true;
-        })
-        .addCase(checkAuthenticationAsync.fulfilled, (state, {payload}) => {
-            state.isAuthenticated = payload === "success";
-            state.isLoading = false;
-        })
-        .addCase(checkAuthenticationAsync.rejected, (state, {payload}) => {
-            state.isLoading = false;
-        })
-        // logout
-        .addCase(logoutAsync.pending, (state) => {
+            .addCase(loginAsync.pending, (state) => {
                 state.isLoading = true;
+                state.isAuthenticated = false;
                 state.successMessage = [];
-                state.errorMessage = '';
+                state.loginErrors = [];
+                state.errorMessage = ''
             })
-        .addCase(logoutAsync.fulfilled, (state, {payload}) => {
-            if (payload.success) {
-                state.successMessage.push(payload.success);
-            } else {
+            .addCase(loginAsync.fulfilled, (state, {payload}) => {
+                if (payload?.non_field_errors) {
+                    payload.non_field_errors.forEach(error => {
+                        state.loginErrors.push(error)
+                    });
+                    state.isAuthenticated = false;
+                }
+                else if (payload.success) {
+                    localStorage.setItem('isAuthenticated', true)
+                    localStorage.setItem('asUser', payload.success);
+                    state.successMessage.push(payload.success);
+                    state.isAuthenticated = localStorage.getItem('isAuthenticated');
+                    state.asUser = localStorage.getItem('asUser')
+                }
+
+                state.isLoading = false;
+            })
+            .addCase(loginAsync.rejected, (state, {payload}) => {
+                state.isLoading = false;
                 state.errorMessage = "Что-то тут не так...";
-            }
-            state.isAuthenticated = false;
-            state.isLoading = false;
-        })
-        .addCase(logoutAsync.rejected, (state, {payload}) => {
-            state.isLoading = false;
-            state.errorMessage = "Что-то тут не так...";
-        })
+            })
+            // register
+            .addCase(registerAsync.pending,(state) => {
+                state.isLoading = true;
+                state.registerErrors = [];
+                state.successMessage = [];
+                state.errorMessage = ''
+            })
+            .addCase(registerAsync.fulfilled,  (state, {payload}) => {
+                if (payload?.non_field_errors instanceof Array) {
+                    payload.non_field_errors.forEach(error => {
+                        state.registerErrors.push(error);
+                    });
+                }
+                else if (payload?.username instanceof Array) {
+                    payload.username.forEach(error => {
+                        state.registerErrors.push(error);
+                    });
+                }
+                else if (payload?.email instanceof Array) {
+                    payload.email.forEach(error => {
+                        state.registerErrors.push(error);
+                    });
+                }
+                else if (payload?.first_name instanceof Array) {
+                    payload.first_name.forEach(error => {
+                        state.registerErrors.push(error);
+                    });
+                }
+                else if (payload?.last_name instanceof Array) {
+                    payload.last_name.forEach(error => {
+                        state.registerErrors.push(error);
+                    });
+                }
+                else if (payload?.password instanceof Array) {
+                    payload.password.forEach(error => {
+                        state.registerErrors.push(error);
+                    });
+                }
+                else if (payload.success){
+                    state.successMessage.push(payload.success);
+                    state.isRegister = true;
+                }
+
+                state.isLoading = false;
+            })
+            .addCase(registerAsync.rejected, (state, {payload}) => {
+                state.isLoading = false;
+                state.isRegister =  false;
+                state.errorMessage = "Что-то тут не так...";
+            })
+            // check auth
+            // .addCase(checkAuthenticationAsync.pending, (state) => {
+            //     state.isLoading = true;
+            // })
+            // .addCase(checkAuthenticationAsync.fulfilled, (state, {payload}) => {
+            //     state.isAuthenticated = payload === "success";
+            //     state.isLoading = false;
+            // })
+            // .addCase(checkAuthenticationAsync.rejected, (state, {payload}) => {
+            //     state.isLoading = false;
+            // })
+            // logout
+            .addCase(logoutAsync.pending, (state) => {
+                    state.isLoading = true;
+                    state.successMessage = [];
+                    state.errorMessage = '';
+                })
+            .addCase(logoutAsync.fulfilled, (state, {payload}) => {
+                if (payload.success) {
+                    state.successMessage.push(payload.success);
+                    localStorage.removeItem('asUser');
+                    localStorage.removeItem('isAuthenticated');
+                } else {
+                    state.errorMessage = "Что-то тут не так...";
+                }
+                state.isAuthenticated = false;
+                state.isLoading = false;
+            })
+            .addCase(logoutAsync.rejected, (state, {payload}) => {
+                state.isLoading = false;
+                state.errorMessage = "Что-то тут не так...";
+            })
+            // .addCase(getAuthenticatedUserAsync.pending, state => {
+            //     state.asUser = '';
+            // })
+            // .addCase(getAuthenticatedUserAsync.fulfilled, (state, {payload}) => {
+            //     state.asUser = payload;
+            // })
+            // .addCase(getAuthenticatedUserAsync.rejected, state => {
+            //     state.asUser = 'error';
+            // })
     }
 });
 
+export const {checkAuthentication, setAsUser} = authSlice.actions;
 export default authSlice.reducer;

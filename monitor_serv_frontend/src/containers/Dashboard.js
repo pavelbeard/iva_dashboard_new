@@ -2,7 +2,7 @@ import React, {useEffect, useState} from "react";
 import ServerCard from "../components/dashboard/card/ServerCard";
 import CheckSSLCert from "../components/dashboard/iva/CheckSSLCert";
 import {API_URL, getData} from "../base";
-import './Dashboard.css';
+import './Containers.css';
 import {useSelector} from "react-redux";
 
 

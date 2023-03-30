@@ -21,7 +21,7 @@ services:
     build:
       context: monitor_serv_frontend
       dockerfile: iva-dev.monitor_serv_frontend.Dockerfile
-    container_name: test-monitor-server-frontend-v0.2
+    container_name: test-monitor-server-frontend-v0.5
     volumes:
       - static_files.iva-dev:/home/monitor-server-app/web/staticfiles
     ports:

@@ -2,7 +2,7 @@ import React, {useEffect, useState} from "react";
 import {DeviceSsd} from "react-bootstrap-icons";
 import {v4} from "uuid";
 import {Tooltip} from "react-tooltip";
-import * as query from '../../queries';
+import * as query from '../queries';
 import {getData, URL} from "../../../base";
 import './ScrollableTooltip.css';
 import {useSelector} from "react-redux";

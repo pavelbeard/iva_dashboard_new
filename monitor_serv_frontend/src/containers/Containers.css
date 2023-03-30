@@ -1,0 +1,22 @@
+#selectRefreshInterval {
+    max-width: 150px;
+}
+
+.vr {
+
+}
+
+.alert-hidden {
+    -moz-animation: fadeout 4s linear forwards;
+    animation: fadeout 4s linear forwards;
+}
+
+@-moz-keyframes fadeout {
+    0% {opacity: 1;}
+    100% {opacity: 0;}
+}
+
+@keyframes fadeout {
+    0% {opacity: 1;}
+    100% {opacity: 0;}
+}

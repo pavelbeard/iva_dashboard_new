@@ -5,14 +5,8 @@ function Charts() {
     document.title = "Инфопанель | Графики";
 
     const [value, setValue] = useState("system");
-    const [filterValue, setFilterValue] = useState("interval.last.hour")
-    // const [charts, setCharts] = useState({
-    //     system: <SystemCharts filter={filterValue}/>
-    // })
 
     const setChart = event => setValue(event.target.value);
-
-    // const setFilter = event => setFilterValue(event.target.value)
 
     return(
         <>

@@ -11,10 +11,16 @@ const refreshIntervalSlice = createSlice({
         changeRefreshInterval(state, {payload}) {
             localStorage.setItem('refreshInterval', parseInt(payload));
             state.refreshInterval = localStorage.getItem('refreshInterval');
+        },
+        checkRefreshInterval(state) {
+            const refreshIntervalState = localStorage.getItem('refreshInterval') !== null;
+            if (refreshIntervalState) {
+                state.refreshInterval = localStorage.getItem('refreshInterval');
+            }
         }
     }
 });
 
-export const {changeRefreshInterval} = refreshIntervalSlice.actions;
+export const {changeRefreshInterval, checkRefreshInterval} = refreshIntervalSlice.actions;
 export default refreshIntervalSlice.reducer;
 

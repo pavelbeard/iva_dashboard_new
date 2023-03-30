@@ -2,13 +2,13 @@ import React, {useEffect, useState} from "react";
 import {AppIndicator as App } from "react-bootstrap-icons";
 import {Tooltip} from "react-tooltip";
 import {v4} from "uuid";
-import * as query from '../../queries'
+import * as query from '../queries'
 import {getData, sum, URL} from "../../../base";
 import './ScrollableTooltip.css';
 import {useSelector} from "react-redux";
 
 const AppIndicator = ({host}) => {
-    const [appsCount, setAppsCount] = useState("N/A");
+    const [threads, setThreadsCount] = useState("N/A");
     const [appsDataTooltip, setAppsDataTooltip] = useState([]);
     const [color, setColor] = useState("#000000");
     const refreshInterval = useSelector(state => {
@@ -30,21 +30,16 @@ const AppIndicator = ({host}) => {
 
             setAppsDataTooltip(__appsDataTooltip__);
 
-            const __appsCount__ = sum(__appsDataTooltip__.map(i => {
+            const threadsCount = sum(__appsDataTooltip__.map(i => {
                 return parseInt(i.value[1]);
             }));
 
-            if (0 <= __appsCount__ && __appsCount__ < 100)
-                setColor("#16b616");
-            else if (100 <= __appsCount__ && __appsCount__ < 400)
-                setColor("#ff9900");
-            else
-                setColor("#ff0000");
+            setColor("#ff00f2");
 
-            setAppsCount(__appsCount__);
+            setThreadsCount(threadsCount);
         } else {
             setColor("#000000");
-            setAppsCount("ERR");
+            setThreadsCount("ERR");
         }
     }
 
@@ -81,7 +76,7 @@ const AppIndicator = ({host}) => {
         <div className="d-flex flex-row justify-content-start mt-1">
             <App height="24" width="24" color={color} data-ivcs-server-img-attr="apps"/>
             <div className="ps-3 mt-1" data-ivcs-server-attr="apps">
-                <a data-tooltip-id={uuid} onMouseEnter={() => setIsOpen(true)}>{appsCount}</a>
+                <a data-tooltip-id={uuid} onMouseEnter={() => setIsOpen(true)}>{threads}</a>
                 <div onMouseLeave={() => setIsOpen(false)}>
                     <Tooltip id={uuid} place="bottom" isOpen={isOpen}>
                     <table>

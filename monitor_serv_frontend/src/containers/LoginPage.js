@@ -1,10 +1,9 @@
 import React, {useEffect, useState} from "react";
 import CSRFToken from "../components/auth/CSRFToken";
-// import {login} from "../actions/auth"
-// import {connect} from "react-redux";
 import {Navigate} from "react-router-dom";
 import {loginAsync} from "../slices/authSlice";
 import {useDispatch, useSelector} from "react-redux";
+import './Containers.css';
 
 const LoginPage = () => {
     document.title = "Инфопанель | Вход в систему";
@@ -28,8 +27,11 @@ const LoginPage = () => {
     };
 
     const alertBlock = (
-        <div className={`mt-4 alert alert-${successMessage.length !== 0 ? 'success' : 'danger'}`} role="alert">
-            {messages ? messages.map(message => {
+        <div className={
+            `mt-4 alert-hidden
+             alert alert-${successMessage.length !== 0 ? 'success' : 'danger'}`}
+             role="alert">
+            {typeof messages.map === "function" ? messages.map(message => {
                 return(<span key={message}>{message}</span>)
             })
             : ""}
@@ -38,9 +40,9 @@ const LoginPage = () => {
 
     useEffect(() => {
         if (successMessage.length !== 0) {
-            setMessages(successMessage)
+            setMessages(successMessage);
         } else {
-            setMessages(loginErrors)
+            setMessages(loginErrors);
         }
     }, [loginErrors]);
 

@@ -6,7 +6,6 @@ import RegisterPage from "./containers/RegisterPage";
 import LoginPage from "./containers/LoginPage";
 import Dashboard from "./containers/Dashboard";
 import Charts from "./containers/Charts";
-import DjangoAdmin from "./containers/DjangoAdmin";
 import PrivateRoute from "./hocs/PrivateRoute";
 
 import {API_URL} from "./base";
@@ -25,7 +24,7 @@ const App = () => (
                     <Route path="/register" element={<RegisterPage/>}/>
                     <Route path="/login" element={<LoginPage/>}/>
                     <Route path="/dashboard" element={<PrivateRoute component={<Dashboard />} />}/>
-                    {/*<Route path="/charts" element={<PrivateRoute component={<Charts />} />}/>*/}
+                    <Route path="/charts" element={<PrivateRoute component={<Charts />} />}/>
                 </Routes>
             </Layout>
         </Router>
