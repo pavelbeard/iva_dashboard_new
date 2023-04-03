@@ -3,13 +3,15 @@ import ServerCard from "../components/dashboard/card/ServerCard";
 import CheckSSLCert from "../components/dashboard/iva/CheckSSLCert";
 import {API_URL, getData} from "../base";
 import './Containers.css';
-import {useSelector} from "react-redux";
+import {useDispatch, useSelector} from "react-redux";
+import {getServers} from "../slices/serverSlice";
 
 
 const Dashboard = () => {
     document.title = "Инфопанель | Главная";
 
     const [data, setData] = useState([]);
+    const dispatch = useDispatch();
     const refreshInterval = useSelector(state => {
         const interval = localStorage.getItem('refreshInterval')
         if (interval !== null)
@@ -17,6 +19,7 @@ const Dashboard = () => {
         else
             return state.refresh.refreshInterval;
     });
+    const servers = useSelector(state => state.serverManager.servers);
 
     const getTargets = async () => {
         try {
@@ -34,13 +37,15 @@ const Dashboard = () => {
     };
 
     const getTargetsImmediately = () => {
-        console.log(refreshInterval)
-        setTimeout(getTargets, 0);
+        // console.log(refreshInterval)
+        // setTimeout(getTargets, 0);
+        dispatch();
+        setData(servers);
     }
 
     useEffect(() => {
-        getTargetsImmediately();
-        const interval1 = setInterval(getTargetsImmediately, refreshInterval);
+        dispatch(getServers())
+        const interval1 = setInterval(dispatch, refreshInterval, getServers());
         return () => clearInterval(interval1);
 
     }, [refreshInterval]);
@@ -51,7 +56,7 @@ const Dashboard = () => {
                 <div className="ps-2 pe-2">
                     <h4 className="text-center pt-2 pb-2">Мониторинг серверов</h4>
                     <div className="col-md-6 w-100 cards">
-                        {data.map(target => {
+                        {servers.map(target => {
                             const card = <ServerCard
                                 key={target.address + ":" + target.port}
                                 id={target.id}

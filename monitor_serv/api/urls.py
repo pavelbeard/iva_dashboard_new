@@ -11,5 +11,8 @@ urlpatterns = (
     path('prom_targets', views.PromTargetView.as_view()),
     path('prom_data', views.PromQlView.as_view()),
     path('csrf_cookie', views.GetCSRF.as_view()),
+    path('app_version', views.get_backend_version),
+
+    path('services_status/<int:server_id>', views.ServicesStatus.as_view()),
 )
 

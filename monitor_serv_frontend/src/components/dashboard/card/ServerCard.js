@@ -29,7 +29,7 @@ const ServerCard = ({id, address, port}) => {
         if (data) {
             setTargetHealth(data.status === 'success');
         }
-    }
+    };
 
     const checkTargetImmediately = () => {
         setTimeout(getTargetHealth,  0);

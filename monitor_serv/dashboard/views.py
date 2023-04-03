@@ -7,7 +7,7 @@ from .serializers import TargetSerializer, BackendSettingsSerializer
 # Create your views here.
 
 class TargetAPIView(ListAPIView):
-    queryset = Target.objects.all()
+    queryset = Target.objects.filter(is_being_scan=True)
     serializer_class = TargetSerializer
 
 

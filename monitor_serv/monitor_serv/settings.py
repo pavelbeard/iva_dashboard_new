@@ -90,7 +90,8 @@ WSGI_APPLICATION = 'monitor_serv.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/4.1/ref/settings/#databases
 
-DEFAULT_IVCS_SCHEMAS = "search_path=auth,billing,instantmessaging,smpp,statistic,storage,updates,videoconference"
+DEFAULT_IVCS_SCHEMAS = "search_path=auth,billing,instantmessaging,smpp,statistic," \
+                       "storage,updates,videoconference"
 
 DATABASE_ROUTERS = (
     # 'common.dbrouters.IvaDashboardRouter',
@@ -100,9 +101,9 @@ DATABASE_ROUTERS = (
 DATABASES = {
     'default': {
         'ENGINE': os.getenv("ENGINE", "django.db.backends.postgresql_psycopg2"),
-        'NAME': os.getenv('POSTGRES_DB_NAME', "admin_test"),
-        'USER': os.getenv('POSTGRES_DB_USER', "admin_test"),
-        'PASSWORD': os.getenv('POSTGRES_DB_PASSWORD', "iva_dashboard_test"),
+        'NAME': os.getenv('POSTGRES_DB_NAME', "test_db"),
+        'USER': os.getenv('POSTGRES_DB_USER', "test_db"),
+        'PASSWORD': os.getenv('POSTGRES_DB_PASSWORD', "test_db"),
         'HOST': os.getenv('POSTGRES_DB_HOST', "localhost"),
         'PORT': os.getenv('POSTGRES_DB_PORT', "8002"),
     },
@@ -209,8 +210,7 @@ if not DEBUG:
     CORS_ALLOWED_ORIGIN_REGEXES = (
         "http:\/\/(localhost|(1|2|10|127).0.(0|96).(1|11|49|50)):(80|[38]00[0-9])",
     )
-
-if DEBUG:
+else:
     CORS_ALLOW_ALL_ORIGINS = True
 
 CORS_ALLOW_METHODS = (
@@ -241,5 +241,3 @@ CORS_ALLOW_CREDENTIALS = True
 #     'ROTATE_REFRESH_TOKENS': True,
 #     'BLACKLIST_AFTER_ROTATION': True,
 # }
-
-APP_VERSION = "v0.8.64"

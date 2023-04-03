@@ -1,12 +1,22 @@
+import json
+
 import requests
+from django.conf import settings
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import ensure_csrf_cookie
 from rest_framework import status
-from rest_framework.permissions import IsAuthenticated, AllowAny
+from rest_framework.decorators import api_view
+from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from api.logic import get_ssl_cert
+from common.pass_handler import decrypt_pass
+
+from common.ssh import ssh_scraper
+from common.parsers import service_status_all_parser
+
+from dashboard.models import Target, BackendVersion
 
 
 # Create your views here.
@@ -102,3 +112,38 @@ class GetCSRF(APIView):
 
     def get(self, request):
         return Response({"status": "success csrf set"}, status=status.HTTP_200_OK)
+
+
+class ServicesStatus(APIView):
+    def get(self, request, server_id):
+        try:
+            target = Target.objects.get(id=server_id)
+            username = target.username
+            password = decrypt_pass(settings.ENCRYPTION_KEY, target.password)
+            host = target.address
+            port = target.port_ssh
+
+            raw_data = ssh_scraper("/usr/sbin/service --status-all",
+                                   username=username, password=password,
+                                   host=host, port=port)
+            if not raw_data:
+                return Response({"error": "no data"}, status.HTTP_400_BAD_REQUEST)
+
+            result = service_status_all_parser(data=raw_data, instance=f"{host}:{port}")
+
+            data = {"resultType": "vector"}
+            data.update(result)
+
+            return Response({"status": "success", "data": data}, status.HTTP_200_OK)
+        except Target.DoesNotExist:
+            return Response({"error": "target not found"}, status.HTTP_400_BAD_REQUEST)
+
+
+@api_view(['GET'])
+def get_backend_version(request):
+    try:
+        version = BackendVersion.objects.get(id=1)
+        return Response({"success": version.version})
+    except BackendVersion.DoesNotExist:
+        return Response({"error": "version not exists"})
+

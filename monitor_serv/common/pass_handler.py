@@ -14,7 +14,7 @@ def encrypt_pass(encryption_key: str | bytes, password: str) -> str | None:
         complete_encrypt_pass = base64.urlsafe_b64encode(encrypted_pass).decode('ascii')
 
         return complete_encrypt_pass
-    except (TypeError, ValueError) as te:
+    except (TypeError, ValueError, Exception) as te:
         logger.error(te.__class__.__name__, exc_info=True)
         return None
 
@@ -26,6 +26,6 @@ def decrypt_pass(encryption_key: str | bytes, password: str) -> str | None:
         decode_pass = cipher_pass.decrypt(__pass).decode('ascii')
 
         return decode_pass
-    except (TypeError, ValueError) as te:
+    except (TypeError, ValueError, Exception) as te:
         logger.error(te.__class__.__name__, exc_info=True)
         return None
