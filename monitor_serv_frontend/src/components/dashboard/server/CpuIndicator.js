@@ -1,12 +1,10 @@
 import React, {useEffect, useState} from "react";
 import {Cpu} from "react-bootstrap-icons";
 import axios from "axios";
-import {v4} from "uuid";
-import {Tooltip} from "react-tooltip";
 import * as query from '../queries'
-import {getData, URL} from "../../../base";
-import './ScrollableTooltip.css';
+import {URL} from "../../../base";
 import {useSelector} from "react-redux";
+import OverlayTrigger from "react-bootstrap/OverlayTrigger";
 
 const CpuIndicator = ({host}) => {
     const [cpuLoad, setCpuLoad] = useState("N/A");
@@ -14,58 +12,56 @@ const CpuIndicator = ({host}) => {
     const [cpuCoresCount, setCpuCoresCount] = useState(0);
     const [cpuCoresLabel, setCpuCoresLabel] = useState([]);
     const [color, setColor] = useState("#000000");
-    const refreshInterval = useSelector(state => {
-        const interval = localStorage.getItem('refreshInterval')
-        if (interval !== null)
-            return interval;
-        else
-            return state.refresh.refreshInterval;
-    });
+    const refreshInterval = useSelector(state => state.refresh.refreshInterval);
 
     const setCpuData = async () => {
-        const urlRequest = URL + `?query=${encodeURI(query.system.cpuData)}`
-            + `&host=${host}`
-            + `&query_range=false`;
-        const data = await getData(urlRequest);
+        try {
+            const urlRequest = URL + `?query=${encodeURI(query.system.cpuData)}`
+                + `&host=${host}`
+                + `&query_range=false`;
+            const response = (await axios.get(urlRequest)).data;
 
-        if (data) {
-            const __cpuDataTooltip__ = data.data.result;
-            const idle = parseFloat(__cpuDataTooltip__[0]?.value[1]);
-            let __cpuLoad__ = (100 - idle).toFixed(2);
+            if (response.data) {
+                const __cpuDataTooltip__ = response.data.result;
+                const idle = parseFloat(__cpuDataTooltip__[0]?.value[1]);
+                let __cpuLoad__ = (100 - idle).toFixed(2);
 
-            if (0 <= __cpuLoad__ && __cpuLoad__ < 50.0)
-                setColor("#16b616")
-            else if (50.0 <= __cpuLoad__ && __cpuLoad__ < 75.0)
-                setColor("#ff9900")
-            else if (75.0 <= __cpuLoad__ && __cpuLoad__ <= 100.0)
-                setColor("#ff0000")
-            else
-                __cpuLoad__ = 0;
+                if (0 <= __cpuLoad__ && __cpuLoad__ < 50.0)
+                    setColor("#16b616")
+                else if (50.0 <= __cpuLoad__ && __cpuLoad__ < 75.0)
+                    setColor("#ff9900")
+                else if (75.0 <= __cpuLoad__ && __cpuLoad__ <= 100.0)
+                    setColor("#ff0000")
+                else
+                    __cpuLoad__ = 0;
 
-            setColor("#16b616");
-            setCpuDataTooltip(__cpuDataTooltip__);
-            setCpuLoad(__cpuLoad__ + "%");
-        }
-        else {
+                setColor("#16b616");
+                setCpuDataTooltip(__cpuDataTooltip__);
+                setCpuLoad(__cpuLoad__ + "%");
+            }
+        } catch (err) {
             setCpuLoad("ERR");
             setColor("#000000");
             setCpuDataTooltip([]);
+            console.log(`${setCpuData.name} что-то тут не так...`)
         }
     };
 
     const setCpuCores = async () => {
-        const urlRequest = URL + `?query=${encodeURI(query.system.cpuCores)}`
-            + `&host=${host}`
-            + `&query_range=false`;
-        const data = await getData(urlRequest);
+        try {
+            const urlRequest = URL + `?query=${encodeURI(query.system.cpuCores)}`
+                + `&host=${host}`
+                + `&query_range=false`;
+            const response = (await axios.get(urlRequest)).data;
 
-        if (data) {
-            const __cpuCoresData__ = data.data.result;
-            setCpuCoresCount(__cpuCoresData__[0]?.value[1]);
-            setCpuCoresLabel(__cpuCoresData__[0]?.metric.__name__);
-        }
-        else {
+            if (response.data) {
+                const __cpuCoresData__ = response.data.result;
+                setCpuCoresCount(__cpuCoresData__[0]?.value[1]);
+                setCpuCoresLabel(__cpuCoresData__[0]?.metric.__name__);
+            }
+        } catch (err) {
             setCpuCoresCount("ERR");
+            console.log(`${setCpuCores.name} что-то тут не так...`)
         }
     };
 
@@ -83,47 +79,57 @@ const CpuIndicator = ({host}) => {
 
     const [isOpen, setIsOpen] = useState(false);
 
-    const uuid = v4()
+    const popover = (
+        <div className="bg-dark text-white rounded p-2 tooltip">
+            <table className="tooltip-text">
+                <thead>
+                    <tr>
+                        <th>{cpuCoresLabel}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>{cpuCoresCount}</td>
+                    </tr>
+                </tbody>
+            </table>
+            <table className="tooltip-text">
+                <thead>
+                    <tr>
+                        <th>mode</th>
+                        <th>| value</th>
+                    </tr>
+                </thead>
+                <tbody>
+                {typeof cpuDataTooltip.map === "function"
+                    ? cpuDataTooltip.map(i => {
+                    return (
+                        <tr key={i.metric.mode}>
+                            <td>{i.metric.mode}</td>
+                            <td>| {parseFloat(i.value[1]).toFixed(2)}</td>
+                        </tr>
+                    )
+                }) : ""}
+                </tbody>
+            </table>
+        </div>
+    );
 
     return(
-        <div className="d-flex flex-row justify-content-start mt-3">
+        <div className="d-flex flex-row justify-content-start mt-1"
+             onMouseLeave={() => setIsOpen(false)}>
             <Cpu height="24" width="24" color={color} data-ivcs-server-img-attr="cpu"/>
-            <div className="ps-3 mt-1" data-ivcs-server-attr="cpu">
-                <a data-tooltip-id={uuid} onMouseEnter={() => setIsOpen(true)}>{cpuLoad}</a>
-                <div onMouseLeave={() => setIsOpen(false)}>
-                    <Tooltip id={uuid} place="bottom" key={20}  isOpen={isOpen}>
-                        <table>
-                            <thead>
-                                <tr>
-                                    <th>{cpuCoresLabel}</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr>
-                                    <td>{cpuCoresCount}</td>
-                                </tr>
-                            </tbody>
-                        </table>
-                        <table>
-                            <thead>
-                                <tr>
-                                    <th>mode</th>
-                                    <th>value</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                            {cpuDataTooltip.map(i => {
-                                return (
-                                    <tr key={i.metric.mode}>
-                                        <td>{i.metric.mode}</td>
-                                        <td>{parseFloat(i.value[1]).toFixed(2)}</td>
-                                    </tr>
-                                )
-                            })}
-                            </tbody>
-                        </table>
-                    </Tooltip>
-                </div>
+            <div className="ps-2 mt-1" data-ivcs-server-attr="cpu"
+            onMouseLeave={() => setIsOpen(false)}>
+                <OverlayTrigger
+                    onToggle={() => setIsOpen(true)}
+                    show={isOpen}
+                    placement="bottom"
+                    overlay={popover}>
+                    <div className={`${isOpen ? 'indicator' : 'text-decoration-none text-dark'}`}>
+                        {cpuLoad}
+                    </div>
+                </OverlayTrigger>
             </div>
         </div>
     );

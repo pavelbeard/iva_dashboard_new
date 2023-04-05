@@ -239,8 +239,7 @@ const authSlice = createSlice({
             .addCase(logoutAsync.fulfilled, (state, {payload}) => {
                 if (payload.success) {
                     state.successMessage.push(payload.success);
-                    localStorage.removeItem('asUser');
-                    localStorage.removeItem('isAuthenticated');
+                    localStorage.clear();
                 } else {
                     state.errorMessage = "Что-то тут не так...";
                 }

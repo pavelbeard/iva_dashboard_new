@@ -1,11 +1,13 @@
 import React, {useEffect, useState} from 'react'
 import '../card/Card.css';
 import {ShieldCheck, ShieldExclamation, ShieldX} from "react-bootstrap-icons";
-import {v4} from "uuid";
-import {Tooltip} from "react-tooltip";
-import {API_URL, getData} from '../../../base'
+import {API_URL} from '../../../base'
+import {useSelector} from "react-redux";
+import OverlayTrigger from "react-bootstrap/OverlayTrigger";
+import axios from "axios";
 
-const CheckSSLCert = ({refreshInterval}) => {
+const CheckSSLCert = () => {
+    const refreshInterval = useSelector(state => state.refresh.refreshInterval);
     const [sslCertStatus, setSslCertStatus] = useState();
     const [sslCertRemainingDays, setSslCertRemainingDays] = useState();
     const [sslIssuer, setSslIssuer] = useState();
@@ -15,35 +17,39 @@ const CheckSSLCert = ({refreshInterval}) => {
     const [color, setColor] = useState("#000000")
 
     const setSslData = async () => {
-        const data = await getData(`${API_URL}/api/v1/sslcert`);
+        try {
+            const urlRequest = `${API_URL}/api/v1/sslcert`;
+            const response = (await axios.get(urlRequest)).data;
 
-        if (data) {
-            const oneDay = 1000 * Math.pow(60, 2) * 24;
-            const validFrom = data.validFrom !== "" ? new Date(data.validFrom) : "";
-            const validTo = data.validTo !== "" ? new Date(data.validTo) : "";
+            if (response) {
+                const oneDay = 1000 * Math.pow(60, 2) * 24;
+                const validFrom = response.validFrom !== "" ? new Date(response.validFrom) : "";
+                const validTo = response.validTo !== "" ? new Date(response.validTo) : "";
 
-            setErrors(data.errors === undefined ? "" : data.errors);
+                setErrors(response.errors === undefined ? "" : response.errors);
 
-            const sslIssuer = data.issuer.organizationName;
-            const remainingDays = Math.round((validTo-validFrom)/oneDay);
+                const sslIssuer = response.issuer.organizationName;
+                const remainingDays = Math.round((validTo - validFrom) / oneDay);
 
-            if (remainingDays > 90) {
-                setSslCertStatus("OK");
-                setColor("#16b616");
+                if (remainingDays > 90) {
+                    setSslCertStatus("OK");
+                    setColor("#16b616");
+                } else if (21 <= remainingDays && remainingDays < 90) {
+                    setSslCertStatus("WARN");
+                    setColor("#ff9900");
+                } else {
+                    setSslCertStatus("DANGER");
+                    setColor("#ff0000");
+                }
+
+                setSslCertValidFrom(validFrom !== "" ? validFrom.toDateString() : "N/A");
+                setSslCertValidTo(validTo !== "" ? validTo.toDateString() : "N/A");
+                setSslIssuer(sslIssuer)
+
+                setSslCertRemainingDays(remainingDays);
             }
-            else if (21 <= remainingDays && remainingDays < 90 ) {
-                setSslCertStatus("WARN");
-                setColor("#ff9900");
-            } else {
-                setSslCertStatus("DANGER");
-                setColor("#ff0000");
-            }
-
-            setSslCertValidFrom(validFrom  !== "" ? validFrom.toDateString() : "N/A");
-            setSslCertValidTo(validTo !== "" ? validTo.toDateString() : "N/A");
-            setSslIssuer(sslIssuer)
-
-            setSslCertRemainingDays(remainingDays);
+        } catch (err) {
+            console.log(`${setSslData.name}: что-то тут не так...`);
         }
     };
 
@@ -71,7 +77,11 @@ const CheckSSLCert = ({refreshInterval}) => {
         return () => clearInterval(interval)
     }, []);
 
-    const uuid = v4();
+    const popover = (
+        <div className="bg-dark text-white rounded p-2 tooltip">
+            <div className="tooltip-text">Осталось дней: {sslCertRemainingDays || 0}</div>
+        </div>
+    );
 
     const getShield = () => {
         let shield;
@@ -92,12 +102,11 @@ const CheckSSLCert = ({refreshInterval}) => {
                     {sslCertStatus === undefined ? <ShieldX height={32} width={32} color={color}/>: getShield()}
                 </div>
                 <div className="text-center mt-2">
-                    <a data-tooltip-id={uuid}>{sslCertStatus || "N/A"}</a>
-                    <Tooltip id={uuid} place="bottom">
-                        <div>
-                            <div>Осталось дней: {sslCertRemainingDays || 0}</div>
-                        </div>
-                    </Tooltip>
+                    <OverlayTrigger
+                        placement="bottom"
+                        overlay={popover}>
+                        <div>{sslCertStatus || "N/A"}</div>
+                    </OverlayTrigger>
                 </div>
                 <div className="text-center mt-2">Мониторинг</div>
                 <div className="text-center">сертификата</div>

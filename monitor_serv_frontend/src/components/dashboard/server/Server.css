@@ -2,3 +2,52 @@ div[data-ivcs-server-attr="targetInfo"] > a:hover {
     transition: .3s;
     color: white;
 }
+
+div[data-ivcs-server-attr="importantApps"] {
+    display: grid;
+    justify-content: center;
+    grid-template-columns:  30px 30px 30px;
+    grid-template-rows:  20px 20px;
+}
+
+.spin {
+    color: #16b616;
+    -webkit-animation: spin 400ms linear infinite;
+    -moz-animation: spin 400ms linear infinite;
+    animation: spin 400ms linear infinite;
+}
+
+@-webkit-keyframes spin {
+    100% {-webkit-transform: rotate(360deg)}
+}
+
+@-moz-keyframes spin {
+    100% {-moz-transform: rotate(360deg)}
+}
+
+@keyframes spin {
+    100% {transform: rotate(360deg)}
+}
+
+.indicator {
+    color: white;
+    text-decoration: none;
+}
+
+.tooltip {
+    max-height: 200px;
+    overflow-y: auto;
+}
+
+.tooltip-text {
+    font-size: 9px;
+}
+
+.apps-state-field {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 80px;
+    width: 80px;
+    font-size: 8px;
+}

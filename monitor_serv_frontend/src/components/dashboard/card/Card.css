@@ -36,8 +36,8 @@
 
 .dashboard-card, .dashboard-card-no-data {
     height: 200px;
-    background: #e0e0e0;
-    border-radius: 8px;
+    background: #bebdbd;
+    border-radius: 6px;
 }
 
 /*SERVER*/

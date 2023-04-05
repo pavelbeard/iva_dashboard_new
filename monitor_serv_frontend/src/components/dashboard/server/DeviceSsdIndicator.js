@@ -1,11 +1,10 @@
 import React, {useEffect, useState} from "react";
 import {DeviceSsd} from "react-bootstrap-icons";
-import {v4} from "uuid";
-import {Tooltip} from "react-tooltip";
 import * as query from '../queries';
 import {getData, URL} from "../../../base";
-import './ScrollableTooltip.css';
 import {useSelector} from "react-redux";
+import OverlayTrigger from "react-bootstrap/OverlayTrigger";
+import axios from "axios";
 
 const DeviceSsdIndicator = ({host}) => {
     const [deviceSsdUsedSpace, setDeviceSsdUsedSpace] = useState("N/A");
@@ -24,46 +23,51 @@ const DeviceSsdIndicator = ({host}) => {
 
 
     const setDeviceSsdData = async () => {
-        const urlRequest = URL + `?query=${encodeURI(query.disk.rootSpace)}`
-            + `&host=${host}`
-            + `&query_range=false`;
-        const data = await getData(urlRequest);
+        try {
+            const urlRequest = URL + `?query=${encodeURI(query.disk.rootSpace)}`
+                + `&host=${host}`
+                + `&query_range=false`;
+            const response = (await axios.get(urlRequest)).data;
 
-        if (data) {
-            const __deviceSsdTooltip__ = data.data.result;
+            if (response.data) {
+                const __deviceSsdTooltip__ = response.data.result;
 
-            setDeviceSsdTooltip(__deviceSsdTooltip__)
+                setDeviceSsdTooltip(__deviceSsdTooltip__)
 
-            const totalSpace = parseFloat(__deviceSsdTooltip__[2]?.value[1]);
-            const freeSpace = parseFloat(__deviceSsdTooltip__[0]?.value[1]);
-            const ssdUsedSpacePrc = (1 - (freeSpace / totalSpace)) * 100;
+                const totalSpace = parseFloat(__deviceSsdTooltip__[2]?.value[1]);
+                const freeSpace = parseFloat(__deviceSsdTooltip__[0]?.value[1]);
+                const ssdUsedSpacePrc = (1 - (freeSpace / totalSpace)) * 100;
 
-            if (0 <= ssdUsedSpacePrc && ssdUsedSpacePrc < 50.0)
-                setColor("#16b616")
-            else if (50.0 <= ssdUsedSpacePrc && ssdUsedSpacePrc < 75.0)
-                setColor("#ff9900")
-            else
-                setColor("#ff0000")
+                if (0 <= ssdUsedSpacePrc && ssdUsedSpacePrc < 50.0)
+                    setColor("#16b616")
+                else if (50.0 <= ssdUsedSpacePrc && ssdUsedSpacePrc < 75.0)
+                    setColor("#ff9900")
+                else
+                    setColor("#ff0000")
 
-            setDeviceSsdUsedSpace(ssdUsedSpacePrc.toFixed(2) + "%");
-        } else {
+                setDeviceSsdUsedSpace(ssdUsedSpacePrc.toFixed(2) + "%");
+            }
+        } catch(err) {
             setColor("#000000");
             setDeviceSsdUsedSpace("ERR");
+            console.log(`${this.name}: что-то тут не так...`);
         }
     };
 
     const setDeviceSsdIOCallback = async () => {
-        const urlRequest = URL + `?query=${encodeURI(query.disk.io)}`
-            + `&host=${host}`
-            + `&query_range=false`;
-        const data = await getData(urlRequest);
+        try {
+            const urlRequest = URL + `?query=${encodeURI(query.disk.io)}`
+                + `&host=${host}`
+                + `&query_range=false`;
+            const response = (await axios.get(urlRequest)).data;
 
-        if (data) {
-            const deviceSsdIo = data.data.result;
-            setDeviceSsdIO(deviceSsdIo);
-        }
-        else {
+            if (response.data) {
+                const deviceSsdIo = response.data.result;
+                setDeviceSsdIO(deviceSsdIo);
+            }
+        } catch (err) {
             setDeviceSsdIO([]);
+            console.log(`${this.name}: что-то тут не так...`);
         }
     };
 
@@ -80,59 +84,69 @@ const DeviceSsdIndicator = ({host}) => {
 
     const [isOpen, setIsOpen] = useState(false);
 
-    const uuid = v4();
+    const popover = (
+        <div className="bg-dark text-white rounded p-2 tooltip">
+            <div className="tooltip-text">IO Operations</div>
+            <table className="tooltip-text">
+                <thead>
+                    <tr>
+                        <th>Metric</th>
+                        <th>| Device</th>
+                        <th>| Value</th>
+                    </tr>
+                </thead>
+                <tbody>
+                {deviceSsdIO.map(i => {
+                    return (
+                        <tr key={i.metric.__name__ + "|" + i.metric.device}>
+                            <td>{i.metric.__name__}</td>
+                            <td>| {i.metric.device}</td>
+                            <td>| {parseFloat(i.value[1]).toFixed(2)}MB/s</td>
+                        </tr>
+                    )
+                })}
+                </tbody>
+            </table>
+            <div className="mt-2 tooltip-text">Space stats</div>
+            <table className="tooltip-text">
+                <thead>
+                    <tr>
+                        <th>Metric</th>
+                        <th>| Device</th>
+                        <th>| Value</th>
+                    </tr>
+                </thead>
+                <tbody>
+                {typeof deviceSsdTooltip.map === "function"
+                    ? deviceSsdTooltip.map(i => {
+                    return (
+                        <tr key={i.metric.__name__}>
+                            <td>{i.metric.__name__}</td>
+                            <td>| {i.metric.device}</td>
+                            <td>| {parseFloat(i.value[1]).toFixed()}GB</td>
+                        </tr>
+                    )
+                }) : ""}
+                </tbody>
+            </table>
+        </div>
+    );
 
     return(
         <div className="d-flex flex-row justify-content-start mt-1">
             <DeviceSsd height="24" width="24" color={color} data-ivcs-server-img-attr="filespace"/>
-            <div className="ps-3 mt-1" data-ivcs-server-attr="filespace">
-                <a data-tooltip-id={uuid} onMouseEnter={() => setIsOpen(true)}>{deviceSsdUsedSpace}</a>
-                <div onMouseLeave={() => setIsOpen(false)}>
-                    <Tooltip id={uuid} place="bottom" key={40} isOpen={isOpen}>
-                    <div>IO Operations</div>
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Metric</th>
-                                <th>Device</th>
-                                <th>Value</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                        {deviceSsdIO.map(i => {
-                            return (
-                                <tr key={i.metric.__name__ + "|" + i.metric.device}>
-                                    <td>{i.metric.__name__}</td>
-                                    <td>{i.metric.device}</td>
-                                    <td>{parseFloat(i.value[1]).toFixed(2)}MB/s</td>
-                                </tr>
-                            )
-                        })}
-                        </tbody>
-                    </table>
-                    <div className="mt-2">Space stats</div>
-                        <table>
-                            <thead>
-                                <tr>
-                                    <th>Metric</th>
-                                    <th>Device</th>
-                                    <th>Value</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                            {deviceSsdTooltip.map(i => {
-                                return (
-                                    <tr key={i.metric.__name__}>
-                                        <td>{i.metric.__name__}</td>
-                                        <td>{i.metric.device}</td>
-                                        <td>{parseFloat(i.value[1]).toFixed()}GB</td>
-                                    </tr>
-                                )
-                            })}
-                            </tbody>
-                        </table>
-                    </Tooltip>
-                </div>
+            <div className="ps-2 mt-1" data-ivcs-server-attr="filespace"
+                 onMouseLeave={() => setIsOpen(false)}>
+                <OverlayTrigger
+                    onToggle={() => setIsOpen(true)}
+                    show={isOpen}
+                    placement="bottom"
+                    overlay={popover}>
+                    <div onMouseEnter={() => setIsOpen(true)}
+                       className={`${isOpen ? 'indicator' : 'text-decoration-none text-dark'}`}>
+                        {deviceSsdUsedSpace}
+                    </div>
+                </OverlayTrigger>
             </div>
         </div>
     );

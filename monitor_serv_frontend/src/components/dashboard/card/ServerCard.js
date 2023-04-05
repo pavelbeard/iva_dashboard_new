@@ -4,30 +4,32 @@ import ServerIndicator from '../server/ServerIndicator';
 import CpuIndicator from "../server/CpuIndicator";
 import MemoryIndicator from "../server/MemoryIndicator";
 import DeviceSsdIndicator from "../server/DeviceSsdIndicator";
-import AppIndicator from "../server/AppIndicator";
+import ThreadAppIndicator from "../server/ThreadAppIndicator";
 import NetworkIndicator from "../server/NetworkIndicator";
+import ConferenceIndicator from "../server/ConferenceIndicator";
 import {ServerDown} from "../server/ServerDown";
-import {getData, API_URL} from "../../../base";
+import {API_URL} from "../../../base";
 import {useSelector} from "react-redux";
+import AppIndicator from "../server/AppIndicator";
+import axios from "axios";
 
-const ServerCard = ({id, address, port}) => {
+const ServerCard = ({id, address, port, role}) => {
+    const refreshInterval = useSelector(state => state.refresh.refreshInterval);
     const [targetHealth, setTargetHealth] = useState(false);
-    const refreshInterval = useSelector(state => {
-        const interval = localStorage.getItem('refreshInterval')
-        if (interval !== null)
-            return interval;
-        else
-            return state.refresh.refreshInterval;
-    });
     const host = `${address}:${port}`;
 
     const getTargetHealth = async () => {
-        const urlRequest = `${API_URL}/api/v1/target_test`
-            + `?host=${host}`;
-        const data = await getData(urlRequest);
+        try {
+            const urlRequest = `${API_URL}/api/v1/target_test`
+                + `?host=${host}`;
+            const response = (await axios.get(urlRequest)).data;
 
-        if (data) {
-            setTargetHealth(data.status === 'success');
+            if (response.status) {
+                setTargetHealth(response.status === 'success');
+            }
+        } catch (err) {
+            setTargetHealth(false);
+            console.log(`${getTargetHealth.name}: что-то тут не так...`);
         }
     };
 
@@ -48,13 +50,15 @@ const ServerCard = ({id, address, port}) => {
     else
         return (
             <div className="dashboard-card" id={id}>
-                <ServerIndicator key={12} host={host} />
-                <div className="server">
+                <ServerIndicator id={id} key={12} host={host} role={role} />
+                <div className="server bg-success ps-1 rounded-end bg-opacity-25">
                     <CpuIndicator key={13} host={host} />
                     <MemoryIndicator key={14} host={host} />
                     <DeviceSsdIndicator key={15} host={host} />
-                    <AppIndicator key={16} host={host} />
+                    <ThreadAppIndicator key={16} host={host} />
+                    <AppIndicator id={id} key={19} host={host} />
                     <NetworkIndicator key={17} host={host} />
+                    <ConferenceIndicator key={18} host={host} />
                 </div>
             </div>
         );

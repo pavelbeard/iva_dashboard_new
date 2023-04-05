@@ -56,38 +56,6 @@ const REFRESH_INTERVALS = [
 
 ]
 
-export function getResponse(url) {
-    return axios.get(url).then(
-        async response => {
-            if (response.status > 400) {
-                throw new Error("Backend responds with error!")
-            }
-            return await response;
-        });
-}
-
-export function getData(url) {
-    return axios.get(url)
-        .then(async response => {
-            if (response.status > 400) {
-                throw new Error("Backend responds with error!");
-            }
-            return await response.data;
-        })
-        .catch(err => console.log(err));
-}
-
-export function postData(url, body) {
-    return axios.post(url, body)
-        .then(async response => {
-            if (response.status > 400) {
-                throw new Error("Backend responds with error!");
-            }
-            return await response.data;
-        })
-        .catch(async err => console.log(err));
-}
-
 export function fadeOut() {
     return {
         opacity: "0",

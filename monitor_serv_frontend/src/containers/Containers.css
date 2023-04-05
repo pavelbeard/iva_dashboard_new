@@ -7,8 +7,14 @@
 }
 
 .alert-hidden {
+    -webkit-animation: fadeout 4s linear forwards;
     -moz-animation: fadeout 4s linear forwards;
     animation: fadeout 4s linear forwards;
+}
+
+@-webkit-keyframes fadeout {
+    0% {opacity: 1;}
+    100% {opacity: 0;}
 }
 
 @-moz-keyframes fadeout {
