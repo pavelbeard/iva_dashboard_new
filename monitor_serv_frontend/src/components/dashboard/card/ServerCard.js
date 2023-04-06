@@ -13,7 +13,7 @@ import {useSelector} from "react-redux";
 import AppIndicator from "../server/AppIndicator";
 import axios from "axios";
 
-const ServerCard = ({id, address, port, role}) => {
+const ServerCard = ({id, address, port}) => {
     const refreshInterval = useSelector(state => state.refresh.refreshInterval);
     const [targetHealth, setTargetHealth] = useState(false);
     const host = `${address}:${port}`;
@@ -50,7 +50,7 @@ const ServerCard = ({id, address, port, role}) => {
     else
         return (
             <div className="dashboard-card" id={id}>
-                <ServerIndicator id={id} key={12} host={host} role={role} />
+                <ServerIndicator id={id} key={12} host={host}/>
                 <div className="server bg-success ps-1 rounded-end bg-opacity-25">
                     <CpuIndicator key={13} host={host} />
                     <MemoryIndicator key={14} host={host} />

@@ -14,5 +14,6 @@ urlpatterns = (
     path('app_version', views.get_backend_version),
 
     path('services_status/<int:server_id>', views.ServicesStatus.as_view()),
+    path('ping', views.ping),
 )
 

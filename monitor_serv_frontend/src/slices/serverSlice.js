@@ -4,37 +4,32 @@ import axios from "axios";
 
 const initialState = {
     isLoading: null,
-    servers: []
+    apiStatus: '',
+    ivcsApiStatus: ''
 };
 
-export const getServers = createAsyncThunk(
-    'servers/getServers',
-    async (arg, thunkAPI) => {
+export const pingApi = createAsyncThunk(
+    'servers/pingApi',
+    async () => {
         try {
-            const getTargetsRequest = `${API_URL}/api/targets/all`;
+            const getTargetsRequest = `${API_URL}/api/v1/ping`;
             const response1 = await axios.get(getTargetsRequest, CONFIG);
-            const getMediaServersRequest = `${IVCS_API_URL}/api/ivcs/media_servers`;
-            const response2 = await axios.get(getMediaServersRequest, CONFIG);
-
-            let length;
-            if (response1.data.length < response2.data.length)
-                length = response1.data.length;
-            else
-                length = response2.data.length;
-
-            //check media
-            for (let i = 0; i < length; i++) {
-                if (response1.data[i]['address'] === response2.data[i]['address'])
-                    response1.data[i].role = "media";
-                else
-                    response1.data[i].role = "head";
-            }
-            // console.log(response1)
-            // console.log(response2)
-
             return response1.data;
         } catch (err) {
-            return [{status: "Что-то тут не так..."}];
+            console.log(`${pingApi.name} что-то тут не так...`)
+        }
+    }
+);
+
+export const pingIvcsApi = createAsyncThunk(
+    'servers/pingIvcsApi',
+    async () => {
+        try {
+            const getMediaServersRequest = `${IVCS_API_URL}/api/ivcs/ping`;
+            const response2 = await axios.get(getMediaServersRequest, CONFIG);
+            return response2.data
+        } catch (err) {
+            console.log(`${pingIvcsApi.name} что-то тут не так...`);
         }
     }
 );
@@ -44,16 +39,38 @@ const serverSlice = createSlice({
     initialState,
     extraReducers: builder => {
         builder
-            .addCase(getServers.pending, state => {
+            .addCase(pingApi.pending, state => {
                 state.isLoading = false;
             })
-            .addCase(getServers.fulfilled, (state, {payload}) => {
+            .addCase(pingApi.fulfilled, (state, {payload}) => {
                 state.isLoading = true;
-                state.servers = payload;
+
+                if (payload?.status === 'ok') {
+                    state.servers = payload;
+                    state.apiStatus = '👍';
+                } else {
+                    state.apiStatus = '❌';
+                }
             })
-            .addCase(getServers.rejected, state => {
+            .addCase(pingApi.rejected, state => {
                 state.isLoading = false;
-                state.servers = [{status: "Что-то тут не так..."}];
+                state.apiStatus = 'Что-то тут не так...';
+            })
+            .addCase(pingIvcsApi.pending, state => {
+                state.isLoading = true;
+            })
+            .addCase(pingIvcsApi.fulfilled, (state, {payload}) => {
+                state.isLoading = true;
+
+                if (payload?.status === "ok") {
+                    state.ivcsApiStatus = '👍';
+                } else {
+                    state.ivcsApiStatus = '❌';
+                }
+            })
+            .addCase(pingIvcsApi.rejected, state => {
+                state.isLoading = false;
+                state.ivcsApiStatus = 'Что-то тут не так...';
             })
     }
 });

@@ -14,24 +14,6 @@ const initialState = {
     loginErrors: []
 };
 
-//region not used
-// export const getAuthenticatedUserAsync = createAsyncThunk(
-//     'auth/getAuthenticatedUserAsync',
-//     async (arg, thunkAPI) => {
-//         try {
-//             const urlRequest = `${API_URL}/api/users/me`;
-//             const response = await axios.get(urlRequest, CONFIG);
-//
-//             localStorage.setItem('asUser', response.data.username);
-//             return localStorage.getItem('asUser')
-//         } catch (err) {
-//             localStorage.setItem('asUser', err.response.data.error);
-//             return localStorage.getItem('asUser')
-//         }
-//     }
-// );
-//endregion
-
 CONFIG.headers = {
     ...CONFIG.headers,
     'X-CSRFToken': Cookies.get('csrftoken')
@@ -79,23 +61,6 @@ export const logoutAsync = createAsyncThunk(
         }
     }
 );
-
-//region not used
-// export const checkAuthenticationAsync = createAsyncThunk(
-//     'authSlice/checkAuthenticationAsync',
-//     async (arg, thunkAPI) => {
-//         try {
-//             const urlRequest = `${API_URL}/api/users/authentication`;
-//             const response = await axios.get(urlRequest, CONFIG);
-//
-//             localStorage.setItem('isAuthenticated', response.data.isAuthenticated)
-//             return localStorage.getItem('isAuthenticated');
-//         } catch (err) {
-//             return false;
-//         }
-//     }
-// );
-//endregion
 
 export const loginAsync = createAsyncThunk(
     'authSlice/loginAsync',
@@ -167,7 +132,9 @@ const authSlice = createSlice({
             })
             .addCase(loginAsync.rejected, (state, {payload}) => {
                 state.isLoading = false;
-                state.errorMessage = "Что-то тут не так...";
+                state.errorMessage = "Сервер авторизации недоступен";
+                localStorage.removeItem('isAuthenticated');
+                localStorage.removeItem('asUser');
             })
             // register
             .addCase(registerAsync.pending,(state) => {
@@ -217,20 +184,8 @@ const authSlice = createSlice({
             .addCase(registerAsync.rejected, (state, {payload}) => {
                 state.isLoading = false;
                 state.isRegister =  false;
-                state.errorMessage = "Что-то тут не так...";
+                state.errorMessage = "Сервер авторизации недоступен";
             })
-            // check auth
-            // .addCase(checkAuthenticationAsync.pending, (state) => {
-            //     state.isLoading = true;
-            // })
-            // .addCase(checkAuthenticationAsync.fulfilled, (state, {payload}) => {
-            //     state.isAuthenticated = payload === "success";
-            //     state.isLoading = false;
-            // })
-            // .addCase(checkAuthenticationAsync.rejected, (state, {payload}) => {
-            //     state.isLoading = false;
-            // })
-            // logout
             .addCase(logoutAsync.pending, (state) => {
                     state.isLoading = true;
                     state.successMessage = [];
@@ -239,7 +194,8 @@ const authSlice = createSlice({
             .addCase(logoutAsync.fulfilled, (state, {payload}) => {
                 if (payload.success) {
                     state.successMessage.push(payload.success);
-                    localStorage.clear();
+                    localStorage.removeItem('isAuthenticated');
+                    localStorage.removeItem('asUser');
                 } else {
                     state.errorMessage = "Что-то тут не так...";
                 }
@@ -248,17 +204,10 @@ const authSlice = createSlice({
             })
             .addCase(logoutAsync.rejected, (state, {payload}) => {
                 state.isLoading = false;
-                state.errorMessage = "Что-то тут не так...";
+                state.errorMessage = "Сервер авторизации недоступен";
+                localStorage.removeItem('isAuthenticated');
+                localStorage.removeItem('asUser');
             })
-            // .addCase(getAuthenticatedUserAsync.pending, state => {
-            //     state.asUser = '';
-            // })
-            // .addCase(getAuthenticatedUserAsync.fulfilled, (state, {payload}) => {
-            //     state.asUser = payload;
-            // })
-            // .addCase(getAuthenticatedUserAsync.rejected, state => {
-            //     state.asUser = 'error';
-            // })
     }
 });
 

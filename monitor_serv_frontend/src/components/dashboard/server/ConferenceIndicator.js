@@ -1,20 +1,32 @@
-import {useDispatch, useSelector} from "react-redux";
+import {useSelector} from "react-redux";
 import {WindowStack} from "react-bootstrap-icons";
 import React, {useEffect, useState} from "react";
-import {getConfData} from "../../../slices/indicatorSlice";
 import OverlayTrigger from "react-bootstrap/OverlayTrigger";
+import axios from "axios";
+import {IVCS_API_URL} from "../../../base";
 
 const ConferenceIndicator = () => {
-    const dispatch = useDispatch();
-    const conferenceData = useSelector(state => state.indicatorManager.conferenceData);
     const refreshInterval = useSelector(state => state.refresh.refreshInterval);
+    const [conferenceData, setConferenceData] = useState([]);
     const [isOpen, setIsOpen] = useState(false);
-    const color = "#ff0cdc";
+    const [color, setColor] = useState("#000000");
+
+    const setDataImmediately = () => {
+        setTimeout(async () => {
+            try {
+                const urlRequest = `${IVCS_API_URL}/api/ivcs/conference_data`
+                // const response = (await axios.get()).data;
+
+                setColor("#ff0cdc");
+            } catch (err) {
+
+            }
+        }, 0)
+    }
 
     useEffect(() =>{
-        const interval = setInterval(() => {
-            dispatch(getConfData())
-        }, refreshInterval);
+        setDataImmediately();
+        const interval = setInterval(setDataImmediately, refreshInterval);
         return () => clearInterval(interval);
     })
 

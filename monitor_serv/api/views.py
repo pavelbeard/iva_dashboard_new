@@ -21,6 +21,9 @@ from dashboard.models import Target, BackendVersion
 
 # Create your views here.
 
+@api_view(['GET'])
+def ping(request):
+    return Response({"status": "ok"}, status=status.HTTP_200_OK)
 
 class PromTargetView(APIView):
     permission_classes = (AllowAny,)

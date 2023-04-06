@@ -1,14 +1,15 @@
 import React, {useEffect, useState} from "react";
 import {DatabaseFillUp, ArrowRepeat, DatabaseFillDown} from "react-bootstrap-icons";
-import {API_URL, getData, IVCS_API_URL} from "../../../base";
+import {API_URL} from "../../../base";
 import {useSelector} from "react-redux";
 import OverlayTrigger from "react-bootstrap/OverlayTrigger";
 
 import './Server.css';
 import axios from "axios";
 import AppList from "./AppList";
+import RoleIndicator from "./RoleIndicator";
 
-const ServerIndicator = ({id, host, role='none'}) => {
+const ServerIndicator = ({id, host}) => {
     const refreshInterval = useSelector(state => state.refresh.refreshInterval);
     const [targetInfo, setTargetInfo] = useState([])
     const [targetStatus, setTargetStatus] = useState("N/A");
@@ -102,7 +103,7 @@ const ServerIndicator = ({id, host, role='none'}) => {
                     placement="bottom"
                     overlay={popover}>
                     <div className={`${isOpen ? 'indicator' : 'text-decoration-none text-dark'}`}>
-                        {role}
+                        <RoleIndicator host={host}/>
                     </div>
                 </OverlayTrigger>
             </div>

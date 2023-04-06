@@ -33,6 +33,24 @@ services:
         max_attempts: 3
         window: 120s
 
+  ivcs-api:
+    build:
+      context: monitor_serv_ivcs_api
+      dockerfile: prod.ivcs_api.Dockerfile
+    container_name: prod.ivcs-api-v0.1
+    env_file:
+      - env/prod.ivcs-api.env
+    entrypoint: ["python3.11", "/home/ivcs-api/web/entrypoint.py"]
+    networks:
+      iva_dashboard_net.prod:
+    restart: on-failure
+    deploy:
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+        window: 120s
+
   monitor-server:
     build:
       context: monitor_serv

@@ -4,13 +4,8 @@ const AppList = ({id=0}) => {
     const [importantApps, setImportantApps] = useState([]);
 
     const updateImportantApps = () => {
-        const appsDict = JSON.parse(localStorage.getItem(`checklistElems${id}`)) || {};
-        const arr = [];
-        for (let [key, value] of Object.entries(appsDict)) {
-            arr.push(value);
-        }
-
-        setImportantApps(arr);
+        const apps = JSON.parse(localStorage.getItem(`checklistElems${id}`)) || [];
+        setImportantApps(apps);
     };
 
     useEffect(() => {
@@ -27,14 +22,14 @@ const AppList = ({id=0}) => {
     );
 
     return (
-        <div className={`text-center mt-1 bg-info bg-info bg-opacity-10
+        <div className={`text-center mt-1 bg-info bg-dark bg-opacity-25
             ${importantApps.length > 0 ? '' : 'd-flex justify-content-center'}`}>
                 {typeof importantApps.map === "function" ? importantApps.length > 0
                     ? importantApps.map((app, i=0) => {
                         if (i <= 5)
                             return(
-                                <div style={{color: app.color}}
-                                    className="ms-1">{app.service}</div>
+                                <div style={{color: app.status}}
+                                    className="ms-1">{app.name}</div>
                             );
                         else
                             return <></>

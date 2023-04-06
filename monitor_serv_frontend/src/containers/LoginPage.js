@@ -13,7 +13,10 @@ const LoginPage = () => {
         password: '',
     });
     const [messages, setMessages] = useState([]);
-    const {isAuthenticated, successMessage, loginErrors} = useSelector(state => state.auth);
+    const {isAuthenticated,
+        successMessage,
+        loginErrors,
+        errorMessage} = useSelector(state => state.auth);
     const dispatch = useDispatch();
 
     const {username, password} = formData;
@@ -41,10 +44,12 @@ const LoginPage = () => {
     useEffect(() => {
         if (successMessage.length !== 0) {
             setMessages(successMessage);
-        } else {
+        } else if (errorMessage === ""){
             setMessages(loginErrors);
+        } else {
+            setMessages([errorMessage])
         }
-    }, [loginErrors]);
+    }, [loginErrors, errorMessage]);
 
     if (isAuthenticated) {
         return <Navigate to="/dashboard" />;
