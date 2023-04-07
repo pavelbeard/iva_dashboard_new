@@ -8,27 +8,36 @@ import {IVCS_API_URL} from "../../../base";
 const ConferenceIndicator = () => {
     const refreshInterval = useSelector(state => state.refresh.refreshInterval);
     const [conferenceData, setConferenceData] = useState([]);
+    const [conferenceCount, setConferenceCount] = useState(0);
     const [isOpen, setIsOpen] = useState(false);
     const [color, setColor] = useState("#000000");
 
-    const setDataImmediately = () => {
-        setTimeout(async () => {
-            try {
-                const urlRequest = `${IVCS_API_URL}/api/ivcs/conference_data`
-                // const response = (await axios.get()).data;
+    const getConferences = async () => {
+        try {
+            const urlRequest = `${IVCS_API_URL}/api/ivcs/conference_data`
+            const response = (await axios.get(urlRequest)).data;
 
-                setColor("#ff0cdc");
-            } catch (err) {
-
+            if (response) {
+                setConferenceData(response);
+                setConferenceCount(response.length);
             }
-        }, 0)
+
+            setColor("#ff0cdc");
+        } catch (err) {
+            setColor("#000");
+            setConferenceCount(0);
+        }
+    };
+
+    const setDataImmediately = () => {
+        setTimeout(getConferences, 0)
     }
 
     useEffect(() =>{
         setDataImmediately();
         const interval = setInterval(setDataImmediately, refreshInterval);
         return () => clearInterval(interval);
-    })
+    }, [])
 
     const popover = (
         <div className="bg-dark text-white rounded p-2 tooltip">
@@ -41,11 +50,14 @@ const ConferenceIndicator = () => {
                 </thead>
                 <tbody>
                 {typeof conferenceData.map === "function" ?
-                    conferenceData.map(i => {
+                    conferenceData.map((i, n = 0) => {
                     return (
-                        <tr key={i.metric.__name__ + "|" + i.metric.device}>
-                            <td>{i.metric.__name__}</td>
-                            <td>| {i.metric.device}</td>
+                        <tr key={i.parent__name+ "|"
+                            + i.conferencesessionactivitystatistic__user_count
+                            + "|"
+                            + `${n}` }>
+                            <td>{i.parent__name}</td>
+                            <td>| {i.conferencesessionactivitystatistic__user_count}</td>
                         </tr>
                     )
                 }) : ""}
@@ -65,7 +77,7 @@ const ConferenceIndicator = () => {
                     placement="bottom"
                     overlay={popover}>
                     <div className={`${isOpen ? 'indicator' : 'text-decoration-none text-dark'}`}>
-                        {conferenceData.length}
+                        {conferenceCount}
                     </div>
                 </OverlayTrigger>
             </div>

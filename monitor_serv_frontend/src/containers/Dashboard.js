@@ -2,7 +2,6 @@ import React, {useEffect, useState} from "react";
 import ServerCard from "../components/dashboard/card/ServerCard";
 import CheckSSLCert from "../components/dashboard/iva/CheckSSLCert";
 import {useDispatch, useSelector} from "react-redux";
-import {pingApi, pingIvcsApi} from "../slices/serverSlice";
 
 import './Containers.css';
 import {API_URL} from "../base";
@@ -12,7 +11,6 @@ import axios from "axios";
 const Dashboard = () => {
     document.title = "Инфопанель | Главная";
 
-    const dispatch = useDispatch();
     const refreshInterval = useSelector(state => state.refresh.refreshInterval);
     const [commonServers, setCommonServers] = useState([]);
 

@@ -5,7 +5,8 @@ import axios from "axios";
 const initialState = {
     isLoading: null,
     apiStatus: '',
-    ivcsApiStatus: ''
+    ivcsApiStatus: '',
+    mediaServersId: [],
 };
 
 export const pingApi = createAsyncThunk(
@@ -37,6 +38,7 @@ export const pingIvcsApi = createAsyncThunk(
 const serverSlice = createSlice({
     name: 'serverManager',
     initialState,
+    reducers: {},
     extraReducers: builder => {
         builder
             .addCase(pingApi.pending, state => {

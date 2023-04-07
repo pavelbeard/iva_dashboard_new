@@ -87,26 +87,6 @@ const AppIndicator = ({id}) => {
         }
     };
 
-    // const compare = (oldArray, newArray) => {
-    //     const _newArray_ = newArray.map(service => {return service.metric.___name___})
-    //     const _oldArray_ = oldArray !== null ? typeof oldArray.split === "function" ?
-    //         oldArray.split(',') : [] : [];
-    //
-    //     if (_oldArray_.length !== _newArray_.length) {
-    //         return false;
-    //     }
-    //
-    //     const filteredArray = _oldArray_.filter(value => newArray.includes(value));
-    //
-    //     filteredArray.forEach(value => {
-    //         if (!value) {
-    //             return false;
-    //         }
-    //     });
-    //
-    //     return true;
-    // };
-
     const colorizeState = state => {
         switch (state) {
             case 'running':
@@ -182,7 +162,7 @@ const AppIndicator = ({id}) => {
 
     const setDataImmediately = () => {
         setTimeout(getAppData, 0);
-        if (parse(appListKey).length > 0) {
+        if (parse(appListKey)?.length > 0) {
             autoUpdateAppList();
         }
     };

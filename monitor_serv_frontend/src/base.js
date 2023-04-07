@@ -2,9 +2,9 @@ import axios from "axios";
 import env from 'react-dotenv';
 
 export const API_URL = env?.REACT_APP_BACKEND_URL || "http://127.0.0.1:10111";
-export const IVCS_API_URL = env?.REACT_APP_IVCS_BACKEND_URL || "http://127.0.0.1:8000";
+export const IVCS_API_URL = env?.REACT_APP_IVCS_API_URL || "http://127.0.0.1:8000";
 export const URL = `${API_URL}/api/v1/prom_data`;
-export const APP_VERSION = env?.REACT_APP_VERSION || "v0.8.82";
+export const APP_VERSION = env?.REACT_APP_VERSION || "v0.8.92";
 
 export const CONFIG  = {
     headers: {

@@ -101,11 +101,11 @@ DATABASE_ROUTERS = (
 DATABASES = {
     'default': {
         'ENGINE': os.getenv("ENGINE", "django.db.backends.postgresql_psycopg2"),
-        'NAME': os.getenv('POSTGRES_DB_NAME', "test_db"),
-        'USER': os.getenv('POSTGRES_DB_USER', "test_db"),
-        'PASSWORD': os.getenv('POSTGRES_DB_PASSWORD', "test_db"),
+        'NAME': os.getenv('POSTGRES_DB_NAME', "iva_dashboard_test"),
+        'USER': os.getenv('POSTGRES_DB_USER', "admin"),
+        'PASSWORD': os.getenv('POSTGRES_DB_PASSWORD', "admin"),
         'HOST': os.getenv('POSTGRES_DB_HOST', "localhost"),
-        'PORT': os.getenv('POSTGRES_DB_PORT', "8002"),
+        'PORT': os.getenv('POSTGRES_DB_PORT', 15432),
     },
     'ivcs': {
         'ENGINE': os.getenv("ENGINE", "django.db.backends.postgresql_psycopg2"),

@@ -21,13 +21,12 @@ from dashboard.models import Target, BackendVersion
 
 # Create your views here.
 
-@api_view(['GET'])
-def ping(request):
-    return Response({"status": "ok"}, status=status.HTTP_200_OK)
+class Ping(APIView):
+    def get(self, request):
+        return Response({"status": "ok"}, status=status.HTTP_200_OK)
+
 
 class PromTargetView(APIView):
-    permission_classes = (AllowAny,)
-
     def get(self, request):
         host = request.GET.get('host')
         try:
@@ -42,8 +41,6 @@ class PromTargetView(APIView):
 
 
 class TargetHealth(APIView):
-    permission_classes = (AllowAny,)
-
     def get(self, request):
         host = request.GET.get('host')
 
@@ -60,8 +57,6 @@ class TargetHealth(APIView):
 
 
 class PromQlView(APIView):
-    permission_classes = (AllowAny,)
-
     @staticmethod
     def create_url(prom_target, query):
         return f'http://{prom_target}/api/v1/{query}'
@@ -95,8 +90,6 @@ class PromQlView(APIView):
 
 
 class SslCertDataView(APIView):
-    permission_classes = (AllowAny,)
-
     def get(self, request, **kwargs):
         try:
             ssl_data = get_ssl_cert()
@@ -149,4 +142,3 @@ def get_backend_version(request):
         return Response({"success": version.version})
     except BackendVersion.DoesNotExist:
         return Response({"error": "version not exists"})
-
