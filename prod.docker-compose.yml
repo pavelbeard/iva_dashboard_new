@@ -19,7 +19,7 @@ services:
 
   monitor-server-frontend:
     image: pavelbeard/prod.monitor-server-frontend:v0.5
-    container_name: prod.monitor-server-frontend-v0.5
+    container_name: prod.monitor-server-frontend-v0.6
     volumes:
       - static_files.prod:/home/monitor-server-app/web/staticfiles
     ports:
@@ -39,7 +39,7 @@ services:
     build:
       context: monitor_serv_ivcs_api
       dockerfile: prod.ivcs_api.Dockerfile
-    container_name: prod.ivcs-api-v0.1
+    container_name: prod.ivcs-api-v0.5
     env_file:
       - env/prod.ivcs-api.env
     entrypoint: ["python3.11", "/home/ivcs-api/web/entrypoint.py"]
@@ -58,7 +58,7 @@ services:
     build:
       context: monitor_serv
       dockerfile: prod.monitor_serv.Dockerfile
-    container_name: prod.monitor-server-v0.5
+    container_name: prod.monitor-server-v0.6
     env_file:
       - env/prod.monitor-serv.env
     entrypoint: ["python3.11", "/home/monitor-server-app/web/entrypoint.py"]
