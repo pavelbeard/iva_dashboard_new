@@ -10,7 +10,7 @@ from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from api.logic import get_ssl_cert
+from api.logic import get_ssl_cert, check_ssl_cert
 from common.pass_handler import decrypt_pass
 
 from common.ssh import ssh_scraper
@@ -92,7 +92,7 @@ class PromQlView(APIView):
 class SslCertDataView(APIView):
     def get(self, request, **kwargs):
         try:
-            ssl_data = get_ssl_cert()
+            ssl_data = check_ssl_cert()
             return Response(data=ssl_data, status=status.HTTP_200_OK)
         except ConnectionError:
             return Response(data={"status": "no connection with server"},

@@ -8,7 +8,7 @@ import ThreadAppIndicator from "../server/ThreadAppIndicator";
 import NetworkIndicator from "../server/NetworkIndicator";
 import ConferenceIndicator from "../server/ConferenceIndicator";
 import {ServerDown} from "../server/ServerDown";
-import {API_URL} from "../../../base";
+import {API_URL, parse} from "../../../base";
 import {useSelector} from "react-redux";
 import AppIndicator from "../server/AppIndicator";
 import axios from "axios";
@@ -16,6 +16,7 @@ import axios from "axios";
 const ServerCard = ({id, address, port}) => {
     const refreshInterval = useSelector(state => state.refresh.refreshInterval);
     const [targetHealth, setTargetHealth] = useState(false);
+    const [role, setRole] = useState('NONE');
     const host = `${address}:${port}`;
 
     const getTargetHealth = async () => {
@@ -26,6 +27,8 @@ const ServerCard = ({id, address, port}) => {
 
             if (response.status) {
                 setTargetHealth(response.status === 'success');
+
+                setRole(parse(host) || "NONE")
             }
         } catch (err) {
             setTargetHealth(false);
@@ -43,6 +46,8 @@ const ServerCard = ({id, address, port}) => {
         return () => clearInterval(interval);
     }, [refreshInterval]);
 
+    const conferenceIndicator = <ConferenceIndicator key={18} host={host} />
+
     if (!targetHealth)
         return (
             <ServerDown host={host}/>
@@ -58,7 +63,7 @@ const ServerCard = ({id, address, port}) => {
                     <ThreadAppIndicator key={16} host={host} />
                     <AppIndicator id={id} key={19} host={host} />
                     <NetworkIndicator key={17} host={host} />
-                    <ConferenceIndicator key={18} host={host} />
+                    {role === 'MEDIA' ? conferenceIndicator : ""}
                 </div>
             </div>
         );

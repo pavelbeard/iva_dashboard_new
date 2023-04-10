@@ -22,14 +22,13 @@ const CheckSSLCert = () => {
             const response = (await axios.get(urlRequest)).data;
 
             if (response) {
-                const oneDay = 1000 * Math.pow(60, 2) * 24;
                 const validFrom = response.validFrom !== "" ? new Date(response.validFrom) : "";
                 const validTo = response.validTo !== "" ? new Date(response.validTo) : "";
 
                 setErrors(response.errors === undefined ? "" : response.errors);
 
-                const sslIssuer = response.issuer.organizationName;
-                const remainingDays = Math.round((validTo - validFrom) / oneDay);
+                const sslIssuer = response.issuer;
+                const remainingDays = response.daysRemaining;
 
                 if (remainingDays > 90) {
                     setSslCertStatus("OK");

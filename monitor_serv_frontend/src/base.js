@@ -79,6 +79,14 @@ export function sum(arr) {
     return total;
 }
 
+export const parse = key => {
+    try {
+        return JSON.parse(localStorage[key]);
+    } catch (err) {
+        return undefined;
+    }
+}
+
 export const chartConfig = {
     type: 'line',
     data: {

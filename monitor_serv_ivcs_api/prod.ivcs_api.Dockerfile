@@ -1,4 +1,4 @@
-FROM pavelbeard/prod.ivcs-api:v0.1
+FROM pavelbeard/prod.ivcs-api:v0.5
 
 ENV APP_HOME=/home/ivcs-api/web
 WORKDIR $APP_HOME

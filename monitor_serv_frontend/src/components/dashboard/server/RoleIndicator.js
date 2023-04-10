@@ -8,6 +8,7 @@ const RoleIndicator = ({host}) => {
     const [role, setRole] = useState("NONE")
 
     const getMediaServers = async () => {
+        let _role_;
         try {
             const urlRequest = `${IVCS_API_URL}/api/ivcs/media_servers`;
             const response = (await axios.get(urlRequest)).data;
@@ -16,16 +17,23 @@ const RoleIndicator = ({host}) => {
                 const isExist = response.find(i => i.address === host.replace(/:.*/g, ''))
                 if (isExist) {
                     setRole('MEDIA');
+                    _role_ = 'MEDIA';
+
                 } else {
                     setRole('HEAD');
+                    _role_ = 'HEAD';
                 }
             } else {
-                setRole('NONE')
+                setRole('NONE');
+                _role_ = 'NONE';
             }
         } catch (e) {
-            setRole('NONE')
-            console.log('Что-то тут не так...')
+            setRole('NONE');
+            _role_ = 'NONE';
+            console.log('Что-то тут не так...');
         }
+
+        localStorage[host] = JSON.stringify(_role_);
     };
 
     const setDataImmediately = () => {

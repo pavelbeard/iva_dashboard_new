@@ -4,9 +4,8 @@ import './Server.css';
 import {useSelector} from "react-redux";
 import OverlayTrigger from "react-bootstrap/OverlayTrigger";
 import React, {useEffect, useState} from "react";
-import {API_URL} from "../../../base";
+import {API_URL, parse} from "../../../base";
 import axios from "axios";
-import app from "../../../App";
 
 const AppIndicator = ({id}) => {
     const hostKey = `host_id${id}`;
@@ -18,14 +17,6 @@ const AppIndicator = ({id}) => {
     const [color, setColor] = useState("#000000");
     const [isOpen, setIsOpen] = useState(false);
     const [checklistStorage, setChecklistStorage] = useState([]);
-
-    const parse = key => {
-        try {
-            return JSON.parse(localStorage[key]);
-        } catch (err) {
-            return undefined;
-        }
-    }
 
     // 1 принимаем входящие данные
     const getAppData = async () => {
