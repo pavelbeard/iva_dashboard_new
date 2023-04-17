@@ -18,7 +18,7 @@ class TargetAdmin(admin.ModelAdmin):
         password = form.cleaned_data['password']
         if not password:
             instance_id = form.instance.id
-            password = self.model.objects.get(id=instance_id).password
+            password = self.model.objects.get().password
             obj.password = password
         else:
             password = encrypt_pass(password=password, encryption_key=settings.ENCRYPTION_KEY)

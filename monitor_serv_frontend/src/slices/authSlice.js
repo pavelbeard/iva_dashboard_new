@@ -196,6 +196,7 @@ const authSlice = createSlice({
                     state.successMessage.push(payload.success);
                     localStorage.removeItem('isAuthenticated');
                     localStorage.removeItem('asUser');
+                    localStorage.removeItem('currentPage');
                 } else {
                     state.errorMessage = "Что-то тут не так...";
                 }

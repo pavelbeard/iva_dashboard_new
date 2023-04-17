@@ -59,10 +59,10 @@ class UpdateUserSerializer(serializers.ModelSerializer):
         fields = ('username', 'first_name', 'last_name', 'email')
 
     def update(self, instance, validated_data):
-        instance.username = validated_data.get('username', instance.username)
-        instance.first_name = validated_data.get('first_name', instance.first_name)
-        instance.last_name = validated_data.get('last_name', instance.last_name)
-        instance.email = validated_data.get('email', instance.email)
+        instance.username = validated_data.get('username')
+        instance.first_name = validated_data.get('first_name')
+        instance.last_name = validated_data.get('last_name')
+        instance.email = validated_data.get('email')
         instance.save()
         return instance
 
@@ -87,7 +87,7 @@ class LoginUserSerializer(serializers.ModelSerializer):
         password = data.get('password')
 
         try:
-            user = CustomUser.objects.get(username=username)
+            user = CustomUser.objects.get()
 
             if user.check_password(password):
                 if not user.is_active:

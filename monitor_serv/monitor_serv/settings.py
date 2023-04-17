@@ -90,11 +90,11 @@ WSGI_APPLICATION = 'monitor_serv.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/4.1/ref/settings/#databases
 
-DEFAULT_IVCS_SCHEMAS = "search_path=auth,billing,instantmessaging,smpp,statistic," \
+DEFAULT_SCHEMAS = "search_path=auth,billing,instantmessaging,smpp,statistic," \
                        "storage,updates,videoconference"
 
 DATABASE_ROUTERS = (
-    # 'common.dbrouters.IvaDashboardRouter',
+    'common.dbrouters.IvaDashboardRouter',
     'common.dbrouters.IvcsRouter',
 )
 
@@ -110,13 +110,14 @@ DATABASES = {
     'ivcs': {
         'ENGINE': os.getenv("ENGINE", "django.db.backends.postgresql_psycopg2"),
         'OPTIONS': {
-            'options': f'-c {os.getenv("IVCS_SCHEMAS", DEFAULT_IVCS_SCHEMAS)}'
+            'options': f'-c {os.getenv("SCHEMAS", DEFAULT_SCHEMAS)}'
         },
         'NAME': os.getenv('IVCS_POSTGRES_DB_NAME', "ivcs"),
         'USER': os.getenv('IVCS_POSTGRES_DB_USER', "ivcs"),
         'PASSWORD': os.getenv('IVCS_POSTGRES_DB_PASSWORD', "ivcs"),
         'HOST': os.getenv('IVCS_POSTGRES_DB_HOST', "localhost"),
-        'PORT': os.getenv('IVCS_POSTGRES_DB_PORT', "8002")
+        'PORT': os.getenv('IVCS_POSTGRES_DB_PORT', 15432),
+        'ATOMIC_REQUESTS': True
     }
 
 }

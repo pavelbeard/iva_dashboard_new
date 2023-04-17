@@ -16,6 +16,10 @@ const Home = () => {
         </div>
     );
 
+    useEffect(() => {
+        localStorage['currentPage'] = JSON.stringify({page: "/"});
+    }, [])
+
     return (
         <div className="container">
             <div className="mt-5 p-5 bg-danger bg-opacity-10">

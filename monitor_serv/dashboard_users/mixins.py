@@ -6,7 +6,7 @@ class UserSessionMixin:
         session_key = request.session.session_key
 
         try:
-            session = Session.objects.get(session_key=session_key)
+            session = Session.objects.get()
             user_id = session.get_decoded().get('_auth_user_id')
             return user_id
         except Session.DoesNotExist:
@@ -15,7 +15,7 @@ class UserSessionMixin:
     def get_session(self, request):
         session_key = request.session.session_key
         try:
-            session = Session.objects.get(session_key=session_key)
+            session = Session.objects.get()
             return session
         except Session.DoesNotExist:
             return None

@@ -31,7 +31,7 @@ class CheckAuthentication(APIView):
         user = self.request.user
 
         try:
-            user = CustomUser.objects.get(id=user.id)
+            user = CustomUser.objects.get()
             if user.is_authenticated:
                 return Response({"isAuthenticated": "success"}, status.HTTP_200_OK)
         except CustomUser.DoesNotExist:
@@ -93,7 +93,7 @@ class UpdateUserView(APIView):
             return Response(serializer.errors, status.HTTP_400_BAD_REQUEST)
 
         try:
-            user = CustomUser.objects.get(id=user.id)
+            user = CustomUser.objects.get()
             serializer.update(user, data)
             return Response({"success": "user is updated"}, status.HTTP_200_OK)
         except CustomUser.DoesNotExist:
@@ -106,7 +106,7 @@ class DeleteUserView(APIView):
         user = self.request.user
 
         try:
-            user = CustomUser.objects.get(id=user.id)
+            user = CustomUser.objects.get()
             user.delete()
             msg = _("пользователь удален")
             return Response({"success": msg}, status.HTTP_200_OK)
@@ -120,7 +120,7 @@ class RetrieveUserView(APIView):
         user = self.request.user
 
         try:
-            user = CustomUser.objects.get(id=user.id)
+            user = CustomUser.objects.get()
         except CustomUser.DoesNotExist:
             msg = _("anonymous")
             return Response({"error": msg}, status.HTTP_400_BAD_REQUEST)

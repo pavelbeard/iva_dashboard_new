@@ -39,9 +39,9 @@ if __name__ == '__main__':
         PYTHON_NAME, os.path.join(os.getenv('APP_HOME', WIN_APP_HOME), "manage.py"),
     ]
     result1 = check_db(pre_args, post_args=["checkdb", "--database"], database="default")
-    # result2 = check_db(pre_args, post_args=["checkdb", "--database"], database="ivcs") \
-    #     if os.getenv('CHECK_IVCS', False) else True
-    result2 = True
+    result2 = check_db(pre_args, post_args=["checkdb", "--database"], database="ivcs") \
+        if os.getenv('CHECK_IVCS', False) else True
+    # result2 = True
 
     if result1 and result2:
         call_django_command(pre_args, ["migrate"])

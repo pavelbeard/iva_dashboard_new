@@ -24,7 +24,7 @@
 
 .dashboard-card {
     display: grid;
-    grid-template-columns: 120px 80px;
+    grid-template-columns: 110px 90px;
 }
 
 .dashboard-card-no-data {
@@ -51,3 +51,10 @@
 }
 
 /*.dashboard-card.div*/
+
+.change-color-pic {
+    color: #000;
+}
+.change-color-pic:hover {
+    color: #fff;
+}

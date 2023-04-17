@@ -36,22 +36,22 @@ services:
         window: 120s
 
 
-  ivcs-api:
-    build:
-      context: monitor_serv_ivcs_api
-      dockerfile: prod.build.ivcs_api.Dockerfile
-    container_name: ivcs-api-v0.5
-    env_file:
-      - env/prod.ivcs-api.env
-    networks:
-      iva_dashboard_net.prod:
-    restart: on-failure
-    deploy:
-      restart_policy:
-        condition: on-failure
-        delay: 5s
-        max_attempts: 3
-        window: 120s
+#  ivcs-api:
+#    build:
+#      context: monitor_serv_ivcs_api
+#      dockerfile: prod.build.ivcs_api.Dockerfile
+#    container_name: ivcs-api-v0.5
+#    env_file:
+#      - env/prod.ivcs-api.env
+#    networks:
+#      iva_dashboard_net.prod:
+#    restart: on-failure
+#    deploy:
+#      restart_policy:
+#        condition: on-failure
+#        delay: 5s
+#        max_attempts: 3
+#        window: 120s
 
 
   monitor-server:

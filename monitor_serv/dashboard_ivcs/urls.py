@@ -1,13 +1,14 @@
-from django import urls
+from django.urls import path
 
 from . import views
 
 app_name = "dashboard_ivcs"
 
-urlpatterns = [
-    urls.path('main/', urls.include([
-        urls.path(
-            'access-log-records/<int:page>/', views.IvcsGetAccessLogRecords.as_view(), name="access_log_records"
-        ),
-    ]))
-]
+urlpatterns = (
+    path('conference_data', views.ConferenceData.as_view()),
+    path('media_servers', views.MediaServer.as_view()),
+    path('audit_log', views.AuditLogRecord.as_view()),
+    path('audit_log_last_events', views.AuditLogLastEvents.as_view()),
+    path('audit_log_events/all', views.AuditLogEventsAll.as_view()),
+    path('ping', views.ping),
+)

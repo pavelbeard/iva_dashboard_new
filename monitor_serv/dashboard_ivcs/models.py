@@ -1,5 +1,6 @@
 from django.db import models
 
+
 # Create your models here.
 
 
@@ -18,7 +19,7 @@ class AccessLogRecord(models.Model):
     user_agent = models.CharField(max_length=255, blank=True, null=True)
 
     class Meta:
-        managed = False
+        # managed = False
         db_table = 'access_log_record'
 
 
@@ -31,7 +32,7 @@ class ActivationRequest(models.Model):
     domain = models.ForeignKey('Domain', models.DO_NOTHING)
 
     class Meta:
-        managed = False
+        # managed = False
         db_table = 'activation_request'
 
 
@@ -42,7 +43,7 @@ class AddressReplacementRule(models.Model):
     rule_type = models.IntegerField()
 
     class Meta:
-        managed = False
+        # managed = False
         db_table = 'address_replacement_rule'
 
 
@@ -56,7 +57,7 @@ class Answer(models.Model):
     version = models.IntegerField()
 
     class Meta:
-        managed = False
+        # managed = False
         db_table = 'answer'
 
 
@@ -65,7 +66,7 @@ class AnswerChoices(models.Model):
     choice = models.ForeignKey('Choice', models.DO_NOTHING)
 
     class Meta:
-        managed = False
+        # managed = False
         db_table = 'answer_choices'
         unique_together = (('answer', 'choice'),)
 
@@ -81,7 +82,7 @@ class Application(models.Model):
     privileges = models.IntegerField()
 
     class Meta:
-        managed = False
+        # managed = False
         db_table = 'application'
 
 
@@ -108,7 +109,7 @@ class AudioParticipant(models.Model):
     is_moving_media = models.BooleanField(blank=True, null=True)
 
     class Meta:
-        managed = False
+        # managed = False
         db_table = 'audio_participant'
 
 
@@ -125,7 +126,7 @@ class AuditLogRecord(models.Model):
     record_subtype = models.IntegerField(blank=True, null=True)
 
     class Meta:
-        managed = False
+        # managed = False
         db_table = 'audit_log_record'
 
 
@@ -148,7 +149,7 @@ class B2BCallHistoryItem(models.Model):
     is_from_media_service = models.BooleanField(blank=True, null=True)
 
     class Meta:
-        managed = False
+        # managed = False
         db_table = 'b2b_call_history_item'
 
 
@@ -165,7 +166,7 @@ class BillingAccount(models.Model):
     trial = models.BooleanField()
 
     class Meta:
-        managed = False
+        # managed = False
         db_table = 'billing_account'
 
 
@@ -192,7 +193,7 @@ class CallRequest(models.Model):
     b2b_call_server = models.CharField(max_length=128, blank=True, null=True)
 
     class Meta:
-        managed = False
+        # managed = False
         db_table = 'call_request'
         unique_together = ("media_conference", "interconnection_to_media_conference")
 
@@ -223,7 +224,7 @@ class ChatMessage(models.Model):
     moderation_status = models.CharField(max_length=32)
 
     class Meta:
-        managed = False
+        # managed = False
         db_table = 'chat_message'
         unique_together = (
             ("moderated_by_profile", "deleted_by_profile"),
@@ -245,7 +246,7 @@ class ChatRoom(models.Model):
     history_start_from = models.DateTimeField()
 
     class Meta:
-        managed = False
+        # managed = False
         db_table = 'chat_room'
 
 
@@ -263,7 +264,7 @@ class ChatRoomCall(models.Model):
     presentation_owner_id = models.UUIDField(blank=True, null=True)
 
     class Meta:
-        managed = False
+        # managed = False
         db_table = 'chat_room_call'
 
 
@@ -278,7 +279,7 @@ class ChatRoomCallHistory(models.Model):
     document_record = models.UUIDField(blank=True, null=True)
 
     class Meta:
-        managed = False
+        # managed = False
         db_table = 'chat_room_call_history'
 
 
@@ -301,7 +302,7 @@ class ChatRoomCallParticipant(models.Model):
     data_subscribe_url = models.CharField(max_length=2048, blank=True, null=True)
 
     class Meta:
-        managed = False
+        # managed = False
         db_table = 'chat_room_call_participant'
         unique_together = (('user_id', 'call'),)
 
@@ -320,7 +321,7 @@ class ChatRoomCallParticipantHistory(models.Model):
     leave_description = models.CharField(max_length=128, blank=True, null=True)
 
     class Meta:
-        managed = False
+        # managed = False
         db_table = 'chat_room_call_participant_history'
 
 
@@ -332,7 +333,7 @@ class ChatRoomCallParticipantRequest(models.Model):
     contact_data = models.CharField(max_length=2048, blank=True, null=True)
 
     class Meta:
-        managed = False
+        # managed = False
         db_table = 'chat_room_call_participant_request'
 
 
@@ -346,7 +347,7 @@ class ChatRoomUser(models.Model):
     role = models.IntegerField()
 
     class Meta:
-        managed = False
+        # managed = False
         db_table = 'chat_room_user'
         unique_together = (('chat_room', 'user_id'),)
 
@@ -358,7 +359,7 @@ class Choice(models.Model):
     poll = models.ForeignKey('Poll', models.DO_NOTHING)
 
     class Meta:
-        managed = False
+        # managed = False
         db_table = 'choice'
 
 
@@ -374,7 +375,7 @@ class Company(models.Model):
                                             blank=True, null=True)
 
     class Meta:
-        managed = False
+        # managed = False
         db_table = 'company'
 
 
@@ -385,7 +386,7 @@ class CompanyGroup(models.Model):
     company = models.ForeignKey(Company, models.DO_NOTHING)
 
     class Meta:
-        managed = False
+        # managed = False
         db_table = 'company_group'
 
 
@@ -397,7 +398,7 @@ class ConfPlannedReminder(models.Model):
     reminder_data = models.ForeignKey('ConfReminderData', models.DO_NOTHING, blank=True, null=True)
 
     class Meta:
-        managed = False
+        # managed = False
         db_table = 'conf_planned_reminder'
 
 
@@ -410,7 +411,7 @@ class ConfReminderData(models.Model):
     reminder_type = models.SmallIntegerField(blank=True, null=True)
 
     class Meta:
-        managed = False
+        # managed = False
         db_table = 'conf_reminder_data'
 
 
@@ -458,7 +459,7 @@ class Conference(models.Model):
     create_date = models.DateTimeField()
 
     class Meta:
-        managed = False
+        # managed = False
         db_table = 'conference'
 
 
@@ -471,7 +472,7 @@ class ConferenceAlert(models.Model):
     created_date = models.DateTimeField()
 
     class Meta:
-        managed = False
+        # managed = False
         db_table = 'conference_alert'
         unique_together = (('conference_session', 'type'),)
 
@@ -480,7 +481,7 @@ class ConferenceForDeleteQueue(models.Model):
     id = models.UUIDField(primary_key=True)
 
     class Meta:
-        managed = False
+        # managed = False
         db_table = 'conference_for_delete_queue'
 
 
@@ -494,7 +495,7 @@ class ConferenceLobbyParticipant(models.Model):
     protocol = models.SmallIntegerField()
 
     class Meta:
-        managed = False
+        # managed = False
         db_table = 'conference_lobby_participant'
         unique_together = (('conference_session_id', 'profile_id'),)
 
@@ -504,7 +505,7 @@ class ConferenceNumber(models.Model):
     release_date = models.DateTimeField(blank=True, null=True)
 
     class Meta:
-        managed = False
+        # managed = False
         db_table = 'conference_number'
 
 
@@ -554,7 +555,7 @@ class ConferenceParticipant(models.Model):
     broadcast_language = models.SmallIntegerField(blank=True, null=True)
 
     class Meta:
-        managed = False
+        # managed = False
         db_table = 'conference_participant'
         unique_together = (('conference', 'profile'),)
 
@@ -571,7 +572,7 @@ class ConferenceQuality(models.Model):
     min_video_quality = models.IntegerField()
 
     class Meta:
-        managed = False
+        # managed = False
         db_table = 'conference_quality'
 
 
@@ -618,7 +619,7 @@ class ConferenceSession(models.Model):
     last_media_session_start_date = models.DateTimeField(blank=True, null=True)
 
     class Meta:
-        managed = False
+        # managed = False
         db_table = 'conference_session'
 
 
@@ -634,7 +635,7 @@ class ConferenceSessionActivityStatistic(models.Model):
     conference_type = models.SmallIntegerField()
 
     class Meta:
-        managed = False
+        # managed = False
         db_table = 'conference_session_activity_statistic'
         unique_together = (('conference_session', 'collect_date'),)
 
@@ -689,7 +690,7 @@ class ConferenceSessionParticipant(models.Model):
     broadcast_language = models.SmallIntegerField(blank=True, null=True)
 
     class Meta:
-        managed = False
+        # managed = False
         db_table = 'conference_session_participant'
         unique_together = (('conference_session', 'profile'),)
 
@@ -711,7 +712,7 @@ class ConferenceSessionParticipantStatistics(models.Model):
     past_all_polls = models.BooleanField()
 
     class Meta:
-        managed = False
+        # managed = False
         db_table = 'conference_session_participant_statistics'
 
 
@@ -725,7 +726,7 @@ class ConferenceSessionPeriodStatistic(models.Model):
     max_frame = models.IntegerField(blank=True, null=True)
 
     class Meta:
-        managed = False
+        # managed = False
         db_table = 'conference_session_period_statistic'
         unique_together = (('conference_session', 'active_speaker', 'start_date'),)
 
@@ -734,7 +735,7 @@ class ConferenceSessionStatisticTimer(models.Model):
     collect_date = models.DateTimeField(primary_key=True)
 
     class Meta:
-        managed = False
+        # managed = False
         db_table = 'conference_session_statistic_timer'
 
 
@@ -765,7 +766,7 @@ class ConferenceSessionStatistics(models.Model):
     rtsp_clients_count = models.IntegerField(blank=True, null=True)
 
     class Meta:
-        managed = False
+        # managed = False
         db_table = 'conference_session_statistics'
 
 
@@ -797,7 +798,7 @@ class ConferenceTemplate(models.Model):
     join_restriction = models.SmallIntegerField()
 
     class Meta:
-        managed = False
+        # managed = False
         db_table = 'conference_template'
 
 
@@ -809,7 +810,7 @@ class ConferenceTranscript(models.Model):
     duration_ms = models.IntegerField(blank=True, null=True)
 
     class Meta:
-        managed = False
+        # managed = False
         db_table = 'conference_transcript'
 
 
@@ -818,7 +819,7 @@ class ConnectionHolder(models.Model):
     node_id = models.CharField(max_length=100, blank=True, null=True)
 
     class Meta:
-        managed = False
+        # managed = False
         db_table = 'connection_holder'
 
 
@@ -841,7 +842,7 @@ class Contact(models.Model):
     deleted = models.BooleanField(blank=True, null=True)
 
     class Meta:
-        managed = False
+        # managed = False
         db_table = 'contact'
         unique_together = (('owner_user', 'user_profile'),)
 
@@ -853,7 +854,7 @@ class ConvertedPage(models.Model):
     image_resource = models.ForeignKey('Resources', models.DO_NOTHING, db_column='image_resource')
 
     class Meta:
-        managed = False
+        # managed = False
         db_table = 'converted_page'
 
 
@@ -868,7 +869,7 @@ class CsiAnswer(models.Model):
     question = models.ForeignKey('CsiQuestion', models.DO_NOTHING)
 
     class Meta:
-        managed = False
+        # managed = False
         db_table = 'csi_answer'
 
 
@@ -884,7 +885,7 @@ class CsiQuestion(models.Model):
     domain = models.ForeignKey('Domain', models.DO_NOTHING)
 
     class Meta:
-        managed = False
+        # managed = False
         db_table = 'csi_question'
 
 
@@ -896,7 +897,7 @@ class DelayedMediaAction(models.Model):
     info_json = models.TextField(blank=True, null=True)
 
     class Meta:
-        managed = False
+        # managed = False
         db_table = 'delayed_media_action'
 
 
@@ -909,7 +910,7 @@ class DelayedSms(models.Model):
     to_phone = models.CharField(max_length=16)
 
     class Meta:
-        managed = False
+        # managed = False
         db_table = 'delayed_sms'
 
 
@@ -921,7 +922,7 @@ class Device(models.Model):
     config_overridden = models.CharField(max_length=2048, blank=True, null=True)
 
     class Meta:
-        managed = False
+        # managed = False
         db_table = 'device'
 
 
@@ -937,7 +938,7 @@ class DeviceModel(models.Model):
     protocols = models.SmallIntegerField(blank=True, null=True)
 
     class Meta:
-        managed = False
+        # managed = False
         db_table = 'device_model'
 
 
@@ -946,7 +947,7 @@ class DeviceModelFirmwareFiles(models.Model):
     firmwarefiles_resource_id = models.UUIDField()
 
     class Meta:
-        managed = False
+        # managed = False
         db_table = 'device_model_firmware_files'
         unique_together = (('device_model', 'firmwarefiles_resource_id'),)
 
@@ -957,7 +958,7 @@ class DocumentAlias(models.Model):
     absolute_link = models.CharField(max_length=255)
 
     class Meta:
-        managed = False
+        # managed = False
         db_table = 'document_alias'
         unique_together = (('alias', 'locale'),)
 
@@ -1009,7 +1010,7 @@ class Domain(models.Model):
     name = models.CharField(max_length=255, blank=True, null=True)
 
     class Meta:
-        managed = False
+        # managed = False
         db_table = 'domain'
 
 
@@ -1019,7 +1020,7 @@ class DtmfCommand(models.Model):
     active = models.BooleanField(blank=True, null=True)
 
     class Meta:
-        managed = False
+        # managed = False
         db_table = 'dtmf_command'
 
 
@@ -1029,7 +1030,7 @@ class EmailInvitation(models.Model):
     source_user = models.ForeignKey('Profile', models.DO_NOTHING)
 
     class Meta:
-        managed = False
+        # managed = False
         db_table = 'email_invitation'
         unique_together = (('source_user', 'email'),)
 
@@ -1044,7 +1045,7 @@ class EventChannels(models.Model):
     place = models.CharField(max_length=255, blank=True, null=True)
 
     class Meta:
-        managed = False
+        # managed = False
         db_table = 'event_channels'
 
 
@@ -1057,7 +1058,7 @@ class ExternalCall(models.Model):
     media_conference = models.ForeignKey('MediaConference', models.DO_NOTHING)
 
     class Meta:
-        managed = False
+        # managed = False
         db_table = 'external_call'
 
 
@@ -1070,7 +1071,7 @@ class FixedLayoutConfiguration(models.Model):
     cell_mapping = models.CharField(max_length=32768, blank=True, null=True)
 
     class Meta:
-        managed = False
+        # managed = False
         db_table = 'fixed_layout_configuration'
 
 
@@ -1100,7 +1101,7 @@ class FsNode(models.Model):
     associated_object_id = models.UUIDField(blank=True, null=True)
 
     class Meta:
-        managed = False
+        # managed = False
         db_table = 'fs_node'
         unique_together = ("parent", "linked_node")
 
@@ -1115,7 +1116,7 @@ class GkNeighbor(models.Model):
     max_send_tries = models.IntegerField(blank=True, null=True)
 
     class Meta:
-        managed = False
+        # managed = False
         db_table = 'gk_neighbor'
 
 
@@ -1124,7 +1125,7 @@ class GroupUsers(models.Model):
     group = models.ForeignKey('UserGroup', models.DO_NOTHING)
 
     class Meta:
-        managed = False
+        # managed = False
         db_table = 'group_users'
         unique_together = (('profile', 'group'),)
 
@@ -1134,7 +1135,7 @@ class GroupsProfiles(models.Model):
     profile = models.ForeignKey('Profile', models.DO_NOTHING)
 
     class Meta:
-        managed = False
+        # managed = False
         db_table = 'groups_profiles'
         unique_together = (('group', 'profile'),)
 
@@ -1145,7 +1146,7 @@ class IceServer(models.Model):
     credential = models.CharField(max_length=128, blank=True, null=True)
 
     class Meta:
-        managed = False
+        # managed = False
         db_table = 'ice_server'
 
 
@@ -1158,7 +1159,7 @@ class Inquiry(models.Model):
     poll = models.ForeignKey('Poll', models.DO_NOTHING)
 
     class Meta:
-        managed = False
+        # managed = False
         db_table = 'inquiry'
 
 
@@ -1168,7 +1169,7 @@ class InstalledUpdates(models.Model):
     minor_version = models.IntegerField()
 
     class Meta:
-        managed = False
+        # managed = False
         db_table = 'installed_updates'
         unique_together = (('name', 'major_version', 'minor_version'),)
 
@@ -1191,7 +1192,7 @@ class InterconnectionParticipant(models.Model):
     media_room = models.ForeignKey('MediaRoom', models.DO_NOTHING)
 
     class Meta:
-        managed = False
+        # managed = False
         db_table = 'interconnection_participant'
         unique_together = ("connected_media_conference", "media_conference")
 
@@ -1213,7 +1214,7 @@ class InterconnectionSettings(models.Model):
     to_layout_style_override = models.CharField(max_length=512, blank=True, null=True)
 
     class Meta:
-        managed = False
+        # managed = False
         db_table = 'interconnection_settings'
         unique_together = (
             ('media_group_from', 'media_group_to', 'conference_session'),
@@ -1231,7 +1232,7 @@ class Ivr(models.Model):
     scheme = models.ForeignKey('IvrScheme', models.DO_NOTHING)
 
     class Meta:
-        managed = False
+        # managed = False
         db_table = 'ivr'
         unique_together = (('type', 'scheme'),)
 
@@ -1252,7 +1253,7 @@ class IvrCallHistoryItem(models.Model):
     b2b_call_server = models.CharField(max_length=128, blank=True, null=True)
 
     class Meta:
-        managed = False
+        # managed = False
         db_table = 'ivr_call_history_item'
 
 
@@ -1263,7 +1264,7 @@ class IvrScheme(models.Model):
     is_default = models.BooleanField(unique=True)
 
     class Meta:
-        managed = False
+        # managed = False
         db_table = 'ivr_scheme'
 
 
@@ -1278,7 +1279,7 @@ class Layout(models.Model):
     description = models.CharField(max_length=2048, blank=True, null=True)
 
     class Meta:
-        managed = False
+        # managed = False
         db_table = 'layout'
 
 
@@ -1312,7 +1313,7 @@ class Ldap(models.Model):
     alternative_server_url = models.CharField(max_length=255, blank=True, null=True)
 
     class Meta:
-        managed = False
+        # managed = False
         db_table = 'ldap'
         unique_together = (('domain', 'domain_alias'),)
 
@@ -1323,7 +1324,7 @@ class Locale(models.Model):
     value = models.TextField()
 
     class Meta:
-        managed = False
+        # managed = False
         db_table = 'locale'
         unique_together = (('key', 'language'),)
 
@@ -1334,7 +1335,7 @@ class LocaleResource(models.Model):
     resource_id = models.UUIDField()
 
     class Meta:
-        managed = False
+        # managed = False
         db_table = 'locale_resource'
         unique_together = (('key', 'language'),)
 
@@ -1349,7 +1350,7 @@ class LoginToken(models.Model):
     create_date = models.DateTimeField()
 
     class Meta:
-        managed = False
+        # managed = False
         db_table = 'login_token'
 
 
@@ -1359,7 +1360,7 @@ class LogsExportsHistory(models.Model):
     max_date_to = models.DateTimeField(blank=True, null=True)
 
     class Meta:
-        managed = False
+        # managed = False
         db_table = 'logs_exports_history'
 
 
@@ -1372,7 +1373,7 @@ class MediaConference(models.Model):
     is_deleted = models.BooleanField(blank=True, null=True)
 
     class Meta:
-        managed = False
+        # managed = False
         db_table = 'media_conference'
         unique_together = (('media_room', 'is_main'),)
 
@@ -1384,7 +1385,7 @@ class MediaGroup(models.Model):
     parent = models.ForeignKey('self', models.DO_NOTHING, blank=True, null=True)
 
     class Meta:
-        managed = False
+        # managed = False
         db_table = 'media_group'
 
 
@@ -1393,7 +1394,7 @@ class MediaGroupMediaServer(models.Model):
     media_server = models.ForeignKey('MediaServer', models.DO_NOTHING, blank=True, null=True)
 
     class Meta:
-        managed = False
+        # managed = False
         db_table = 'media_group_media_server'
         unique_together = (('media_group', 'media_server'),)
 
@@ -1429,7 +1430,7 @@ class MediaParticipant(models.Model):
     translation_direction = models.SmallIntegerField(blank=True, null=True)
 
     class Meta:
-        managed = False
+        # managed = False
         db_table = 'media_participant'
 
 
@@ -1462,7 +1463,7 @@ class MediaParticipantHistory(models.Model):
     user_session_id = models.CharField(max_length=128, blank=True, null=True)
 
     class Meta:
-        managed = False
+        # managed = False
         db_table = 'media_participant_history'
 
 
@@ -1485,7 +1486,7 @@ class MediaProfile(models.Model):
     audio_quality = models.IntegerField()
 
     class Meta:
-        managed = False
+        # managed = False
         db_table = 'media_profile'
 
 
@@ -1508,7 +1509,7 @@ class MediaPublication(models.Model):
     internal_server = models.CharField(max_length=128, blank=True, null=True)
 
     class Meta:
-        managed = False
+        # managed = False
         db_table = 'media_publication'
 
 
@@ -1526,7 +1527,7 @@ class MediaRoom(models.Model):
     transcribing_start_date = models.DateTimeField(blank=True, null=True)
 
     class Meta:
-        managed = False
+        # managed = False
         db_table = 'media_room'
 
 
@@ -1535,7 +1536,7 @@ class MediaServer(models.Model):
     status = models.SmallIntegerField()
 
     class Meta:
-        managed = False
+        # managed = False
         db_table = 'media_server'
 
 
@@ -1559,7 +1560,7 @@ class Message(models.Model):
     type = models.IntegerField()
 
     class Meta:
-        managed = False
+        # managed = False
         db_table = 'message'
         unique_together = (('chat_room', 'created_at'), ("replied_on",))
 
@@ -1573,7 +1574,7 @@ class MonitorIcmp(models.Model):
     last_success_date = models.DateTimeField(blank=True, null=True)
 
     class Meta:
-        managed = False
+        # managed = False
         db_table = 'monitor_icmp'
 
 
@@ -1593,7 +1594,7 @@ class MonitorMcu(models.Model):
     error = models.CharField(max_length=128, blank=True, null=True)
 
     class Meta:
-        managed = False
+        # managed = False
         db_table = 'monitor_mcu'
 
 
@@ -1610,7 +1611,7 @@ class Notification(models.Model):
     conference_session = models.ForeignKey(ConferenceSession, models.DO_NOTHING, blank=True, null=True)
 
     class Meta:
-        managed = False
+        # managed = False
         db_table = 'notification'
         unique_together = ("user", "source_user")
 
@@ -1627,7 +1628,7 @@ class Poll(models.Model):
     text = models.CharField(max_length=2048)
 
     class Meta:
-        managed = False
+        # managed = False
         db_table = 'poll'
 
 
@@ -1665,7 +1666,7 @@ class Presentation(models.Model):
     bottom = models.IntegerField(blank=True, null=True)
 
     class Meta:
-        managed = False
+        # managed = False
         db_table = 'presentation'
 
 
@@ -1746,7 +1747,7 @@ class Profile(models.Model):
     broadcast_language = models.SmallIntegerField(blank=True, null=True)
 
     class Meta:
-        managed = False
+        # managed = False
         db_table = 'profile'
         unique_together = (('profile_type', 'external_id', 'ldap_server'), ('domain', 'login', 'ldap_server'),)
 
@@ -1755,7 +1756,7 @@ class ProfileForDeleteQueue(models.Model):
     id = models.UUIDField(primary_key=True)
 
     class Meta:
-        managed = False
+        # managed = False
         db_table = 'profile_for_delete_queue'
 
 
@@ -1766,7 +1767,7 @@ class Questionnaire(models.Model):
     owner = models.ForeignKey(Profile, models.DO_NOTHING)
 
     class Meta:
-        managed = False
+        # managed = False
         db_table = 'questionnaire'
 
 
@@ -1775,7 +1776,7 @@ class QuestionnairePoll(models.Model):
     polls = models.OneToOneField(Poll, models.DO_NOTHING)
 
     class Meta:
-        managed = False
+        # managed = False
         db_table = 'questionnaire_poll'
         unique_together = (('questionnaire', 'polls'),)
 
@@ -1786,7 +1787,7 @@ class RecoveryPasswordToken(models.Model):
     profile = models.ForeignKey(Profile, models.DO_NOTHING)
 
     class Meta:
-        managed = False
+        # managed = False
         db_table = 'recovery_password_token'
 
 
@@ -1804,7 +1805,7 @@ class Registrant(models.Model):
     sip_transport = models.SmallIntegerField(blank=True, null=True)
 
     class Meta:
-        managed = False
+        # managed = False
         db_table = 'registrant'
 
 
@@ -1823,7 +1824,7 @@ class Resources(models.Model):
     meta_data = models.CharField(max_length=4096, blank=True, null=True)
 
     class Meta:
-        managed = False
+        # managed = False
         db_table = 'resources'
 
 
@@ -1833,7 +1834,7 @@ class RestorePassword(models.Model):
     user_id = models.UUIDField()
 
     class Meta:
-        managed = False
+        # managed = False
         db_table = 'restore_password'
 
 
@@ -1845,7 +1846,7 @@ class ScheduledWorksNotification(models.Model):
     show_to_all = models.BooleanField()
 
     class Meta:
-        managed = False
+        # managed = False
         db_table = 'scheduled_works_notification'
 
 
@@ -1858,7 +1859,7 @@ class ScreenShareQuality(models.Model):
     protocol = models.IntegerField()
 
     class Meta:
-        managed = False
+        # managed = False
         db_table = 'screen_share_quality'
 
 
@@ -1867,7 +1868,7 @@ class Services(models.Model):
     name = models.CharField(unique=True, max_length=255)
 
     class Meta:
-        managed = False
+        # managed = False
         db_table = 'services'
 
 
@@ -1877,7 +1878,7 @@ class Settings(models.Model):
     domain = models.ForeignKey(Domain, models.DO_NOTHING, blank=True, null=True)
 
     class Meta:
-        managed = False
+        # managed = False
         db_table = 'settings'
         unique_together = (('name', 'domain'),)
 
@@ -1887,7 +1888,7 @@ class ShortLink(models.Model):
     full_link = models.CharField(max_length=1024)
 
     class Meta:
-        managed = False
+        # managed = False
         db_table = 'short_link'
 
 
@@ -1918,7 +1919,7 @@ class SiteCall(models.Model):
     record_path = models.CharField(max_length=1024, blank=True, null=True)
 
     class Meta:
-        managed = False
+        # managed = False
         db_table = 'site_call'
 
 
@@ -1943,7 +1944,7 @@ class SiteCallAccount(models.Model):
     record_keep_days = models.IntegerField(blank=True, null=True)
 
     class Meta:
-        managed = False
+        # managed = False
         db_table = 'site_call_account'
 
 
@@ -1965,7 +1966,7 @@ class Sms(models.Model):
     protocol_id = models.SmallIntegerField()
 
     class Meta:
-        managed = False
+        # managed = False
         db_table = 'sms'
 
 
@@ -1976,7 +1977,7 @@ class StaticNat(models.Model):
     order_number = models.IntegerField()
 
     class Meta:
-        managed = False
+        # managed = False
         db_table = 'static_nat'
 
 
@@ -1985,7 +1986,7 @@ class SubscribedUsers(models.Model):
     user_id = models.UUIDField()
 
     class Meta:
-        managed = False
+        # managed = False
         db_table = 'subscribed_users'
 
 
@@ -2011,7 +2012,7 @@ class SubscriptionDetail(models.Model):
     live_streaming = models.BooleanField(blank=True, null=True)
 
     class Meta:
-        managed = False
+        # managed = False
         db_table = 'subscription_detail'
 
 
@@ -2028,7 +2029,7 @@ class Subscriptions(models.Model):
     unblock_date = models.DateTimeField(blank=True, null=True)
 
     class Meta:
-        managed = False
+        # managed = False
         db_table = 'subscriptions'
 
 
@@ -2043,7 +2044,7 @@ class SystemAlert(models.Model):
     info_json = models.TextField()
 
     class Meta:
-        managed = False
+        # managed = False
         db_table = 'system_alert'
 
 
@@ -2061,7 +2062,7 @@ class Ticket(models.Model):
     user_role = models.SmallIntegerField(blank=True, null=True)
 
     class Meta:
-        managed = False
+        # managed = False
         db_table = 'ticket'
 
 
@@ -2071,7 +2072,7 @@ class TicketBinding(models.Model):
     ticket = models.ForeignKey(Ticket, models.DO_NOTHING)
 
     class Meta:
-        managed = False
+        # managed = False
         db_table = 'ticket_binding'
 
 
@@ -2081,7 +2082,7 @@ class UncommittedResources(models.Model):
     user_session_id = models.UUIDField(blank=True, null=True)
 
     class Meta:
-        managed = False
+        # managed = False
         db_table = 'uncommitted_resources'
 
 
@@ -2093,7 +2094,7 @@ class UserAttribute(models.Model):
     security_level = models.SmallIntegerField()
 
     class Meta:
-        managed = False
+        # managed = False
         db_table = 'user_attribute'
 
 
@@ -2110,7 +2111,7 @@ class UserDevice(models.Model):
     client_assembly = models.SmallIntegerField()
 
     class Meta:
-        managed = False
+        # managed = False
         db_table = 'user_device'
         unique_together = (('id', 'client_type', 'client_assembly'),)
 
@@ -2123,7 +2124,7 @@ class UserGroup(models.Model):
     domain = models.ForeignKey(Domain, models.DO_NOTHING)
 
     class Meta:
-        managed = False
+        # managed = False
         db_table = 'user_group'
 
 
@@ -2133,7 +2134,7 @@ class UserMarkedMessage(models.Model):
     chat_room = models.ForeignKey(ChatRoom, models.DO_NOTHING)
 
     class Meta:
-        managed = False
+        # managed = False
         db_table = 'user_marked_message'
         unique_together = (('message', 'profile_id'),)
 
@@ -2144,7 +2145,7 @@ class UserParameter(models.Model):
     value = models.CharField(max_length=2048, blank=True, null=True)
 
     class Meta:
-        managed = False
+        # managed = False
         db_table = 'user_parameter'
         unique_together = (('attribute', 'profile'),)
 
@@ -2156,7 +2157,7 @@ class UserProperty(models.Model):
     profile = models.ForeignKey(Profile, models.DO_NOTHING)
 
     class Meta:
-        managed = False
+        # managed = False
         db_table = 'user_property'
         unique_together = (('profile', 'key'),)
 
@@ -2175,7 +2176,7 @@ class UserSessions(models.Model):
     domain_id = models.UUIDField(blank=True, null=True)
 
     class Meta:
-        managed = False
+        # managed = False
         db_table = 'user_sessions'
 
 
@@ -2190,7 +2191,7 @@ class UserSessionsHistory(models.Model):
     session_end_type = models.IntegerField(blank=True, null=True)
 
     class Meta:
-        managed = False
+        # managed = False
         db_table = 'user_sessions_history'
         unique_together = (('user_id', 'user_session_id'),)
 
@@ -2199,7 +2200,7 @@ class VcsServerInstance(models.Model):
     id = models.CharField(primary_key=True, max_length=255)
 
     class Meta:
-        managed = False
+        # managed = False
         db_table = 'vcs_server_instance'
 
 
@@ -2208,7 +2209,7 @@ class Vendor(models.Model):
     name = models.CharField(unique=True, max_length=255)
 
     class Meta:
-        managed = False
+        # managed = False
         db_table = 'vendor'
 
 
@@ -2220,7 +2221,7 @@ class VideoCountRestrictions(models.Model):
     width = models.IntegerField()
 
     class Meta:
-        managed = False
+        # managed = False
         db_table = 'video_count_restrictions'
 
 
@@ -2238,7 +2239,7 @@ class VoipCallSettings(models.Model):
     audio_only = models.BooleanField()
 
     class Meta:
-        managed = False
+        # managed = False
         db_table = 'voip_call_settings'
 
 
@@ -2253,7 +2254,7 @@ class VvoipRegisterSession(models.Model):
     contacts_json = models.TextField(blank=True, null=True)
 
     class Meta:
-        managed = False
+        # managed = False
         db_table = 'vvoip_register_session'
         unique_together = (('id', 'profile_id'),)
 
@@ -2270,7 +2271,7 @@ class VvoipRegisterSessionHistory(models.Model):
     session_end_type = models.IntegerField(blank=True, null=True)
 
     class Meta:
-        managed = False
+        # managed = False
         db_table = 'vvoip_register_session_history'
 
 
@@ -2282,7 +2283,7 @@ class Wbbooks(models.Model):
     created_by = models.UUIDField()
 
     class Meta:
-        managed = False
+        # managed = False
         db_table = 'wbbooks'
 
 
@@ -2295,7 +2296,7 @@ class Wbpages(models.Model):
     book_fk = models.ForeignKey(Wbbooks, models.DO_NOTHING, db_column='book_fk')
 
     class Meta:
-        managed = False
+        # managed = False
         db_table = 'wbpages'
 
 
@@ -2309,7 +2310,7 @@ class Wbshape(models.Model):
     creator_participant = models.ForeignKey(ConferenceSessionParticipant, models.DO_NOTHING, blank=True, null=True)
 
     class Meta:
-        managed = False
+        # managed = False
         db_table = 'wbshape'
 
 
@@ -2326,7 +2327,7 @@ class WbshapeChange(models.Model):
     svg = models.TextField()
 
     class Meta:
-        managed = False
+        # managed = False
         db_table = 'wbshape_change'
 
 
@@ -2334,5 +2335,5 @@ class Whiteboard(models.Model):
     whiteboard_id = models.UUIDField(primary_key=True)
 
     class Meta:
-        managed = False
+        # managed = False
         db_table = 'whiteboard'

@@ -69,17 +69,14 @@ class TestMixins(TestCase):
     def test_response_data_mixin(self):
         response = self.client.get(reverse(
             "api:cpu_data",
-            args=("127.0.0.1:9121",)), data=self.CPU_DATA
-        )
+            args=("127.0.0.1:9121",)))
         pprint(json.loads(response.content))
         self.assertEqual(response.status_code, HTTPStatus.OK)
 
     def test_ram_data(self):
         response = self.client.get(reverse(
             "api:ram_data",
-            args=("127.0.0.1:9121",)),
-            data=self.RAM_DATA
-        )
+            args=("127.0.0.1:9121",)))
         pprint(json.loads(response.content))
         self.assertEqual(response.status_code, HTTPStatus.OK)
 
@@ -92,18 +89,14 @@ class TestMixins(TestCase):
     def test_filespace_data(self):
         response = self.client.get(reverse(
             "api:filesystem_data",
-            args=("127.0.0.1:9121",)),
-            data=self.FS_DATA
-        )
+            args=("127.0.0.1:9121",)))
         pprint(json.loads(response.content), indent=3)
         self.assertEqual(response.status_code, HTTPStatus.OK)
         self.assertTrue(isinstance(response.content, bytes))
 
     def test_network_data(self):
         response = self.client.get(reverse(
-            "api:net_data", args=("127.0.0.1:9121",)),
-            data=self.NET_DATA
-        )
+            "api:net_data", args=("127.0.0.1:9121",)))
         pprint(json.loads(response.content), indent=2, width=140, depth=5)
         self.assertEqual(response.status_code, HTTPStatus.OK)
         self.assertTrue(isinstance(response.content, bytes))
@@ -112,9 +105,7 @@ class TestMixins(TestCase):
         self.THROUGHPUT['query'] = quote(self.THROUGHPUT['query'], safe='~@#$&()*!+=:;,?/\'')
 
         response = self.client.get(reverse(
-            "api:net_data", args=("127.0.0.1:9101",)),
-            data=self.THROUGHPUT
-        )
+            "api:net_data", args=("127.0.0.1:9101",)))
         pprint(json.loads(response.content), indent=2, width=140, depth=5)
         self.assertEqual(response.status_code, HTTPStatus.OK)
         self.assertTrue(isinstance(response.content, bytes))
@@ -122,9 +113,7 @@ class TestMixins(TestCase):
     def test_encoded_filesystem_data(self):
         self.ROOT_SPACE['query'] = quote(self.ROOT_SPACE['query'], safe='~@#$&()*!+=:;,?/\'')
         response = self.client.get(reverse(
-            "api:filesystem_data", args=("127.0.0.1:9101",)),
-            data=self.ROOT_SPACE
-        )
+            "api:filesystem_data", args=("127.0.0.1:9101",)))
         pprint(json.loads(response.content), indent=2, width=140, depth=5)
         self.assertEqual(response.status_code, HTTPStatus.OK)
         self.assertTrue(isinstance(response.content, bytes))

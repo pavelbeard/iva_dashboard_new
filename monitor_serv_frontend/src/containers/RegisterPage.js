@@ -3,20 +3,12 @@ import {useDispatch, useSelector} from "react-redux";
 import {Navigate} from "react-router-dom";
 import CSRFToken from "../components/auth/CSRFToken";
 import {registerAsync} from "../slices/authSlice";
+import {parse} from "../base";
 
 const RegisterPage = () => {
     document.title = "Инфопанель | Регистрация";
 
-    const {isRegister, registerErrors} = useSelector(state => state.auth);
-    const {isAuthenticated} = useSelector(state => {
-        const authState = localStorage.getItem('isAuthenticated') !== null;
-        if (authState) {
-            return localStorage.getItem('isAuthenticated');
-        }
-        else {
-            return state.auth
-        }
-    });
+    const {isRegister, registerErrors, isAuthenticated} = useSelector(state => state.auth);
     const dispatch = useDispatch();
 
     const [formData, setFormData] = useState({
@@ -46,6 +38,7 @@ const RegisterPage = () => {
     );
 
     useEffect(() => {
+        localStorage['currentPage'] = JSON.stringify({page: "/register"})
         setMessages(registerErrors)
     }, [registerErrors, isRegister])
 
@@ -53,7 +46,11 @@ const RegisterPage = () => {
         return <Navigate to="/" />
     }
     else if (isAuthenticated) {
-        return <Navigate to="/dashboard" />
+        let page = parse('currentPage').page;
+        if (page === '/register') {
+            page = "/dashboard";
+        }
+        return <Navigate to={page} />
     }
 
     return (

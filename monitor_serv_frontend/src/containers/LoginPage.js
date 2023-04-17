@@ -4,6 +4,7 @@ import {Navigate} from "react-router-dom";
 import {loginAsync} from "../slices/authSlice";
 import {useDispatch, useSelector} from "react-redux";
 import './Containers.css';
+import {parse} from "../base";
 
 const LoginPage = () => {
     document.title = "Инфопанель | Вход в систему";
@@ -42,6 +43,8 @@ const LoginPage = () => {
     );
 
     useEffect(() => {
+        localStorage['currentPage'] = JSON.stringify({page: "/login"});
+
         if (successMessage.length !== 0) {
             setMessages(successMessage);
         } else if (errorMessage === ""){
@@ -52,7 +55,12 @@ const LoginPage = () => {
     }, [loginErrors, errorMessage]);
 
     if (isAuthenticated) {
-        return <Navigate to="/dashboard" />;
+        let page = parse('currentPage').page;
+        if (page === "/login") {
+            page = "/dashboard";
+        }
+
+        return <Navigate to={page} />;
     }
 
     return(

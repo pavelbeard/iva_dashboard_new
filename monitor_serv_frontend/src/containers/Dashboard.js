@@ -6,6 +6,7 @@ import {useDispatch, useSelector} from "react-redux";
 import './Containers.css';
 import {API_URL} from "../base";
 import axios from "axios";
+import EventsJournal from "../components/dashboard/iva/EventsJournal";
 
 
 const Dashboard = () => {
@@ -33,6 +34,7 @@ const Dashboard = () => {
     };
 
     useEffect(() => {
+        localStorage['currentPage'] = JSON.stringify({page: "/dashboard"});
         setDataImmediately();
         const interval1 = setInterval(setDataImmediately, refreshInterval);
         return () => clearInterval(interval1);
@@ -60,7 +62,7 @@ const Dashboard = () => {
             <h4 className="text-center pt-2 pb-2">Мониторинг ВКС IVA</h4>
             <div className="col-md-6 w-100 cards">
                 <CheckSSLCert/>
-                {/*<ServerCard/>*/}
+                <EventsJournal/>
                 {/*<ServerCard/>*/}
                 {/*<ServerCard/>*/}
                 {/*<ServerCard/>*/}

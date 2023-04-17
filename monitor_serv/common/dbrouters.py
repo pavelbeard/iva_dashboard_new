@@ -39,7 +39,7 @@ class IvaDashboardRouter(BaseDBRouter):
 
     def db_for_read(self, model, **hints):
         # __db = "test_db" if DEBUG else "iva_dashboard"
-        __db = "iva_dashboard"
+        __db = "default"
 
         if model._meta.app_label in self.router_app_labels:
             return __db
@@ -48,7 +48,7 @@ class IvaDashboardRouter(BaseDBRouter):
 
     def db_for_write(self, model, **hints):
         # __db = "test_db" if DEBUG else "iva_dashboard"
-        __db = "iva_dashboard"
+        __db = "default"
 
         if model._meta.app_label in self.router_app_labels:
             return __db
@@ -63,14 +63,14 @@ class IvaDashboardRouter(BaseDBRouter):
 
     def allow_migrate(self, db, app_label, model_name=None, **hints):
         # __db = "test_db" if DEBUG else "iva_dashboard"
-        __db = "iva_dashboard"
+        __db = "default"
 
         if app_label in self.router_app_labels:
             return db == __db
 
 
 class IvcsRouter(BaseDBRouter):
-    router_app_labels = {'dashboard_ivcs', 'dashboard_ivcs_detail'}
+    router_app_labels = {'dashboard_ivcs'}
 
     def db_for_read(self, model, **hints):
         # __db = "test_db" if DEBUG else "iva_dashboard"

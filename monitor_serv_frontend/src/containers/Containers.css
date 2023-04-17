@@ -26,3 +26,47 @@
     0% {opacity: 1;}
     100% {opacity: 0;}
 }
+
+.status-bar-table, .status-bar-table-events {
+    display: grid;
+    grid-template-rows: 20px 20px;
+}
+.status-bar-table {
+    grid-template-columns: 120px 80px;
+}
+.status-bar-table-events {
+    grid-template-columns: 120px 600px;
+}
+
+.audit-log-table {
+    /*font-size: 8px;*/
+    /*border-top: 0.3px solid gray;*/
+    height: 500px;
+    overflow-y: auto;
+}
+
+.form-font-size {
+    font-size: 10px;
+}
+
+.form-font-size > div > select {
+    font-size: 10px;
+}
+
+input[type='datetime-local'] {
+    width: 150px;
+    font-size: 10px;
+}
+
+label.access-event-log {
+    width: 100px;
+}
+
+label.access-event-log + select {
+    width: 170px;
+}
+
+.page-num:hover {
+    cursor: pointer;
+    text-decoration: underline;
+}
