@@ -39,7 +39,7 @@ export function* params(object, type) {
 }
 
 export function parseInfo (object) {
-    console.log(object);
+    // console.log(object);
     const username = object['userName'] || object['username'] || object['login'];
     const conference = object['conferenceSessionName'] || object['name'] || object['eventName'];
     const eventType = object['changeType']
