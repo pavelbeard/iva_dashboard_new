@@ -18,8 +18,8 @@ services:
         window: 120s
 
   monitor-server-frontend:
-    image: pavelbeard/prod.monitor-server-frontend:v0.6
-    container_name: prod.monitor-server-frontend-v0.6
+    image: pavelbeard/prod.monitor-server-frontend:v0.7
+    container_name: prod.monitor-server-frontend-v0.7
     volumes:
       - static_files.prod:/home/monitor-server-app/web/staticfiles
     ports:

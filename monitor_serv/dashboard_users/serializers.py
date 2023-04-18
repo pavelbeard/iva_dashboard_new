@@ -87,7 +87,7 @@ class LoginUserSerializer(serializers.ModelSerializer):
         password = data.get('password')
 
         try:
-            user = CustomUser.objects.get()
+            user = CustomUser.objects.get(username=username)
 
             if user.check_password(password):
                 if not user.is_active:
