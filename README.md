@@ -51,6 +51,53 @@ Created by pavelbeard
     <pre>
     cd iva_dashboard_new
     </pre>
+    <li>Меняем переменные окружения в файлах в папке /env и <br>
+    /monitor_serv_frontend/nginx:
+        <ul>
+            <li>файл prod.monitor-postgres.env содержит:
+                <ul>
+                    <li><b>POSTGRES_USER=имя админа базы данных</b></li>
+                    <li><b>POSTGRES_PASSWORD=пароль БД</b></li>
+                    <li><b>POSTGRES_DB=имя базы данных</b></li>
+                </ul>
+            </li>
+            <li>файл prod.monitor-serv.env содержит
+                <ul>
+                    <li><b>SECRET_KEY=секретный ключ приложения, для API</b></li>
+                    <li><b>DEBUG=режим отладки. в продакшн должен быть отключен</b></li>
+                    <li><b>ENGINE=движок баз данных</b></li>
+                    <li><b>POSTGRES_DB_HOST=хост базы данных приложения</b></li>
+                    <li><b>POSTGRES_DB_PORT=порт</b></li>
+                    <li><b>POSTGRES_DB_USER=пользователь</b></li>
+                    <li><b>POSTGRES_DB_PASSWORD=пароль</b></li>
+                    <li><b>POSTGRES_DB_NAME=имя бд</b></li>
+                    <li><b>IVCS_POSTGRES_DB_NAME=имя базы данных IVA</b></li>
+                    <li><b>IVCS_POSTGRES_DB_USER=пользователь</b></li>
+                    <li><b>IVCS_POSTGRES_DB_PASSWORD=пароль</b></li>
+                    <li><b>IVCS_POSTGRES_DB_HOST=хост</b></li>
+                    <li><b>IVCS_POSTGRES_DB_PORT=порт</b></li>
+                    <li><b>SCHEMAS=если есть схемы в базе данных - ставим</b></li>
+                    <li><b>CSRF_TRUSTED_ORIGINS=домены, с которых могут поступать запросы 
+                    от аутентифицированных пользователей</b></li>
+                    <li><b>DJANGO_SUPERUSER_USERNAME=имя админа приложения</b></li>
+                    <li><b>DJANGO_SUPERUSER_EMAIL=email админа</b></li>
+                    <li><b>DJANGO_SUPERUSER_PASSWORD=пароль по умолчанию</b></li>
+                    <li><b>MONITOR_SERVER_ADDRESS=адрес сервера</b></li>
+                    <li><b>MONITOR_SERVER_PORT=порт сервера</b></li>
+                </ul>
+            </li>
+            <li>файл prod.monitor-serv-frontend содержит:
+                <ul>
+                    <li><b>REACT_APP_BACKEND_URL=адрес API-сервера</b></li>
+                    <li><b>REACT_APP_IVCS_API_URL=скоро будет удалена</b></li>
+                    <li><b>REACT_APP_DEBUG=режим отладки. в продакшн должен быть отключен</b></li>
+                    <li><b>REACT_APP_MAIL_TO_DEV=email администратора</b></li>
+                    <li><b>REACT_APP_CALL_TO_DEV=телефон администратора</b></li>
+                    <li><b>NODE_ENV=должно стоять production</b></li>
+                </ul>
+            </li>
+        </ul>
+    </li>
     <li>Запускаем команду сборки docker-compose</li>
     <pre>
     docker-compose -f prod.docker-compose.yml up -d --build
