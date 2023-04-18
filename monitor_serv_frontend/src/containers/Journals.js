@@ -21,6 +21,11 @@ const Journals = () => {
     const [nextPage, setNextPage] = useState();
     const [pagesRange, setPagesRange] = useState([]);
 
+    const [severity, setSeverity] = useState();
+    const [recordType, setRecordType] = useState();
+    const [startDate, setStart] = useState();
+    const [endDate, setEnd] = useState();
+
 
     const start = () => {
         return new Date().toISOString().slice(0,-8)
@@ -41,10 +46,26 @@ const Journals = () => {
 
     const getAuditLogData = async (page=1, pageSize=25) => {
         try {
-            const urlRequest = `${IVCS_API_URL}/api/ivcs/audit_log_events/all?page=${page}&pageSize=${pageSize}`
-                // + `&severity=${2}`
-                // + `&start=${start}`
-                // + `&end=${end}`;
+            let urlRequest = `${IVCS_API_URL}/api/ivcs/audit_log_events/all?page=${page}&page_size=${pageSize}`;
+            if (severity && parseInt(severity) !== 0) {
+                urlRequest += `&severity=${severity}`;
+            }
+            if (recordType && parseInt(recordType) !== -1) {
+                urlRequest += `&record_type=${recordType}`;
+            }
+
+            if (startDate) {
+                urlRequest += `&date_created_after=${startDate}:00`;
+            } else {
+                urlRequest += `&date_created_after=${start()}:00`;
+            }
+
+            if (endDate) {
+                urlRequest += `&date_created_before=${endDate}:00`;
+            } else {
+                urlRequest += `&date_created_before=${end()}:00`;
+            }
+
             const response = (await axios.get(urlRequest, CONFIG)).data;
 
             if (response.results) {
@@ -55,16 +76,35 @@ const Journals = () => {
         } catch (err) {
             console.log('что-то тут не так...')
         }
-    }
+    };
+
+    const handleFilters = e => {
+        e.preventDefault();
+        const element = e.target;
+        const value = element.value;
+
+        if (element.id === "inputSeverity") {
+            setSeverity(value);
+        } else if (element.id === "inputRecordType") {
+            setRecordType(value);
+        } else if (element.id === "inputDateStart") {
+            setStart(value);
+        } else if (element.id === "inputDateEnd") {
+            setEnd(value);
+        }
+
+        console.log(value);
+
+    };
 
     const setDataImmediately = () => {
         setTimeout(getAuditLogData, 0, page, pageSize)
-    }
+    };
 
     useEffect(() => {
         localStorage['currentPage'] = JSON.stringify({page: "/journals"});
         setDataImmediately();
-    }, [page]);
+    }, [page, severity, recordType, startDate, endDate]);
 
     const startIndex = page > 1? page * pageSize : 1;
 
@@ -78,19 +118,23 @@ const Journals = () => {
                             <input type="datetime-local" id="inputDateStart"
                                    className="form-control"
                                    defaultValue={start()}
+                                   onChange={e => handleFilters(e)}
                             />
                             <label htmlFor="inputDate" className="ps-2 pe-1">Конец:</label>
                             <input type="datetime-local" id="inputDateEnd"
                                    className="form-control"
                                    defaultValue={end()}
+                                   onChange={e => handleFilters(e)}
                             />
                             <div className="form-group d-flex flex-row pe-5 form-font-size">
                             <div className="d-flex flex-row align-items-center">
                                 <label htmlFor="inputSeverity"
                                        className="access-event-log ms-3 pe-1">Уровень важности:</label>
                                 <select name="severity" id="inputSeverity"
-                                    className="form-select"
-                                    defaultValue="0"
+                                        className="form-select"
+                                        defaultValue="0"
+                                        value={severity}
+                                        onChange={e => handleFilters(e)}
                                 >
                                     <option value="0">Любой</option>
                                     <option value="3">{SEVERITY[3][0]}</option>
@@ -102,8 +146,10 @@ const Journals = () => {
                                 <label htmlFor="inputRecordType"
                                    className="ps-4 access-event-log">Тип записей:</label>
                                 <select name="recordType" id="inputRecordType"
-                                    className="form-select"
-                                    defaultValue="-1"
+                                        className="form-select"
+                                        defaultValue="-1"
+                                        value={recordType}
+                                        onChange={e => handleFilters(e)}
                                 >
                                     <option value="-1">Любой</option>
                                     <option value="0">{RECORD_TYPE[0][0]}</option>
@@ -155,9 +201,9 @@ const Journals = () => {
                             <td style={{width: "60px"}}>{date}</td>
                             <td>{item['username']}</td>
                             <td>{item['user_ip']}</td>
-                            <td>{SEVERITY[parseInt(item['severity'])][0]} {item['severity']}</td>
-                            <td>{RECORD_TYPE[parseInt(item['record_type'])][0]} {item['record_type']}</td>
-                            <td><JournalInfo object={JSON.parse(item['info_json'])} /></td>
+                            <td>{SEVERITY[parseInt(item['severity'])][0]}</td>
+                            <td>{RECORD_TYPE[parseInt(item['record_type'])][0]}</td>
+                            <td><JournalInfo key={item['username'] + `${n}`} object={JSON.parse(item['info_json'])} /></td>
                         </tr>)
                     })}
                     </tbody>

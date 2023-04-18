@@ -19,25 +19,27 @@ export const RECORD_TYPE = {
     11: ["Контроль безопасности", "SECURITY_CONTROL"],
 };
 
-export function changePageNumStyle() {
-
-}
-
-export function* changedParams (object) {
+export function* params(object, type) {
     for (let outerValue of Object.values(object)) {
         if (typeof outerValue === "object") {
             for (let [innerKey, innerValue] of Object.entries(outerValue)) {
-                const oldValue = innerValue.oldValue;
-                const newValue = innerValue.newValue;
-                yield <div>Параметр <b>
-                    {innerKey}</b> изменен с <b>{oldValue}</b> на <b>{newValue}</b></div>;
+                if (type === "CREATE") {
+                    console.log()
+                    yield <div><b>{innerKey} = {innerValue === "" ? "unknown" : innerValue}</b></div>
+                } else if (type === "UPDATE") {
+                    const oldValue = innerValue.oldValue;
+                    const newValue = innerValue.newValue;
+                    yield <div>Параметр <b>
+                        {innerKey}</b> изменен с <b>{oldValue}</b> на <b>{newValue}</b></div>;
+
+                }
             }
         }
     }
 }
 
 export function parseInfo (object) {
-    console.log(object)
+    console.log(object);
     const username = object['userName'] || object['username'] || object['login'];
     const conference = object['conferenceSessionName'] || object['name'] || object['eventName'];
     const eventType = object['changeType']
@@ -60,13 +62,24 @@ export function parseInfo (object) {
             </div>)
         case "JOIN":
             return <div>Пользователь <b>{username}</b> вошел в конференцию <b>
-                "{conference}"</b> в роли {roles.map(role => {return <b>{role}</b>})} <br />
+                "{conference}"</b> в роли {roles.map((role, n) => {
+                    return <b key={`${role}${n}`}>{role}</b>
+                })} <br />
                 Протокол: <b>{protocol}</b>
+            </div>
+        case "CREATE":
+            return <div>
+                Создано мероприятие <b>{conference}</b> с параметрами:<br/>
+                {Array.from(params(object, eventType)).map((item, n) => (
+                    <div key={`${item}${n}`}>
+                        {item}
+                    </div>
+                ))}
             </div>
         case "UPDATE":
             return <div>Изменены настройки пользователя <b>{username}</b> в мероприятии <b>{conference}</b>
-                {Array.from(changedParams(object)).map(item => {
-                    return (<div>{item}</div>)
+                {Array.from(params(object, eventType)).map((item, n) => {
+                    return (<div key={`${item}${n}`}>{item}</div>)
                 })}</div>
         case "LOGOUT":
             return (

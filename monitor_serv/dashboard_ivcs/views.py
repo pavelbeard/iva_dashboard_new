@@ -2,6 +2,7 @@ from datetime import timedelta
 from django.db.models import Q
 
 from django.utils import timezone
+from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import status
 from rest_framework.decorators import api_view
 from rest_framework.generics import ListAPIView, GenericAPIView
@@ -11,6 +12,7 @@ from rest_framework.views import APIView
 
 from monitor_serv import settings
 from . import models
+from .filters import AuditLogRecordFilter
 from .serializers import MediaServerSerializer, AuditLogRecordSerializer
 from .pagination import LargeResultsSetPagination, StandardResultsSetPagination
 
@@ -118,17 +120,22 @@ class AuditLogLastEvents(GenericAPIView):
 
 
 class AuditLogEventsAll(APIView):
+    permission_classes = (AllowAny, )
     pagination_class = StandardResultsSetPagination
+    filter_backends = [DjangoFilterBackend]
+    filterset_class = AuditLogRecordFilter
 
     def get(self, request):
-        page_size = request.GET.get('pageSize', 25)
+        params = request.GET
+        page_size = params.get('page_size', 25)
 
         self.pagination_class.page_size = int(page_size)
         queryset = models.AuditLogRecord.objects.order_by('-date_created')
 
         paginator = self.pagination_class()
 
-        page = paginator.paginate_queryset(queryset, request)
+        filtered_queryset = self.filterset_class(request.GET, queryset).qs
+        page = paginator.paginate_queryset(filtered_queryset, request)
         serializer = AuditLogRecordSerializer(page, many=True)
         paginated_response = paginator.get_paginated_response(serializer.data)
 

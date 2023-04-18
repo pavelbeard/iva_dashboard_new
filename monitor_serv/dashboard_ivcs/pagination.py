@@ -7,7 +7,7 @@ from rest_framework.utils.urls import replace_query_param
 
 class PaginationResponseMixin(PageNumberPagination):
     def get_paginated_response(self, data):
-        url = self.request.build_absolute_uri()
+        # url = self.request.build_absolute_uri()
         page_size = self.get_page_size(self.request)
         page_number = self.page.number
         pages_count = self.page.paginator.count
@@ -22,8 +22,10 @@ class PaginationResponseMixin(PageNumberPagination):
         # right_visible_pages_range = [page for page in range(page_number, page_number + 3) if page < last_page_num - 1]
         right_visible_pages_range = [page for page in range(page_number, page_number + 3) if page < last_page - 1]
 
-        if max(right_visible_pages_range) < 7:
-            for i in range(min(right_visible_pages_range), 7):
+        last_visible_page = last_page if last_page < 7 else 7
+
+        if right_visible_pages_range and max(right_visible_pages_range) < last_visible_page:
+            for i in range(min(right_visible_pages_range), last_visible_page):
                 right_visible_pages_range.append(i)
 
         pages_range = []

@@ -14,14 +14,17 @@ const Pagination = ({pageCount: pagesRange, currentPage, onPageChange, lastPage,
         <nav>
             <ul className="pagination">
                 <li className="page-item">
-                    <button className="page-link bg-dark bg-opacity-50 page-button"
+                    <button className={
+                        `page-link bg-dark bg-opacity-50 page-button ${lastPage !== 0 ? '' : 'disabled'}`
+                    }
                             style={style}
                             onClick={() => onPageChange(1)}>
-                        <b>1</b>
+                        <b>{lastPage !== 0 ? 1 : "---"}</b>
                     </button>
                 </li>
                 <li className="page-item">
-                    <button className={`page-link bg-dark bg-opacity-50 page-button ${prevPage ? '' : 'disabled'}`}
+                    <button className={`page-link bg-dark bg-opacity-50 page-button 
+                    ${prevPage && lastPage !== 0 ?  '' : 'disabled'}`}
                             style={style}
                             onClick={() => onPageChange(prevPage)}>
                         <b>{"<"}</b>
@@ -29,7 +32,8 @@ const Pagination = ({pageCount: pagesRange, currentPage, onPageChange, lastPage,
                 </li>
                 {pagesRange.map(page => (
                     <li key={page} className={`page-item ${page === currentPage ? 'active' : ''}`}>
-                        <button className={`${page === currentPage ? 'bg-opacity-75' : 'bg-opacity-50'} page-link bg-dark page-button`}
+                        <button className={`${page === currentPage ? 'bg-opacity-75' : 'bg-opacity-50'} 
+                        page-link bg-dark page-button`}
                                 style={style}
                                 onClick={() => onPageChange(page)}>
                             {page}
@@ -37,17 +41,19 @@ const Pagination = ({pageCount: pagesRange, currentPage, onPageChange, lastPage,
                     </li>
                 ))}
                 <li className="page-item">
-                    <button className={`page-link bg-dark bg-opacity-50 page-button ${nextPage ? '' : 'disabled'}`}
+                    <button className={`page-link bg-dark bg-opacity-50 page-button 
+                    ${nextPage && lastPage !== 0 ? '' : 'disabled'}`}
                             style={style}
                             onClick={() => onPageChange(nextPage)}>
                         <b>{">"}</b>
                     </button>
                 </li>
                 <li className="page-item">
-                    <button className="page-link bg-dark bg-opacity-50 page-button"
+                    <button className={`page-link bg-dark bg-opacity-50 page-button 
+                    ${lastPage !== 0 ? '' : 'disabled'}`}
                             style={style}
                             onClick={() => onPageChange(lastPage)}>
-                        <b>{lastPage}</b>
+                        <b>{lastPage !== 0 ? lastPage : "---"}</b>
                     </button>
                 </li>
             </ul>
