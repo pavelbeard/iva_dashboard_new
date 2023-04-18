@@ -115,7 +115,7 @@ DATABASES = {
         'NAME': os.getenv('IVCS_POSTGRES_DB_NAME', "ivcs"),
         'USER': os.getenv('IVCS_POSTGRES_DB_USER', "ivcs"),
         'PASSWORD': os.getenv('IVCS_POSTGRES_DB_PASSWORD', "ivcs"),
-        'HOST': os.getenv('IVCS_POSTGRES_DB_HOST', "192.168.223.205"),
+        'HOST': os.getenv('IVCS_POSTGRES_DB_HOST', "localhost"),
         'PORT': os.getenv('IVCS_POSTGRES_DB_PORT', 15432),
         'ATOMIC_REQUESTS': True
     }

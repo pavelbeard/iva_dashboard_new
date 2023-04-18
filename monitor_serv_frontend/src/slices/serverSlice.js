@@ -40,11 +40,11 @@ export const auditLogEvent = createAsyncThunk(
     'servers/auditLogEvent',
     async (args, thunkAPI) => {
         try {
-            const {secureAudit, severity, start, end} = args;
+            // const {secureAudit, severity, start, end} = args;
 
-            const getMediaServersRequest = `${IVCS_API_URL}/api/ivcs/audit_log_last_events`
-                + `?secureAudit=${secureAudit}`
-                + `&severity=${severity}`
+            const getMediaServersRequest = `${IVCS_API_URL}/api/ivcs/audit_log_last_events`;
+                // + `?secureAudit=${secureAudit}`
+                // + `&severity=${severity}`
                 // + `&start=${start}`
                 // + `&end=${end}`;
             const response = await axios.get(getMediaServersRequest, CONFIG);

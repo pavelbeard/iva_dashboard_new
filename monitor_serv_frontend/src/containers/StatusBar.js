@@ -24,7 +24,7 @@ const StatusBar = () => {
 
     const setStatusImmediately = () => {
         setTimeout(dispatch, 0, pingApi());
-        setTimeout(dispatch, 0, pingIvcsApi());
+        // setTimeout(dispatch, 0, pingIvcsApi());
         setTimeout(dispatch, 0, auditLogEvent({secureAudit: true, severity: 2}));
     };
 

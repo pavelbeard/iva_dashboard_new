@@ -62,56 +62,11 @@ class AuditLogLastEvents(GenericAPIView):
 
     def get(self, request):
         try:
-            params = request.GET
-
-            page_size = int(params.get('pageSize', 25))
-            secure_audit = params.get('secureAudit')
-            severity = params.get('severity')
-            record_type = params.get('recordSubtype')
-            start = params.get('start')
-            end = params.get('end')
-            datetime_range = (
-                timezone.now() - timedelta(days=1),
-                timezone.now()
-            )
-
-            if len(params) == 0:
-                paginated_data = self.queryset \
-                    .filter(date_created__range=datetime_range) \
-                    .values('date_created', 'profile_id', 'severity', 'record_type', 'info_json') \
-                    .order_by('-date_created')
-
-
-
-            else:
-                filter_ = None
-
-                if severity:
-                    if settings.DEBUG:
-                        filter_ = ~Q(user_ip="") & Q(severity=severity)
-                    else:
-                        filter_ = ~Q(user_ip="") & Q(severity=severity) & Q(date_created__range=datetime_range)
-                elif severity and record_type:
-                    filter_ = ~Q(user_ip="")
-
-                elif severity and record_type and start and end:
-                    filter_ = ~Q(user_ip="") & Q(severity=severity) & Q(date_created__range=(
-                        start, end
-                    ))
-
-                query = self.queryset \
-                    .filter(filter_) \
-                    .values('date_created', 'profile_id', 'user_ip', 'severity', 'record_type', 'info_json') \
-                    .order_by('-date_created')
-
-                if secure_audit:
-                    paginated_data = query[:9]
-                else:
-                    page = self.paginate_queryset(query)
-                    serializer = self.get_serializer(page, many=True)
-                    paginated_data = self.get_paginated_response(serializer.data).data
-
-            return Response(paginated_data, status=status.HTTP_200_OK)
+            query = self.queryset.filter(~Q(user_ip="") & Q(severity=2)) \
+                .values('date_created', 'profile_id', 'user_ip', 'severity', 'record_type', 'info_json') \
+                .order_by('-date_created')[:9]
+            serializer = self.get_serializer(query, many=True)
+            return Response(serializer.data, status=status.HTTP_200_OK)
         except Exception as e:
             return Response({
                 "status": "error",
