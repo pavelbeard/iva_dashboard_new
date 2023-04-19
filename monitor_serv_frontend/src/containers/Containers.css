@@ -32,10 +32,10 @@
     grid-template-rows: 20px 20px;
 }
 .status-bar-table {
-    grid-template-columns: 120px 80px;
+    grid-template-columns: 80px 80px;
 }
 .status-bar-table-events {
-    grid-template-columns: 120px 600px;
+    grid-template-columns: 80px 1100px;
 }
 
 .audit-log-table {

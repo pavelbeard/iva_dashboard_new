@@ -1,6 +1,6 @@
 import React, {useEffect} from "react";
 import {useDispatch, useSelector} from "react-redux";
-import {auditLogEvent, pingApi, pingIvcsApi} from "../slices/serverSlice";
+import {auditLogEvent, pingApi} from "../slices/serverSlice";
 import {parseInfo} from "../components/dashboard/iva/journalFunctions";
 
 const StatusBar = () => {
@@ -24,7 +24,6 @@ const StatusBar = () => {
 
     const setStatusImmediately = () => {
         setTimeout(dispatch, 0, pingApi());
-        // setTimeout(dispatch, 0, pingIvcsApi());
         setTimeout(dispatch, 0, auditLogEvent({secureAudit: true, severity: 2}));
     };
 
@@ -62,7 +61,6 @@ const StatusBar = () => {
                     <div className="d-flex">
                         <div className="status-bar-table">
                             <div>API Статус:</div><div>{apiStatus}</div>
-                            {/*<div>IVCS API Статус:</div><div>{ivcsApiStatus}</div>*/}
                         </div>
                     </div>
                 </div>
@@ -71,6 +69,7 @@ const StatusBar = () => {
                         <div>Аудит безопасности:</div>
                         <div className="ms-2 status-bar-table-events">
                             <div>IP:</div><div style={{color: color}}>{lastWarningEvent}</div>
+                            {/*<div>Причина:</div><div style={{color: color}}>{reason}</div>*/}
                             <div>Причина:</div><div style={{color: color}}>{reason}</div>
                         </div>
                     </div>

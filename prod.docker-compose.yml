@@ -1,6 +1,21 @@
 version: '3.9'
 
 services:
+  monitor-broker:
+    image: redis
+    container_name: prod.monitor-broker-v1.0
+    networks:
+      iva_dashboard_net.prod:
+        ipv4_address: 11.0.96.5
+    restart: on-failure
+    deploy:
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+        window: 120s
+
+
   monitor-postgres:
     image: pavelbeard/prod.monitor-postgres:v1.0
     container_name: prod.monitor-postgres-v1.0
@@ -35,24 +50,23 @@ services:
         max_attempts: 3
         window: 120s
 
-#  ivcs-api:
-#    build:
-#      context: monitor_serv_ivcs_api
-#      dockerfile: prod.ivcs_api.Dockerfile
-#    container_name: prod.ivcs-api-v0.5
-#    env_file:
-#      - env/prod.ivcs-api.env
-#    entrypoint: ["python3.11", "/home/ivcs-api/web/entrypoint.py"]
-#    networks:
-#      iva_dashboard_net.prod:
-#        ipv4_address: 11.0.96.3
-#    restart: on-failure
-#    deploy:
-#      restart_policy:
-#        condition: on-failure
-#        delay: 5s
-#        max_attempts: 3
-#        window: 120s
+  worker:
+    build:
+      context: monitor_serv
+      dockerfile: prod.build.monitor_serv_celery.Dockerfile
+    container_name: monitor-serv-worker-v1.0
+    env_file:
+      - env/prod.monitor-worker.env
+    entrypoint: ["python3.11", "/home/celery-worker/entrypoint_worker.py"]
+    networks:
+      iva_dashboard_net.prod:
+    restart: on-failure
+    deploy:
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+        window: 120s
 
   monitor-server:
     build:
@@ -69,6 +83,8 @@ services:
         ipv4_address: 11.0.96.2
     depends_on:
       - monitor-postgres
+      - worker
+      - monitor-broker
     restart: on-failure
     deploy:
       restart_policy:

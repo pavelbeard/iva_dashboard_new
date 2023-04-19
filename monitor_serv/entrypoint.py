@@ -50,8 +50,11 @@ if __name__ == '__main__':
                                        os.getenv('DJANGO_SUPERUSER_EMAIL', 'admin@example.com')])
         call_django_command(pre_args, ["collectstatic", "--noinput", "--clear"])
 
+        # run_server = subprocess.Popen(
+        #     ("uvicorn", "monitor_serv.asgi:application",
+        #      "--host", MONITOR_SERVER_ADDRESS, "--port", MONITOR_SERVER_PORT)
         run_server = subprocess.Popen(
-            ("uvicorn", "monitor_serv.asgi:application",
-             "--host", MONITOR_SERVER_ADDRESS, "--port", MONITOR_SERVER_PORT)
+            ("gunicorn", "monitor_serv.wsgi:application",
+             f"--bind={MONITOR_SERVER_ADDRESS}:{MONITOR_SERVER_PORT}", "--workers=6", "--threads=6")
         )
         run_server.communicate()

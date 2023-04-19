@@ -98,21 +98,16 @@ export function parseInfo (object) {
         case "INCORRECT_EVENT_ID":
             return <div>Ошибка при попытке доступа к ресурсу: введен неверный ID мероприятия</div>;
         case "INVALID_CREDENTIALS":
-            return <div>Не удалось выполнить вход в домен <b>{domainName}</b><br/>
-                с учетными данными <b>{username} из-за неверных учетных данных</b></div>
+            return <div>Не удалось выполнить вход в домен <b>{domainName}</b> с учетными данными <b>{username} из-за неверных учетных данных</b></div>
         case "BLOCKED_ACCESS_FROM_IP":
             return <div>Ошибка при попытке доступа к ресурсу: IP-адрес заблокирован</div>;
         case "BLOCKED_ACCESS_FROM_PROFILE":
             return <div>Доступ из профиля заблокирован</div>;
         case "NOT_IN_CONFERENCE":
             return <div>Попытка неавторизованного выполнения операции в мероприятии <b>{conference}</b>
-            <br/>
-                пользователь не находится в мероприятии
-            </div>;
+            <br/>пользователь не находится в мероприятии</div>;
         case "NO_OPERATOR_ROLE":
-            return <div>Попытка неавторизованного выполнения операции в администрировании:
-                <br/>отсутствует роль оператора системы
-            </div>;
+            return <div>Попытка неавторизованного выполнения операции в администрировании: отсутствует роль оператора системы</div>;
         default:
             return '';
     }

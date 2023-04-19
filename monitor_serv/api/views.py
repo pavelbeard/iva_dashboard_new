@@ -1,5 +1,4 @@
-import json
-
+import httpx
 import requests
 from django.conf import settings
 from django.utils.decorators import method_decorator
@@ -10,7 +9,7 @@ from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from api.logic import get_ssl_cert, check_ssl_cert
+from api.tasks import check_ssl_cert, request_for_prom_data
 from common.pass_handler import decrypt_pass
 
 from common.ssh import ssh_scraper
@@ -57,6 +56,8 @@ class TargetHealth(APIView):
 
 
 class PromQlView(APIView):
+    permission_classes = (AllowAny, )
+
     @staticmethod
     def create_url(prom_target, query):
         return f'http://{prom_target}/api/v1/{query}'
@@ -83,10 +84,13 @@ class PromQlView(APIView):
             completed_query += f"&{step}"
 
         try:
-            context = requests.get(self.create_url(host, completed_query))
-            return Response(data=context.json(), status=status.HTTP_200_OK)
+            response = request_for_prom_data.delay(self.create_url(host, completed_query))
+            context = response.get()
+            return Response(data=context, status=status.HTTP_200_OK)
         except requests.exceptions.ConnectionError:
             return Response(data={"status": f"no connection with {host}"})
+        except TimeoutError:
+            return Response({"status": "timeout error"})
 
 
 class SslCertDataView(APIView):

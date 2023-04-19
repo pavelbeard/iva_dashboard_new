@@ -27,7 +27,7 @@ const EventsJournal = () => {
 
     const getAuditLogData = async () => {
         try {
-            const urlRequest = `${IVCS_API_URL}/api/ivcs/audit_log_events/all`
+            const urlRequest = `${IVCS_API_URL}/api/ivcs/audit_log_events?page=1&page_size=9`
             const response = (await axios.get(urlRequest, CONFIG)).data;
 
             if (response.results) {

@@ -1,6 +1,6 @@
-from datetime import timedelta
-from django.db.models import Q
+from datetime import timedelta, datetime
 
+from django.db.models import Q
 from django.utils import timezone
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import status
@@ -10,11 +10,10 @@ from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from monitor_serv import settings
 from . import models
 from .filters import AuditLogRecordFilter
+from .pagination import StandardResultsSetPagination
 from .serializers import MediaServerSerializer, AuditLogRecordSerializer
-from .pagination import LargeResultsSetPagination, StandardResultsSetPagination
 
 
 # Create your views here.
@@ -63,8 +62,8 @@ class AuditLogLastEvents(GenericAPIView):
     def get(self, request):
         try:
             query = self.queryset.filter(~Q(user_ip="") & Q(severity=2)) \
-                .values('date_created', 'profile_id', 'user_ip', 'severity', 'record_type', 'info_json') \
-                .order_by('-date_created')[:9]
+                        .values('date_created', 'profile_id', 'user_ip', 'severity', 'record_type', 'info_json') \
+                        .order_by('-date_created')[:9]
             serializer = self.get_serializer(query, many=True)
             return Response(serializer.data, status=status.HTTP_200_OK)
         except Exception as e:
@@ -75,28 +74,33 @@ class AuditLogLastEvents(GenericAPIView):
 
 
 class AuditLogEventsAll(APIView):
-    permission_classes = (AllowAny, )
     pagination_class = StandardResultsSetPagination
     filter_backends = [DjangoFilterBackend]
     filterset_class = AuditLogRecordFilter
 
     def get(self, request):
-        params = request.GET
-        page_size = params.get('page_size', 25)
+        try:
+            params = request.GET
+            page_size = params.get('page_size', 25)
 
-        self.pagination_class.page_size = int(page_size)
-        queryset = models.AuditLogRecord.objects.order_by('-date_created')
+            # datetime_range = (
+            #     datetime.fromisoformat(params.get('date_created_after')),
+            #     datetime.fromisoformat(params.get('date_created_before'))
+            # )
 
-        paginator = self.pagination_class()
+            self.pagination_class.page_size = int(page_size)
+            queryset = models.AuditLogRecord.objects.order_by('-date_created')
 
-        filtered_queryset = self.filterset_class(request.GET, queryset).qs
-        page = paginator.paginate_queryset(filtered_queryset, request)
-        serializer = AuditLogRecordSerializer(page, many=True)
-        paginated_response = paginator.get_paginated_response(serializer.data)
+            paginator = self.pagination_class()
 
-        return Response(paginated_response.data, status=status.HTTP_200_OK)
+            filtered_queryset = self.filterset_class(request.GET, queryset).qs
+            page = paginator.paginate_queryset(filtered_queryset, request)
+            serializer = AuditLogRecordSerializer(page, many=True)
+            paginated_response = paginator.get_paginated_response(serializer.data)
 
-
-class Test(APIView):
-    def get(self, request):
-        queryset = models.AuditLogRecord.objects.all()
+            return Response(paginated_response.data, status=status.HTTP_200_OK)
+        except Exception:
+            return Response({
+                "status": "error",
+                "reason": "unexpected exception"
+            }, status=status.HTTP_400_BAD_REQUEST)

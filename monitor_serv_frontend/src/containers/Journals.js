@@ -12,7 +12,6 @@ const mem = {
 const Journals = () => {
     document.title = "Инфопанель | Журнал аудита";
 
-    // const refreshInterval = useSelector(state => state.refresh.refreshInterval);
     const [auditData, setAuditData] = useState([]);
     const [page, setPage] = useState(localStorage['currentPagePaginator']?.page || 1);
     const [pageSize, setPageSize] = useState(10);
@@ -46,7 +45,7 @@ const Journals = () => {
 
     const getAuditLogData = async (page=1, pageSize=25) => {
         try {
-            let urlRequest = `${IVCS_API_URL}/api/ivcs/audit_log_events/all?page=${page}&page_size=${pageSize}`;
+            let urlRequest = `${IVCS_API_URL}/api/ivcs/audit_log_events?page=${page}&page_size=${pageSize}`;
             if (severity && parseInt(severity) !== 0) {
                 urlRequest += `&severity=${severity}`;
             }
