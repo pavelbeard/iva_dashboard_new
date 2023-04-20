@@ -10,7 +10,14 @@ const EventsJournal = () => {
     const [color, setColor] = useState("#06567c")
 
     const popover = data => {
-        const infoJson = parseInfo(JSON.parse(data)) || "unknown";
+        let infoJson;
+
+        try {
+            infoJson = parseInfo(JSON.parse(data));
+        } catch (err) {
+            infoJson = "unknown";
+        }
+
         return(
             <div className="bg-dark text-white rounded p-2 tooltip">
                 {infoJson}
