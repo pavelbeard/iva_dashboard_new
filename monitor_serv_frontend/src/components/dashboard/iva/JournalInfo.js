@@ -4,7 +4,7 @@ const JournalInfo = ({object}) => {
 
     return (
         <div>
-            {parseInfo(object)}
+            {object ? parseInfo(object) : "unknown"}
         </div>
     );
 };
