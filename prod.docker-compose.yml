@@ -2,7 +2,7 @@ version: '3.9'
 
 services:
   monitor-broker:
-    image: redis
+    image: pavelbeard/prod.monitor-broker:v1.0
     container_name: prod.monitor-broker-v1.0
     networks:
       iva_dashboard_net.prod:
@@ -53,7 +53,7 @@ services:
   worker:
     build:
       context: monitor_serv
-      dockerfile: prod.build.monitor_serv_celery.Dockerfile
+      dockerfile: prod.monitor_serv_celery.Dockerfile
     container_name: monitor-serv-worker-v1.0
     env_file:
       - env/prod.monitor-worker.env
