@@ -11,6 +11,7 @@ const ConferenceIndicator = () => {
     const [conferenceCount, setConferenceCount] = useState(0);
     const [isOpen, setIsOpen] = useState(false);
     const [color, setColor] = useState("#000000");
+    const [hoverColor, setHoverColor] = useState();
 
     const getConferences = async () => {
         try {
@@ -68,6 +69,7 @@ const ConferenceIndicator = () => {
 
     return(
         <div className="d-flex flex-row justify-content-start mt-1">
+            {/*Возможно здесь будет ссылка на график с конференциями*/}
             <WindowStack height="24" width="24" color={color} data-ivcs-server-img-attr="net"/>
             <div className="ps-2 mt-1" data-ivcs-server-attr="net"
                  onMouseLeave={() => setIsOpen(false)}>

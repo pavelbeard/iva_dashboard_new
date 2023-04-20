@@ -25,7 +25,7 @@ const App = () => (
                     <Route path="/register" element={<RegisterPage/>}/>
                     <Route path="/login" element={<LoginPage/>}/>
                     <Route path="/dashboard" element={<PrivateRoute component={<Dashboard />} />}/>
-                    {/*<Route path="/charts" element={<PrivateRoute component={<Charts />} />}/>*/}
+                    <Route path="/charts" element={<PrivateRoute component={<Charts />} />}/>
                     <Route path="/journals" element={<PrivateRoute component={<Journals />} />}/>
                     <Route path="/test_pag" element={<PrivateRoute component={<Pag />} />}/>
                 </Routes>

@@ -1,4 +1,4 @@
-import React, {useState} from "react";
+import React, {useEffect, useState} from "react";
 import SystemCharts from "../components/dashboard/charts/SystemCharts";
 
 function Charts() {
@@ -7,6 +7,10 @@ function Charts() {
     const [value, setValue] = useState("system");
 
     const setChart = event => setValue(event.target.value);
+
+    useEffect(() => {
+        localStorage['currentPage'] = JSON.stringify({page: "/charts"})
+    });
 
     return(
         <>

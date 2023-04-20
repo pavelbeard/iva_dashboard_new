@@ -62,7 +62,8 @@ class AuditLogLastEvents(GenericAPIView):
     def get(self, request):
         try:
             query = self.queryset.filter(~Q(user_ip="") & Q(severity=2)) \
-                        .values('date_created', 'profile_id', 'user_ip', 'severity', 'record_type', 'info_json') \
+                        .values('date_created', 'profile_id', 'user_ip',
+                                'severity', 'record_type', 'info_json') \
                         .order_by('-date_created')[:9]
             serializer = self.get_serializer(query, many=True)
             return Response(serializer.data, status=status.HTTP_200_OK)

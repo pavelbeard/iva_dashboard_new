@@ -39,7 +39,9 @@ export function* params(object, type) {
 }
 
 export function parseInfo (object) {
-    // console.log(object);
+    if (!object)
+        return '';
+    console.log(object);
     const username = object['userName'] || object['username'] || object['login'];
     const conference = object['conferenceSessionName'] || object['name'] || object['eventName'];
     const eventType = object['changeType']
@@ -52,8 +54,29 @@ export function parseInfo (object) {
     const domainName = object['domainName'];
     const roles = object['roles'] || [];
     const protocol = object['protocol'];
+    const dtmfSymbol = object['dtmfSymbol'];
+    const elementType = object['elementType'];
+    const pageIndex = object['pageIndex']
 
     switch (eventType) {
+        case "DTMF_FROM":
+            return <div>
+                Пользователь <b>{username}</b> отправил DTMF тон <b>{dtmfSymbol}</b> в мероприятии <b>{conference}</b>
+            </div>;
+        case "START_TRANSLATION_DESKTOP":
+            return <div>
+                Пользователь <b>{username}</b> начал демонстрацию рабочего стола в мероприятии <b>{conference}</b>
+            </div>;
+        case "STOP_TRANSLATION_DESKTOP":
+            return <div>
+                Пользователь <b>{username}</b> остановил демонстрацию рабочего стола в мероприятии <b>{conference}</b>
+            </div>;
+
+        case "ELEMENT_CHANGE":
+            return <div>
+                Добавлен элемент <b>{elementType}</b> на лист <b>pageIndex {pageIndex}</b> на доске в мероприятии <b>{conference}</b>
+            </div>;
+
         case "LOGIN":
             return (<div>
                 Пользователь вошел в систему в домене <b>{domainName}</b>.
@@ -81,6 +104,10 @@ export function parseInfo (object) {
                 {Array.from(params(object, eventType)).map((item, n) => {
                     return (<div key={`${item}${n}`}>{item}</div>)
                 })}</div>
+        case "DELETE":
+            return <div>
+                Мероприятие <b>{conference} удалено!</b>
+            </div>
         case "LOGOUT":
             return (
                 <>

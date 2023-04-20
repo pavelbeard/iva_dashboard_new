@@ -10,7 +10,7 @@ const EventsJournal = () => {
     const [color, setColor] = useState("#06567c")
 
     const popover = data => {
-        const infoJson = parseInfo(JSON.parse(data));
+        const infoJson = parseInfo(JSON.parse(data)) || "unknown";
         return(
             <div className="bg-dark text-white rounded p-2 tooltip">
                 {infoJson}
@@ -75,6 +75,7 @@ const EventsJournal = () => {
                     </thead>
                     <tbody>
                         {auditData.slice(0,9)?.map((i, n=0) => {
+
                             return(
                                 <OverlayTrigger
                                     placement="bottom"

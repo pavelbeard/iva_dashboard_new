@@ -5,6 +5,7 @@ import * as query from '../queries'
 import {URL} from "../../../base";
 import {useSelector} from "react-redux";
 import OverlayTrigger from "react-bootstrap/OverlayTrigger";
+import {Link} from "react-router-dom";
 
 const CpuIndicator = ({host}) => {
     const [cpuLoad, setCpuLoad] = useState("N/A");
@@ -12,6 +13,7 @@ const CpuIndicator = ({host}) => {
     const [cpuCoresCount, setCpuCoresCount] = useState(0);
     const [cpuCoresLabel, setCpuCoresLabel] = useState([]);
     const [color, setColor] = useState("#000000");
+    const [hoverColor, setHoverColor] = useState();
     const refreshInterval = useSelector(state => state.refresh.refreshInterval);
 
     const setCpuData = async () => {
@@ -118,7 +120,11 @@ const CpuIndicator = ({host}) => {
     return(
         <div className="d-flex flex-row justify-content-start mt-1"
              onMouseLeave={() => setIsOpen(false)}>
-            <Cpu height="24" width="24" color={color} data-ivcs-server-img-attr="cpu"/>
+            <Link to="/charts">
+                <Cpu height="24" width="24" color={hoverColor || color}
+                    onMouseEnter={() => setHoverColor("#fff")}
+                    onMouseLeave={() => setHoverColor(undefined)}/>
+            </Link>
             <div className="ps-2 mt-1" data-ivcs-server-attr="cpu"
             onMouseLeave={() => setIsOpen(false)}>
                 <OverlayTrigger
