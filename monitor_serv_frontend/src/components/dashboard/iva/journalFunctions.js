@@ -39,9 +39,8 @@ export function* params(object, type) {
 }
 
 export function parseInfo (object) {
-    if (!object)
+    if (object === undefined || object === null)
         return '';
-    console.log(object);
     const username = object['userName'] || object['username'] || object['login'];
     const conference = object['conferenceSessionName'] || object['name'] || object['eventName'];
     const eventType = object['changeType']
@@ -56,7 +55,8 @@ export function parseInfo (object) {
     const protocol = object['protocol'];
     const dtmfSymbol = object['dtmfSymbol'];
     const elementType = object['elementType'];
-    const pageIndex = object['pageIndex']
+    const pageIndex = object['pageIndex'];
+    const blockReason = object['blockReason'];
 
     switch (eventType) {
         case "DTMF_FROM":

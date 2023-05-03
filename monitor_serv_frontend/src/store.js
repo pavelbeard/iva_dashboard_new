@@ -5,6 +5,7 @@ import authSlice from "./slices/authSlice";
 import refreshIntervalSlice from "./slices/refreshIntervalSlice";
 import serverSlice from "./slices/serverSlice";
 import indicatorSlice from "./slices/indicatorSlice";
+import datetimeSlice from "./slices/datetimeSlice";
 
 const middleware = [thunk];
 
@@ -12,7 +13,8 @@ const rootReducer = combineReducers({
     auth: authSlice,
     serverManager: serverSlice,
     indicatorManager: indicatorSlice,
-    refresh: refreshIntervalSlice
+    refresh: refreshIntervalSlice,
+    datetimeManager: datetimeSlice,
 });
 
 const store = configureStore({

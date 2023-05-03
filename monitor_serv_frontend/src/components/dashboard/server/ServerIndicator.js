@@ -68,9 +68,9 @@ const ServerIndicator = ({id, host}) => {
                 </thead>
                 <tbody>
                     {typeof targetInfo.map === "function"
-                        ? targetInfo.map(data => {
+                        ? targetInfo.map((data, n=0) => {
                         return (
-                            <tr key={data.labels.instance}>
+                            <tr key={data.labels.instance + `${n}`}>
                                 <td>{data.labels.instance}</td>
                                 <td>| {data.health}</td>
                             </tr>

@@ -1,4 +1,5 @@
-import httpx
+from urllib.parse import quote
+from datetime import datetime, timedelta
 import requests
 from django.conf import settings
 from django.utils.decorators import method_decorator
@@ -56,35 +57,42 @@ class TargetHealth(APIView):
 
 
 class PromQlView(APIView):
-    permission_classes = (AllowAny, )
+    @staticmethod
+    def normalize_date(date_time: str):
+        date_time = datetime.fromisoformat(date_time)
+        date_time = date_time - timedelta(hours=3)
+        return date_time.strftime('%Y-%m-%dT%H:%M:%S.%fZ')
 
     @staticmethod
     def create_url(prom_target, query):
         return f'http://{prom_target}/api/v1/{query}'
 
     def get(self, request):
-        query = request.GET.get('query')
-        host = request.GET.get('host')
-        query_range = request.GET.get('query_range')
-        start = request.GET.get('start')
-        end = request.GET.get('end')
-        step = request.GET.get('step')
+        params = request.GET
 
-        boolean_true_list = ['True', 'true']
+        query = params.get('query')
+        host = params.get('host')
+        query_range = params.get('query_range')
+        start = params.get('start')
+        end = params.get('end')
+        step = params.get('step')
 
-        query_type = "query_range?query" if query_range in boolean_true_list else "query?query"
+        boolean_true_tuple = ('True', 'true')
 
-        completed_query = f"{query_type}={query}"
+        query_type = "query_range?query" if query_range in boolean_true_tuple else "query?query"
+
+        completed_query = f"{query_type}={quote(query)}"
 
         if start:
-            completed_query += f"&{start}"
+            completed_query += f"&start={self.normalize_date(start)}"
         if end:
-            completed_query += f"&{end}"
+            completed_query += f"&end={self.normalize_date(end)}"
         if step:
-            completed_query += f"&{step}"
+            completed_query += f"&step={step}"
 
         try:
-            response = request_for_prom_data.delay(self.create_url(host, completed_query))
+            url = self.create_url(host, completed_query)
+            response = request_for_prom_data.delay(url)
             context = response.get()
             return Response(data=context, status=status.HTTP_200_OK)
         except requests.exceptions.ConnectionError:

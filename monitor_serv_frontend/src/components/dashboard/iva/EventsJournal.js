@@ -14,6 +14,7 @@ const EventsJournal = () => {
 
         try {
             infoJson = parseInfo(JSON.parse(data));
+            // console.log(infoJson)
         } catch (err) {
             infoJson = "unknown";
         }
@@ -82,7 +83,6 @@ const EventsJournal = () => {
                     </thead>
                     <tbody>
                         {auditData.slice(0,9)?.map((i, n=0) => {
-
                             return(
                                 <OverlayTrigger
                                     placement="bottom"

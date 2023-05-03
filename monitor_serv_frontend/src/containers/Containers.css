@@ -53,6 +53,11 @@
     font-size: 10px;
 }
 
+.form-font-size > select {
+    font-size: 10px;
+    width: 130px;
+}
+
 input[type='datetime-local'] {
     width: 150px;
     font-size: 10px;
@@ -69,4 +74,8 @@ label.access-event-log + select {
 .page-num:hover {
     cursor: pointer;
     text-decoration: underline;
+}
+
+.btn.btn-outline-primary {
+    font-size: 10px;
 }

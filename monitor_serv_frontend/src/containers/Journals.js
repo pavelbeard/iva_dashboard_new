@@ -193,7 +193,8 @@ const Journals = () => {
                     </thead>
                     <tbody>
                     {auditData.map((item, n) => {
-                        // const parsedDate = ;
+                        // console.log(item['info_json'])
+                        // console.log(item['user_ip'])
                         const date = new Date(item['date_created']).toLocaleString('ru-RU');
                         return(<tr key={item['user_ip'] + "|" + n}>
                             <th scope="row">{n + startIndex}</th>

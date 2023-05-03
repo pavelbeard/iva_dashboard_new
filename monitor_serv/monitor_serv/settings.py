@@ -160,7 +160,7 @@ LANGUAGE_CODE = 'ru-RU'
 TIME_ZONE = 'Europe/Moscow'
 
 USE_I18N = True
-
+USE_L10N = True
 USE_TZ = True
 
 # Static files (CSS, JavaScript, Images)
@@ -187,7 +187,7 @@ AUTH_USER_MODEL = "dashboard_users.CustomUser"
 
 ENCRYPTION_KEY = os.getenv('ENCRYPTION_KEY', b'Thm1rA590U9IBSMMIlKWgBSPwbP30nz4keJR6N4RXjI=')
 
-DATETIME_FORMAT = "%d/%m/%y %H:%M:%S"
+DATETIME_FORMAT = "d/m/y H:M:S"
 
 REST_FRAMEWORK = {
     'DEFAULT_PARSER_CLASSES': [

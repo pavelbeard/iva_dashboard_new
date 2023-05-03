@@ -30,7 +30,7 @@ const CheckSSLCert = () => {
                 const sslIssuer = response.issuer;
                 const remainingDays = response.daysRemaining;
 
-                if (remainingDays > 90) {
+                if (remainingDays >= 90) {
                     setSslCertStatus("OK");
                     setColor("#16b616");
                 } else if (21 <= remainingDays && remainingDays < 90) {
