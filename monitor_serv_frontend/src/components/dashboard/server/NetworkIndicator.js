@@ -70,7 +70,7 @@ const NetworkIndicator = ({host}) => {
                         <tr key={i.metric.__name__ + "|" + i.metric.device}>
                             <td>{i.metric.__name__}</td>
                             <td>{i.metric.device}</td>
-                            <td>{parseFloat(i.value[1]).toFixed(2)} mbps</td>
+                            <td>{parseFloat(i.value[1]).toFixed(2)} kbit/s</td>
                         </tr>
                     )
                 }) : ""}

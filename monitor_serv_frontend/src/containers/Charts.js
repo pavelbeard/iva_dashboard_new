@@ -63,6 +63,8 @@ const Charts = () => {
     }, [startDate, endDate, step, autoupdate, host]);
 
     useEffect(() => {
+        dispatch(getServers());
+        setHost(commonServers?.slice(0, -1));
         const interval = setInterval(dispatch, refreshInterval, getServers());
         return () => clearInterval(interval);
     }, []);
