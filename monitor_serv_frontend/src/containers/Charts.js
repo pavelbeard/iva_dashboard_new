@@ -2,15 +2,24 @@ import React, {useEffect, useRef, useState} from "react";
 import SystemCharts from "../components/dashboard/charts/SystemCharts";
 import {useDispatch, useSelector} from "react-redux";
 import {setAutoupdate, setEndDate, setPeriod, setStartDate} from "../slices/datetimeSlice";
+import {getServers} from "../slices/serverSlice";
+import NetworkCharts from "../components/dashboard/charts/NetworkCharts";
+import DiskCharts from "../components/dashboard/charts/DiskCharts";
+import ModulesCharts from "../components/dashboard/charts/ModulesCharts";
 
 const Charts = () => {
     document.title = "Инфопанель | Графики";
 
     const dispatch = useDispatch();
     const {startDate, endDate, step} = useSelector(state => state.datetimeManager);
+    const refreshInterval = useSelector(state => state.refresh.refreshInterval);
+    const commonServers = useSelector(state => state.serverManager.serversList.map(s => {
+        return s.address + ":" + s.port;
+    }));
     const [value, setValue] = useState("system");
     const [period, _] = useState("1h");
     const [autoupdate, setAutoUpdate] = useState(false);
+    const [host, setHost] = useState();
     const changePeriodSelectRef = useRef();
     const changePeriodManuallyRefStart = useRef();
     const changePeriodManuallyRefEnd = useRef();
@@ -26,6 +35,9 @@ const Charts = () => {
         const changeElem = changePeriodSelectRef.current;
         changeElem.value = "custom";
 
+        setAutoUpdate(false);
+        dispatch(setAutoupdate({autoupdate: false}));
+
         if (element.id === "inputStartDate") {
             dispatch(setStartDate({value: date.toISOString(), op: "+"}));
         }
@@ -40,28 +52,46 @@ const Charts = () => {
     };
 
     const changeAutoupdate = e => {
-        e.preventDefault();
-        setAutoUpdate(prevState => !prevState);
-        console.log(autoupdate)
-        dispatch(setAutoupdate({autoupdate: autoupdate}));
-    }
+        setAutoUpdate(e.target.checked);
+        dispatch(setAutoupdate({autoupdate: e.target.checked}));
+    };
+
+    const handleHost = e => setHost(e.target.value);
 
     useEffect(() => {
         localStorage['currentPage'] = JSON.stringify({page: "/charts"});
-    }, [startDate, endDate, step]);
+    }, [startDate, endDate, step, autoupdate, host]);
+
+    useEffect(() => {
+        const interval = setInterval(dispatch, refreshInterval, getServers());
+        return () => clearInterval(interval);
+    }, []);
 
     const popover = chartType => {
         switch (chartType) {
-            case "modules": return <div>ModulesCharts</div>
-            case "network": return <div>NetworkCharts</div>
-            default: return <SystemCharts/>
+            case "modules": return <ModulesCharts host={host}/>
+            case "disk": return <DiskCharts host={host}/>
+            case "network": return <NetworkCharts host={host} />
+            default: return <SystemCharts host={host}/>
         }
     };
 
     return(
         <>
             <div className="container-fluid d-flex mt-3">
-                <div className="form-group d-flex flex-row ps-5 align-items-center form-font-size">
+                <div className="form-font-size d-flex flex-row align-items-center ps-5">
+                    <label htmlFor="servers">Сервер:</label>
+                    <select defaultValue={commonServers?.slice(0, 1)} className="form-select ms-1" id="servers"
+                    onChange={e => handleHost(e)}>
+                        {commonServers.map(s => {
+                            return(
+                                <option value={s} key={s}>{s}</option>
+                            )
+                        })}
+                    </select>
+                </div>
+                
+                <div className="form-group d-flex flex-row ps-2 align-items-center form-font-size">
                     <label htmlFor="inputStartDate" className="pe-1">Начало:</label>
                     <input defaultValue={startDate.slice(0, -8)}
                            onChange={e => changePeriodManually(e)}
@@ -96,9 +126,8 @@ const Charts = () => {
                 <div className="form-font-size d-flex flex-row align-items-center ps-3">
                     <label htmlFor="autoupdate">Автообновление:</label>
                     <input id="autoupdate" className="ms-1" type="checkbox"
-                        defaultChecked={autoupdate}
-                           onClick={e => changeAutoupdate(e)}
-                    />
+                           defaultChecked={autoupdate}
+                           onClick={e => changeAutoupdate(e)} />
                 </div>
 
                 <div onChange={setChart.bind(this)} className="btn-group ps-3"
@@ -109,6 +138,9 @@ const Charts = () => {
                     <input type="radio" className="btn-check" name="network" id="network" autoComplete="off"
                            value="network" checked={"network" === value} readOnly={true}/>
                     <label className="btn btn-outline-primary" htmlFor="network">Network</label>
+                    <input type="radio" className="btn-check" name="disk" id="disk" autoComplete="off"
+                           value="disk" checked={"disk" === value} readOnly={true}/>
+                    <label className="btn btn-outline-primary" htmlFor="disk">Disk</label>
                     <input type="radio" className="btn-check" name="modules" id="modules" autoComplete="off"
                            value="modules" checked={"modules" === value} readOnly={true}/>
                     <label className="btn btn-outline-primary" htmlFor="modules">Modules</label>

@@ -7,30 +7,34 @@ import './Containers.css';
 import {API_URL} from "../base";
 import axios from "axios";
 import EventsJournal from "../components/dashboard/iva/EventsJournal";
+import {getServers} from "../slices/serverSlice";
 
 
 const Dashboard = () => {
     document.title = "Инфопанель | Главная";
 
+    const dispatch = useDispatch();
+    const commonServers = useSelector(state => state.serverManager.serversList);
     const refreshInterval = useSelector(state => state.refresh.refreshInterval);
-    const [commonServers, setCommonServers] = useState([]);
+    // const [commonServers, setCommonServers] = useState([]);
 
-    const scanServers = async () => {
-        try {
-            const urlRequest = `${API_URL}/api/targets/all`;
-            const response = (await axios.get(urlRequest)).data;
-
-            if (response) {
-                setCommonServers(response)
-            }
-
-        } catch (err) {
-            setCommonServers([]);
-        }
-    }
+    // const scanServers = async () => {
+    //     dispatch(getServers())
+        // try {
+        //     const urlRequest = `${API_URL}/api/targets/all`;
+        //     const response = (await axios.get(urlRequest)).data;
+        //
+        //     if (response) {
+        //         setCommonServers(response);
+        //     }
+        //
+        // } catch (err) {
+        //     setCommonServers([]);
+        // }
+    // }
 
     const setDataImmediately = () => {
-        setTimeout(scanServers, 0);
+        setTimeout(dispatch, 0, getServers());
     };
 
     useEffect(() => {
@@ -45,7 +49,7 @@ const Dashboard = () => {
         <div className="ps-2 pe-2">
             <h4 className="text-center pt-2 pb-2">Мониторинг серверов</h4>
             <div className="col-md-6 w-100 cards">
-                {commonServers.map(target => {
+                {typeof commonServers.map === "function" ? commonServers.map(target => {
                     const card = <ServerCard
                         key={target.address + ":" + target.port}
                         id={target.id}
@@ -53,7 +57,7 @@ const Dashboard = () => {
                         port={target.port}
                     />;
                     return (card);
-                })}
+                }) : ""}
             </div>
         </div>
     );

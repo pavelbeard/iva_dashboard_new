@@ -1,6 +1,6 @@
 import {createSlice} from "@reduxjs/toolkit";
 
-const MOSCOW_TIME = 180
+const MOSCOW_TIME = 180;
 
 let startDate = new Date();
 startDate.setHours(startDate.getHours() - 1);
@@ -46,7 +46,7 @@ const datetimeSlice = createSlice({
             state.period = payload.period;
         },
         setAutoupdate(state, {payload}) {
-            state.autoupdate = payload.autoupdate
+            state.autoupdate = payload.autoupdate;
         }
     }
 });

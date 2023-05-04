@@ -3,25 +3,28 @@ import {API_URL, CONFIG} from "../../../base";
 import axios from "axios";
 import {useSelector} from "react-redux";
 import {
-  Chart as ChartJS,
-  CategoryScale,
-  LinearScale,
-  PointElement,
-  LineElement,
-  Title,
-  Tooltip,
-  Legend,
+    Chart as ChartJS,
+    CategoryScale,
+    LinearScale,
+    PointElement,
+    LineElement,
+    Title,
+    Tooltip,
+    Legend,
+    TimeScale
 } from 'chart.js';
 import {Line} from "react-chartjs-2";
+// import ChartDateFns from "chartjs-adapter-date-fns";
 
 ChartJS.register(
-  CategoryScale,
-  LinearScale,
-  PointElement,
-  LineElement,
-  Title,
-  Tooltip,
-  Legend
+    CategoryScale,
+    LinearScale,
+    PointElement,
+    LineElement,
+    Title,
+    Tooltip,
+    Legend,
+    TimeScale
 );
 
 const COLOR_PALETTE =
@@ -35,7 +38,7 @@ const COLOR_PALETTE =
     '#006347', '#425D10', '#AC0123',
     '#56187D', '#411747', '#010101'];
 
-const Chart = ({metricName, host, query, name}) => {
+const Chart = ({metricName, host, query, name, metricMeasure}) => {
     const data = {
         labels: [],
         datasets: [{
@@ -49,43 +52,85 @@ const Chart = ({metricName, host, query, name}) => {
     const options = {
         scales: {
             y: {
+                ticks: {
+                    callback: function (value, index, ticks) {
+                        return this.getLabelForValue(value) + " " + metricMeasure;
+                    }
+                },
                 beginAtZero: true
+            },
+            x: {
+                ticks: {
+                    maxRotation: 0,
+                    callback: function (value, index, ticks) {
+                        return this.getLabelForValue(value).slice(0, -3) ;
+                    }
+                },
+
+            }
+        },
+        plugins: {
+            title: {
+                display: true,
+                text: name
             }
         }
     };
 
     const refreshInterval = useSelector(state => state.refresh.refreshInterval);
-    let {startDate, endDate, period, autoupdate} = useSelector(state => state.datetimeManager);
+    let {startDate, endDate, period} = useSelector(state => state.datetimeManager);
+    const autoupdate = useSelector(state => state.datetimeManager.autoupdate);
     const [chartData, setChartData] = useState(data);
     const [step, setStep] = useState("1m");
 
-    const changeDate = date => {
-        date = new Date(date);
-        date.setMinutes(date.getMinutes() + 1);
-        return date.toISOString();
-    };
-
     const fetchData = async () => {
         try {
-            if (autoupdate) {
-                endDate = changeDate(endDate);
-                startDate = changeDate(startDate);
+            let hoursPeriod;
+            switch (period) {
+                case "3h": hoursPeriod = 3; break;
+                case "6h": hoursPeriod = 6; break;
+                case "12h": hoursPeriod = 12; break;
+                case "1d": hoursPeriod = 24; break;
+                case "1w": hoursPeriod = 24 * 7; break;
+                case "1m": hoursPeriod = 24 * 30; break;
+                case "custom": hoursPeriod = undefined; break;
+                default: hoursPeriod = 1; break;
             }
 
-            const hours = Math.round((new Date(endDate) - new Date(startDate)) / (60 * 60 * 1000));
-            if (hours > 0 && hours <= 1) {
+            if (autoupdate) {
+                startDate = new Date();
+                startDate.setHours((startDate.getHours() + 3) - hoursPeriod);
+                startDate = startDate.toISOString();
+
+                endDate = new Date();
+                endDate.setHours(endDate.getHours() + 3);
+                endDate = endDate.toISOString();
+            }
+
+            let hoursDifference;
+            if (!(hoursPeriod === undefined || hoursPeriod === 1)) {
+                startDate = new Date(startDate);
+                startDate.setHours(startDate.getHours() - hoursPeriod);
+                startDate = startDate.toISOString();
+            }
+
+            hoursDifference = Math.round((new Date(endDate) - new Date(startDate)) / (60 * 60 * 1000));
+
+            if (hoursDifference > 0 && hoursDifference <= 0.5) {
+                setStep("15s");
+            } else if (hoursDifference > 0.5 && hoursDifference <= 1) {
                 setStep("1m");
-            } else if (hours > 1 && hours <= 3) {
+            } else if (hoursDifference > 1 && hoursDifference <= 3) {
                 setStep("2m");
-            } else if (hours > 3 && hours <= 6) {
+            } else if (hoursDifference > 3 && hoursDifference <= 6) {
                 setStep("4m");
-            } else if (hours > 6 && hours <= 12) {
+            } else if (hoursDifference > 6 && hoursDifference <= 12) {
                 setStep("8m");
-            } else if (hours > 12 && hours <= 24) {
+            } else if (hoursDifference > 12 && hoursDifference <= 24) {
                 setStep("15m");
-            } else if (hours > 24 && hours <= (24 * 7)) {
+            } else if (hoursDifference > 24 && hoursDifference <= (24 * 7)) {
                 setStep("30m");
-            } else if (hours > (24 * 7) && hours <= (24 * 30)) {
+            } else if (hoursDifference > (24 * 7) && hoursDifference <= (24 * 30)) {
                 setStep("1h");
             }
 
@@ -101,7 +146,7 @@ const Chart = ({metricName, host, query, name}) => {
 
             if (result?.length > 0) {
                 let labels;
-                if (hours > 24) {
+                if (hoursDifference >= 24) {
                     labels = result[0].values.map(v => new Date(v[0] * 1000).toLocaleString());
                 } else {
                     labels = result[0].values.map(v => new Date(v[0] * 1000).toLocaleTimeString());
@@ -111,7 +156,7 @@ const Chart = ({metricName, host, query, name}) => {
                     const colorPaletteElement = COLOR_PALETTE[i];
 
                     return {
-                        label: dataset.metric.mode || "",
+                        label: dataset.metric.mode || dataset.metric.__name__ + " {" + (dataset.metric.device || "") + "}",
                         data: dataset.values.map(v => parseFloat(v[1]).toFixed(2)),
                         borderColor: colorPaletteElement
                     }
@@ -136,18 +181,15 @@ const Chart = ({metricName, host, query, name}) => {
         fetchDataImmediately();
         const interval = setInterval(fetchDataImmediately, refreshInterval);
         return () => clearInterval(interval)
-    }, [refreshInterval, startDate, endDate, step, period]);
+    }, [refreshInterval, startDate, endDate, step, period, autoupdate, host]);
 
     return (
-        <>
-            <div className="container-fluid ps-5 pt-3">{name}  {startDate} </div>
-            <div className="ps-5 pt-1 pe-5">
-                <Line data={chartData}
-                      options={{...options, maintainAspectRatio: false}}
-                      width={100}
-                      height={350}/>
-            </div>
-        </>
+        <div className="ps-5 pt-1 pe-5">
+            <Line data={chartData}
+                  options={{...options, maintainAspectRatio: false}}
+                  width={100}
+                  height={350}/>
+        </div>
     );
     // return <div>CHART</div>;
 };

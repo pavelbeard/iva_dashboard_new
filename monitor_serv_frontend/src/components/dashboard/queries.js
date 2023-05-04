@@ -15,13 +15,18 @@ export const system = {
 }
 
 export const network = {
-    errors: '',
+    errors: 'label_keep(('
+                        + 'alias(node_network_receive_errs_total, "RX errors"),'
+                        + 'alias(node_network_transmit_errs_total, "TX errors")' +
+                        '), "__name__", "device")',
     throughput: 'label_keep(('
                 + 'alias((rate(node_network_receive_bytes_total) * 8 / 1024), "RX"),'
                 + 'alias((rate(node_network_transmit_bytes_total) * 8 / 1024), "TX")'
                 + '), "__name__", "device")',
-    packets: '',
-
+    packets: 'label_keep(('
+                        + 'alias(rate(node_network_receive_packets_total), "RX packets/s"),'
+                        + 'alias(rate(node_network_transmit_packets_total), "TX packets/s")'
+                        + '), "__name__", "device")',
 }
 
 export const disk = {
@@ -32,19 +37,21 @@ export const disk = {
                 'alias((node_filesystem_free_bytes-node_filesystem_avail_bytes) / 1073741824, "Reserved"), ' +
                 'alias(node_filesystem_avail_bytes / 1073741824, "Free")), ' +
                 '"mountpoint", "/|/etc/hosts"), "__name__", "device")',
-    merges: '',
+    merges: 'label_keep((alias(rate(node_disk_reads_merged_total), "Reads merged"), alias(rate(node_disk_writes_merged_total), "Writes merged")), "__name__", "device")',
     io: 'label_keep((alias(rate(node_disk_read_bytes_total) / 1048576, "Reads"), alias(rate(node_disk_written_bytes_total) / 1048576, "Writes")), "__name__", "device")',
-    operations: '',
-    times: '',
+    operations: 'label_keep((alias(rate(node_disk_reads_completed_total), "Reads"), alias(rate(node_disk_writes_completed_total), "Writes")), "__name__", "device")',
+    times: 'label_keep((alias(rate(node_disk_read_time_seconds_total) / rate(node_disk_reads_completed_total),"Avg time/op read"), alias(rate(node_disk_write_time_seconds_total) / rate(node_disk_writes_completed_total), "Avg time/op write"), alias(rate(node_disk_io_time_seconds_total) * 100, "I/O utilization")), "__name__", "device")',
 }
 
 export const modules = {
     states: 'namedprocess_namegroup_states',
-    cpuUsage: '',
-    memoryResident: '',
-    diskRead: '',
-    diskWrite: '',
-    threads: '',
+    cpuUsage: 'label_keep(label_move((sum(rate(namedprocess_namegroup_cpu_seconds_total) * 100) by (groupname)), "groupname", "__name__"), "__name__")',
+    memoryResident: 'label_keep(label_move(namedprocess_namegroup_memory_bytes{memtype="resident"} / 1048576, "groupname", "__name__"), "__name__")',
+    diskRead: 'label_keep(label_move(rate(namedprocess_namegroup_read_bytes_total) / 1024, "groupname", "__name__"), "__name__")',
+    diskWrite: 'label_keep(label_move(rate(namedprocess_namegroup_write_bytes_total) / 1024, "groupname", "__name__"), "__name__")',
+    threads: 'label_keep(label_move(namedprocess_namegroup_num_threads, "groupname", "__name__"), "__name__")',
     processes: 'label_keep(label_move(namedprocess_namegroup_num_procs, "groupname","__name__"),"__name__")',
-    fileDescriptors: '',
+    fileDescriptors: 'label_keep(label_move(namedprocess_namegroup_open_filedesc, "groupname", "__name__"), "__name__")',
+    hiccupsMonotonic: 'label_keep(label_move(monotonic_hiccup_max_ms / 1000, "service", "__name__"), "__name__")',
+    hiccupsNonMonotonic: 'label_keep(label_move(non_monotonic_hiccup_max_ms / 1000, "service", "__name__"), "__name__")'
 }

@@ -1,48 +1,69 @@
 import {system} from "../queries";
 import Chart from "./Chart";
+import {useEffect} from "react";
 
-const chartGroups = [
-    {
-        id: 'group.System',
-        charts: [
-            {
-                id: 'chart.system.cpu.usage',
-                query: system.cpuData,
-            },
-            {
-                id: 'chart.system.la',
-                query: system.la,
-            },
-            {
-                id: 'chart.system.memory',
-                query: system.memory,
-            },
-            {
-                id: 'chart.system.contextSwitches',
-                query: system.contextSwitches,
-            },
-            {
-                id: 'chart.system.uptime',
-                query: system.uptime,
-            }
-        ]
+const chartGroups = {
+    id: 'group.System',
+    charts: [
+        {
+            id: 'chart.system.cpu.usage',
+            query: system.cpuData,
+            name: "CPU usage",
+            metricMeasure: "%"
+        },
+        {
+            id: 'chart.system.la',
+            query: system.la,
+            name: "Load Average",
+            metricMeasure: ""
+        },
+        {
+            id: 'chart.system.memory',
+            query: system.memory,
+            name: "RAM",
+            metricMeasure: "GB"
+        },
+        {
+            id: 'chart.system.contextSwitches',
+            query: system.contextSwitches,
+            name: "Context switches",
+            metricMeasure: "s"
+        },
+        {
+            id: 'chart.system.uptime',
+            query: system.uptime,
+            name: "Uptime",
+            metricMeasure: "hours"
+        }
+    ]
+};
+
+
+const SystemCharts = ({host}) => {
+    useEffect(() => {
+
+    }, [host])
+
+    if (host) {
+        return(
+            <div className="overflow-auto" style={{height: "500px"}}>
+                {chartGroups.charts.map(chart => {
+                    return (
+                        <div key={chart.name}>
+                            <Chart metricName={chart.id}
+                                   query={chart.query}
+                                   host={host}
+                                   name={chart.name}
+                                   metricMeasure={chart.metricMeasure}
+                            />
+                        </div>
+                    );
+                })}
+            </div>
+        )
     }
-];
 
-const metricName = "cpu.stats";
-
-const SystemCharts = () => {
-
-    // const q = 'sum by (mode,instance) (label_keep(rate(node_cpu_seconds_total[1h]), "mode")) * 100 / distinct(label_value(node_cpu_seconds_total, "cpu"))';
-    // chartGroups[0].charts[0].query
-    return(
-        <div>
-            <Chart metricName={metricName}
-                   query={chartGroups[0].charts[0].query}
-                   host={"127.0.0.1:9091"}
-                   name={"CPU"}/>
-        </div>
-    )
+    return <div className="container-fluid p-5">Нет серверов!</div>
 };
 
 export default SystemCharts;
