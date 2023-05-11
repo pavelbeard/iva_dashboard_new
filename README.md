@@ -2,7 +2,7 @@
 
 <p style="text-align: center">
 Created by pavelbeard
-<br>v0.6.94</p>
+<br>v0.9.5</p>
 
 Введение:
   <ul>

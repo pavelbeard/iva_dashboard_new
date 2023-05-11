@@ -50,7 +50,7 @@ export const registerAsync = createAsyncThunk(
 
 export const logoutAsync = createAsyncThunk(
     'authSlice/logoutAsync',
-    async (arg, thunkAPI) => {
+    async () => {
         try {
             const urlRequest = `${API_URL}/api/users/logout`;
             const response = await axios.post(urlRequest, CONFIG);
@@ -80,19 +80,24 @@ export const loginAsync = createAsyncThunk(
     }
 );
 
+export const checkAuthentication = createAsyncThunk(
+    'authSlice/checkAuthentication',
+    async () => {
+        try {
+            const urlRequest = `${API_URL}/api/users/authentication`;
+            const response = (await axios.get(urlRequest, CONFIG)).data;
+            return response.isAuthenticated;
+
+        } catch (err) {
+            return "false";
+        }
+    }
+);
+
 const authSlice = createSlice({
     name: 'auth',
     initialState,
     reducers: {
-        checkAuthentication(state) {
-            const authState = localStorage.getItem('isAuthenticated') !== null;
-            if(authState) {
-                state.isAuthenticated = localStorage.getItem('isAuthenticated');
-            }
-            else {
-                state.isAuthenticated = false;
-            }
-        },
         setAsUser(state) {
             const userState = localStorage.getItem('asUser') !== null;
             if(userState) {
@@ -121,7 +126,7 @@ const authSlice = createSlice({
                     state.isAuthenticated = false;
                 }
                 else if (payload.success) {
-                    localStorage.setItem('isAuthenticated', true)
+                    localStorage.setItem('isAuthenticated', true);
                     localStorage.setItem('asUser', payload.success);
                     state.successMessage.push(payload.success);
                     state.isAuthenticated = localStorage.getItem('isAuthenticated');
@@ -209,8 +214,16 @@ const authSlice = createSlice({
                 localStorage.removeItem('isAuthenticated');
                 localStorage.removeItem('asUser');
             })
+            .addCase(checkAuthentication.fulfilled, (state, {payload}) => {
+                state.isAuthenticated = payload === "true";
+                localStorage['isAuthenticated'] = payload;
+            })
+            .addCase(checkAuthentication.rejected, (state) => {
+                state.isAuthenticated = false;
+                localStorage['isAuthenticated'] = false;
+            })
     }
 });
 
-export const {checkAuthentication, setAsUser} = authSlice.actions;
+export const {setAuthenticationState, setAsUser} = authSlice.actions;
 export default authSlice.reducer;

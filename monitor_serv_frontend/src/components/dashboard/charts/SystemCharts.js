@@ -46,7 +46,7 @@ const SystemCharts = ({host}) => {
 
     if (host) {
         return(
-            <div className="overflow-auto" style={{height: "500px"}}>
+            <div className="overflow-auto h-auto">
                 {chartGroups.charts.map(chart => {
                     return (
                         <div key={chart.name}>

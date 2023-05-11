@@ -33,8 +33,8 @@ services:
         window: 120s
 
   monitor-server-frontend:
-    image: pavelbeard/prod.monitor-server-frontend:v0.95
-    container_name: prod.monitor-server-frontend-v0.95
+    image: pavelbeard/prod.monitor-server-frontend:v0.96
+    container_name: prod.monitor-server-frontend-v0.96
     volumes:
       - static_files.prod:/home/monitor-server-app/web/staticfiles
     ports:
@@ -72,7 +72,7 @@ services:
     build:
       context: monitor_serv
       dockerfile: prod.monitor_serv.Dockerfile
-    container_name: prod.monitor-server-v0.95
+    container_name: prod.monitor-server-v0.96
     env_file:
       - env/prod.monitor-serv.env
     entrypoint: ["python3.11", "/home/monitor-server-app/web/entrypoint.py"]

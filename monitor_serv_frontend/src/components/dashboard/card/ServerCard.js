@@ -12,6 +12,7 @@ import {API_URL, parse} from "../../../base";
 import {useSelector} from "react-redux";
 import AppIndicator from "../server/AppIndicator";
 import axios from "axios";
+import {setAuthenticationState} from "../../../slices/authSlice";
 
 const ServerCard = ({id, address, port}) => {
     const refreshInterval = useSelector(state => state.refresh.refreshInterval);
@@ -32,6 +33,7 @@ const ServerCard = ({id, address, port}) => {
             }
         } catch (err) {
             setTargetHealth(false);
+            // setAuthenticationState({isAuthenticated: false});
             console.log(`${getTargetHealth.name}: что-то тут не так...`);
         }
     };

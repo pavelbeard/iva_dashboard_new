@@ -25,17 +25,17 @@ class UsersView(ListAPIView):
 
 
 class CheckAuthentication(APIView):
-    permission_classes = (AllowAny, )
-
     def get(self, request):
-        user = self.request.user
-
-        try:
-            user = CustomUser.objects.get()
-            if user.is_authenticated:
-                return Response({"isAuthenticated": "success"}, status.HTTP_200_OK)
-        except CustomUser.DoesNotExist:
-            return Response({"isAuthenticated": "error"}, HTTPStatus.UNAUTHORIZED)
+        return Response({"isAuthenticated": "true"})
+        #
+        # user = self.request.user
+        #
+        # try:
+        #     user = CustomUser.objects.get()
+        #     if user.is_authenticated:
+        #         return Response({"isAuthenticated": "success"}, status.HTTP_200_OK)
+        # except CustomUser.DoesNotExist:
+        #     return Response({"isAuthenticated": "error"}, HTTPStatus.UNAUTHORIZED)
 
 
 @csrf_protect_method
