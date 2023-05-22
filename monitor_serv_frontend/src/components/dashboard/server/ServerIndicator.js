@@ -8,12 +8,14 @@ import './Server.css';
 import axios from "axios";
 import AppList from "./AppList";
 import RoleIndicator from "./RoleIndicator";
+import {Link} from "react-router-dom";
 
 const ServerIndicator = ({id, host}) => {
     const refreshInterval = useSelector(state => state.refresh.refreshInterval);
     const [targetInfo, setTargetInfo] = useState([])
     const [targetStatus, setTargetStatus] = useState("N/A");
     const [color, setColor] = useState("#000000");
+    const [hoverColor, setHoverColor] = useState();
     const [rotateEvent, setRotateEvent] = useState(false);
 
     const animateRefresh = () => {
@@ -81,7 +83,12 @@ const ServerIndicator = ({id, host}) => {
         </div>
     );
 
-    const up = <DatabaseFillUp height="32" width="32" color={color} data-ivcs-server-img-attr="server"/>
+    const up = <Link to="/charts">
+        <DatabaseFillUp height="32" width="32" color={hoverColor || color} data-ivcs-server-img-attr="server"
+                        onMouseEnter={() => setHoverColor("#fff")}
+                        onMouseLeave={() => setHoverColor(undefined)}
+        />
+    </Link>
     const down = <DatabaseFillDown height="32" width="32" color={color} data-ivcs-server-img-attr="server"/>
 
 

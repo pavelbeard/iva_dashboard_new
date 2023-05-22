@@ -76,18 +76,13 @@ class AuditLogLastEvents(GenericAPIView):
 
 class AuditLogEventsAll(APIView):
     pagination_class = StandardResultsSetPagination
-    filter_backends = [DjangoFilterBackend]
+    filter_backends = (DjangoFilterBackend, )
     filterset_class = AuditLogRecordFilter
 
     def get(self, request):
         try:
             params = request.GET
             page_size = params.get('page_size', 25)
-
-            # datetime_range = (
-            #     datetime.fromisoformat(params.get('date_created_after')),
-            #     datetime.fromisoformat(params.get('date_created_before'))
-            # )
 
             self.pagination_class.page_size = int(page_size)
             queryset = models.AuditLogRecord.objects.order_by('-date_created')
@@ -104,4 +99,38 @@ class AuditLogEventsAll(APIView):
             return Response({
                 "status": "error",
                 "reason": "unexpected exception"
+            }, status=status.HTTP_400_BAD_REQUEST)
+
+
+class PlannedConference(APIView):
+    permission_classes = (AllowAny, )
+    pagination_class = StandardResultsSetPagination
+    filter_backends = (DjangoFilterBackend, )
+    filterset_class = None
+
+    def get(self, request):
+        try:
+            params = request.GET
+            page_size = params.get('page_size', 25)
+
+            self.pagination_class.page_size = int(page_size)
+            query = models.Conference.objects\
+                .select_related('owner')\
+                .filter(~Q(conference_number=None))
+
+            paginator = self.pagination_class()
+            page = paginator.paginate_queryset(
+                query.values('name', 'owner__name', 'start_date', 'conference_number'), request
+            )
+            paginated_response = paginator.get_paginated_response(page)
+
+            # запрос: по каждому мероприятию нужно узнать количество юзеров в данный момент времени
+            now = timezone.now()
+            now_1 = timezone.now() - timedelta(minutes=1, seconds=1)
+
+            return Response(paginated_response.data, status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response({
+                "status": "error",
+                "message": "unexpected exception"
             }, status=status.HTTP_400_BAD_REQUEST)

@@ -5,11 +5,13 @@ import {getData, URL} from "../../../base";
 import {useSelector} from "react-redux";
 import OverlayTrigger from "react-bootstrap/OverlayTrigger";
 import axios from "axios";
+import {Link} from "react-router-dom";
 
 const NetworkIndicator = ({host}) => {
     const [netStatus, setNetStatus] = useState("N/A");
     const [netDataTooltip, setNetDataTooltip] = useState([]);
     const [color, setColor] = useState("#000000");
+    const [hoverColor, setHoverColor] = useState();
     const refreshInterval = useSelector(state => {
         const interval = localStorage.getItem('refreshInterval')
         if (interval !== null)
@@ -82,7 +84,12 @@ const NetworkIndicator = ({host}) => {
     return(
         <div className="d-flex flex-row justify-content-start mt-1"
              onMouseLeave={() => setIsOpen(false)}>
-            <Ethernet height="24" width="24" color={color} data-ivcs-server-img-attr="net"/>
+            <Link to="/charts">
+                <Ethernet height="24" width="24" color={hoverColor || color} data-ivcs-server-img-attr="net"
+                          onMouseEnter={() => setHoverColor("#fff")}
+                          onMouseLeave={() => setHoverColor(undefined)}
+                />
+            </Link>
             <div className="ps-2 mt-1" data-ivcs-server-attr="net">
                 <OverlayTrigger
                     onToggle={() => setIsOpen(true)}

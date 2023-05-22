@@ -64,7 +64,7 @@ const Charts = () => {
 
     useEffect(() => {
         dispatch(getServers());
-        setHost(commonServers?.slice(0, -1));
+        setHost(commonServers[0]);
         const interval = setInterval(dispatch, refreshInterval, getServers());
         return () => clearInterval(interval);
     }, []);
@@ -83,9 +83,11 @@ const Charts = () => {
             <div className="container-fluid d-flex mt-3">
                 <div className="form-font-size d-flex flex-row align-items-center ps-5">
                     <label htmlFor="servers">Сервер:</label>
-                    <select defaultValue={commonServers?.slice(0, 1)} className="form-select ms-1" id="servers"
+                    <select defaultValue={commonServers[0]} className="form-select ms-1" id="servers"
                     onChange={e => handleHost(e)}>
                         {commonServers.map(s => {
+                            console.log(s)
+
                             return(
                                 <option value={s} key={s}>{s}</option>
                             )

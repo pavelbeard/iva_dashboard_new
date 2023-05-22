@@ -30,10 +30,11 @@ class MediaServerSerializer(serializers.ModelSerializer):
         model = MediaServer
         fields = '__all__'
 
+
 class ProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model = Profile
-        fields = ('name', )
+        fields = ('name',)
 
 
 class AuditLogRecordSerializer(serializers.ModelSerializer):
@@ -56,3 +57,9 @@ class AuditLogRecordSerializer(serializers.ModelSerializer):
 
         profile_serializer = ProfileSerializer(profile)
         return profile_serializer.data['name']
+
+
+class PlannedConferenceSerializer(serializers.Serializer):
+    class Meta:
+        model = Conference
+

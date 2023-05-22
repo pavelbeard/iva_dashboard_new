@@ -5,11 +5,13 @@ import {getData, URL} from "../../../base";
 import {useSelector} from "react-redux";
 import OverlayTrigger from "react-bootstrap/OverlayTrigger";
 import axios from "axios";
+import {Link} from "react-router-dom";
 
 const MemoryIndicator = ({host}) => {
     const [memoryStatus, setMemoryStatus] = useState("N/A");
     const [memoryDataTooltip, setMemoryDataTooltip] = useState([]);
     const [color, setColor] = useState("#000000");
+    const [hoverColor, setHoverColor] = useState();
     const refreshInterval = useSelector(state => {
         const interval = localStorage.getItem('refreshInterval')
         if (interval !== null)
@@ -86,7 +88,12 @@ const MemoryIndicator = ({host}) => {
 
     return(
         <div className="d-flex flex-row justify-content-start mt-1">
-            <Memory height="24" width="24" color={color} data-ivcs-server-img-attr="memory"/>
+            <Link to="/charts">
+                <Memory height="24" width="24" color={hoverColor || color} data-ivcs-server-img-attr="memory"
+                        onMouseEnter={() => setHoverColor("#fff")}
+                        onMouseLeave={() => setHoverColor(undefined)}
+                />
+            </Link>
             <div className="ps-2 mt-1" data-ivcs-server-attr="memory"
                  onMouseLeave={() => setIsOpen(false)}>
                 <OverlayTrigger

@@ -5,11 +5,13 @@ import {getData, URL} from "../../../base";
 import {useSelector} from "react-redux";
 import OverlayTrigger from "react-bootstrap/OverlayTrigger";
 import axios from "axios";
+import {Link} from "react-router-dom";
 
 const DeviceSsdIndicator = ({host}) => {
     const [deviceSsdUsedSpace, setDeviceSsdUsedSpace] = useState("N/A");
     const [deviceSsdTooltip, setDeviceSsdTooltip] = useState([]);
     const [color, setColor] = useState("#000000");
+    const [hoverColor, setHoverColor] = useState();
     const refreshInterval = useSelector(state => {
         const interval = localStorage.getItem('refreshInterval')
         if (interval !== null)
@@ -134,7 +136,13 @@ const DeviceSsdIndicator = ({host}) => {
 
     return(
         <div className="d-flex flex-row justify-content-start mt-1">
-            <DeviceSsd height="24" width="24" color={color} data-ivcs-server-img-attr="filespace"/>
+            <Link to="/charts">
+                <DeviceSsd height="24" width="24" color={hoverColor || color}
+                           data-ivcs-server-img-attr="filespace"
+                           onMouseEnter={() => setHoverColor("#fff")}
+                           onMouseLeave={() => setHoverColor(undefined)}
+                />
+            </Link>
             <div className="ps-2 mt-1" data-ivcs-server-attr="filespace"
                  onMouseLeave={() => setIsOpen(false)}>
                 <OverlayTrigger

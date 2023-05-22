@@ -1,16 +1,18 @@
 import React, {useEffect, useState} from "react";
 import {AppIndicator as App } from "react-bootstrap-icons";
-import {getData, sum, URL} from "../../../base";
+import {sum, URL} from "../../../base";
 import {useSelector} from "react-redux";
 import * as query from '../queries'
 
 import OverlayTrigger from "react-bootstrap/OverlayTrigger";
 import axios from "axios";
+import {Link} from "react-router-dom";
 
 const ThreadAppIndicator = ({host}) => {
     const [threads, setThreadsCount] = useState("N/A");
     const [threadsDataTooltip, setThreadsDataTooltip] = useState([]);
     const [color, setColor] = useState("#000000");
+    const [hoverColor, setHoverColor] = useState();
     const refreshInterval = useSelector(state => state.refresh.refreshInterval);
 
     const getAppsData = async () => {
@@ -99,7 +101,12 @@ const ThreadAppIndicator = ({host}) => {
     return(
         <div className="d-flex flex-row justify-content-start mt-1"
              onMouseLeave={() => setIsOpen(false)}>
-            <App height="24" width="24" color={color} data-ivcs-server-img-attr="apps"/>
+            <Link to="/charts">
+                <App height="24" width="24" color={hoverColor || color} data-ivcs-server-img-attr="apps"
+                        onMouseEnter={() => setHoverColor("#fff")}
+                        onMouseLeave={() => setHoverColor(undefined)}
+                />
+            </Link>
             <div className="ps-2 mt-1" data-ivcs-server-attr="apps">
                 <OverlayTrigger
                     onToggle={() => setIsOpen(true)}

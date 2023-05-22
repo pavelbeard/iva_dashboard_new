@@ -1,4 +1,4 @@
-FROM pavelbeard/prod.monitor-server:v0.96
+FROM pavelbeard/prod.monitor-server:v0.97
 
 ENV APP_HOME=/home/monitor-server-app/web
 WORKDIR $APP_HOME

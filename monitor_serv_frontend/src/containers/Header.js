@@ -19,7 +19,7 @@ const Header = () => {
         <>
             <NavLink to="/" className="nav-item nav-link">Главная</NavLink>
             <NavLink to="/dashboard" className="nav-item nav-link">Инфопанель</NavLink>
-            {/*<NavLink to="/charts" className="nav-item nav-link">Графики</NavLink>*/}
+            <NavLink to="/charts" className="nav-item nav-link">Графики</NavLink>
             <a href={`${API_URL}/admin`} className="nav-item nav-link">
                 Админ
             </a>

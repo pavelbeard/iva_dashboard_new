@@ -209,7 +209,7 @@ if not DEBUG:
     })
 
     CORS_ALLOWED_ORIGIN_REGEXES = (
-        "http:\/\/(localhost|(1|2|10|127).0.(0|96).(1|11|49|50)):(80|[38]00[0-9])",
+        "http:\/\/(localhost|(1|2|10|127).0.(0|96).(1|11|49|50)):([38]00[0-9]|80)",
     )
 else:
     CORS_ALLOW_ALL_ORIGINS = True

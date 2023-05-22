@@ -33,8 +33,8 @@ services:
         window: 120s
 
   monitor-server-frontend:
-    image: pavelbeard/prod.monitor-server-frontend:v0.96
-    container_name: prod.monitor-server-frontend-v0.96
+    image: pavelbeard/prod.monitor-server-frontend:v0.97
+    container_name: prod.monitor-server-frontend-v0.97
     volumes:
       - static_files.prod:/home/monitor-server-app/web/staticfiles
     ports:
@@ -68,11 +68,26 @@ services:
         max_attempts: 3
         window: 120s
 
+#  worker-dashboard:
+#    build: ./project
+#    command: flower -A core --port=5555 --broker=redis://redis:6379/0
+#    ports:
+#      - 5555:5555
+#    environment:
+#      - DEBUG=1
+#      - SECRET_KEY=dbaa1_i7%*3r9-=z-+_mz4r-!qeed@(-a_r(g@k8jo8y3r27%m
+#      - DJANGO_ALLOWED_HOSTS=localhost 127.0.0.1 [::1]
+#      - CELERY_BROKER=redis://redis:6379/0
+#      - CELERY_BACKEND=redis://redis:6379/0
+#    depends_on:
+#      - monitor-broker
+#      - worker
+
   monitor-server:
     build:
       context: monitor_serv
       dockerfile: prod.monitor_serv.Dockerfile
-    container_name: prod.monitor-server-v0.96
+    container_name: prod.monitor-server-v0.97
     env_file:
       - env/prod.monitor-serv.env
     entrypoint: ["python3.11", "/home/monitor-server-app/web/entrypoint.py"]

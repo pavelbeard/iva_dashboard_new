@@ -10,5 +10,6 @@ urlpatterns = (
     path('audit_log', views.AuditLogRecord.as_view()),
     path('audit_log_last_events', views.AuditLogLastEvents.as_view()),
     path('audit_log_events', views.AuditLogEventsAll.as_view()),
+    path('planned_conferences', views.PlannedConference.as_view()),
     path('ping', views.ping),
 )
