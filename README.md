@@ -1,123 +1,122 @@
-<h1 style="text-align: center">Приложение IVA MCU Dashboard</h1>
+<h1 style="text-align: center">IVA MCU Dashboard Application</h1>
 
 <p style="text-align: center">
 Created by pavelbeard
 <br>v0.6.94</p>
 
-Введение:
+Introduction:
   <ul>
-    <li><a href="#about">Краткое описание</a></li>
-    <li><a href="#howToInstall">Как установить?</a></li>
-    <li>Как пользоваться?</li>
+    <li><a href="#about">Brief Overview</a></li>
+    <li><a href="#howToInstall">How to Install?</a></li>
+    <li>How to Use?</li>
   </ul>
 
 <div id="about">
-<h2>1. Краткое описание</h2>
-    Сей веб-сервис используется для мониторинга системы ВКС IVA MCU.<br> 
-    <div style="text-align: center">Главная страница выглядит так:</div><br><br>
+<h2>1. Brief Overview</h2>
+    This web service is used for monitoring the IVA MCU system.<br> 
+    <div style="text-align: center">The main page looks like this:</div><br><br>
     <img src="doc_pics/img.png" alt="main"><br><br>
-    На ней изображен мониторинг серверов IVA. На каждом сервере мониторятся:
+    It displays the monitoring of IVA servers. On each server, the following are monitored:
     <ul>
-        <li>Процессор</li>
-        <li>ОЗУ</li>
-        <li>Диски(виртуальные) и файловые системы</li>
-        <li>Состояние потоков приложений и служб</li>
-        <li>Состояние приложений и служб</li>
-        <li>Состояние сетевых интерфейсов</li>
-        <li>Мероприятия</li>
+        <li>Processor</li>
+        <li>RAM</li>
+        <li>Disks (virtual) and file systems</li>
+        <li>Status of application and service threads</li>
+        <li>Status of applications and services</li>
+        <li>Status of network interfaces</li>
+        <li>Events</li>
     </ul>
-    В правой части панели отображен мониторинг журнала событий
-    и возраст TLS сертификата 
+    On the right side of the panel, the event log monitoring
+    and the age of the TLS certificate are displayed 
     <br>
     <br>
-    В будущем ожидается:
+    Upcoming features include:
     <ul>
-        <li>графики</li>
-        <li>панель мероприятий</li>
-        <li>панель лицензий</li>
-        <li>панель пользователей IVA</li>
+        <li>Graphs</li>
+        <li>Events panel</li>
+        <li>Licenses panel</li>
+        <li>IVA users panel</li>
     </ul>
 </div>
 <div id="howToInstall">
-<h2>2. Как установить?</h2>
+<h2>2. How to Install?</h2>
 
 <div>
 <ul>
-    <li>Скачиваем репозиторий</li>
+    <li>Download the repository</li>
     <pre>
     wget https://github.com/pavelbeard/iva_dashboard_new
     </pre>
-    <li>Заходим в папку iva_dashboard_new</li>
+    <li>Navigate to the iva_dashboard_new folder</li>
     <pre>
     cd iva_dashboard_new
     </pre>
-    <li>Меняем переменные окружения в файлах в папке /env и <br>
-    /monitor_serv_frontend/nginx:
+    <li>Update environment variables in files in the /env and <br>
+    /monitor_serv_frontend/nginx folders:
         <ul>
-            <li>файл prod.monitor-postgres.env содержит:
+            <li>The prod.monitor-postgres.env file contains:
                 <ul>
-                    <li><b>POSTGRES_USER=имя админа базы данных</b></li>
-                    <li><b>POSTGRES_PASSWORD=пароль БД</b></li>
-                    <li><b>POSTGRES_DB=имя базы данных</b></li>
+                    <li><b>POSTGRES_USER=database admin name</b></li>
+                    <li><b>POSTGRES_PASSWORD=database password</b></li>
+                    <li><b>POSTGRES_DB=database name</b></li>
                 </ul>
             </li>
-            <li>файл prod.monitor-serv.env содержит
+            <li>The prod.monitor-serv.env file contains:
                 <ul>
-                    <li><b>SECRET_KEY=секретный ключ приложения, для API</b></li>
-                    <li><b>DEBUG=режим отладки. в продакшн должен быть отключен</b></li>
-                    <li><b>ENGINE=движок баз данных</b></li>
-                    <li><b>POSTGRES_DB_HOST=хост базы данных приложения</b></li>
-                    <li><b>POSTGRES_DB_PORT=порт</b></li>
-                    <li><b>POSTGRES_DB_USER=пользователь</b></li>
-                    <li><b>POSTGRES_DB_PASSWORD=пароль</b></li>
-                    <li><b>POSTGRES_DB_NAME=имя бд</b></li>
-                    <li><b>IVCS_POSTGRES_DB_NAME=имя базы данных IVA</b></li>
-                    <li><b>IVCS_POSTGRES_DB_USER=пользователь</b></li>
-                    <li><b>IVCS_POSTGRES_DB_PASSWORD=пароль</b></li>
-                    <li><b>IVCS_POSTGRES_DB_HOST=хост</b></li>
-                    <li><b>IVCS_POSTGRES_DB_PORT=порт</b></li>
-                    <li><b>SCHEMAS=если есть схемы в базе данных - ставим</b></li>
-                    <li><b>CSRF_TRUSTED_ORIGINS=домены, с которых могут поступать запросы 
-                    от аутентифицированных пользователей</b></li>
-                    <li><b>DJANGO_SUPERUSER_USERNAME=имя админа приложения</b></li>
-                    <li><b>DJANGO_SUPERUSER_EMAIL=email админа</b></li>
-                    <li><b>DJANGO_SUPERUSER_PASSWORD=пароль по умолчанию</b></li>
-                    <li><b>MONITOR_SERVER_ADDRESS=адрес сервера</b></li>
-                    <li><b>MONITOR_SERVER_PORT=порт сервера</b></li>
+                    <li><b>SECRET_KEY=application secret key, for API</b></li>
+                    <li><b>DEBUG=debug mode. should be turned off in production</b></li>
+                    <li><b>ENGINE=database engine</b></li>
+                    <li><b>POSTGRES_DB_HOST=application database host</b></li>
+                    <li><b>POSTGRES_DB_PORT=port</b></li>
+                    <li><b>POSTGRES_DB_USER=user</b></li>
+                    <li><b>POSTGRES_DB_PASSWORD=password</b></li>
+                    <li><b>POSTGRES_DB_NAME=database name</b></li>
+                    <li><b>IVCS_POSTGRES_DB_NAME=IVA database name</b></li>
+                    <li><b>IVCS_POSTGRES_DB_USER=user</b></li>
+                    <li><b>IVCS_POSTGRES_DB_PASSWORD=password</b></li>
+                    <li><b>IVCS_POSTGRES_DB_HOST=host</b></li>
+                    <li><b>IVCS_POSTGRES_DB_PORT=port</b></li>
+                    <li><b>SCHEMAS=if there are schemas in the database - set</b></li>
+                    <li><b>CSRF_TRUSTED_ORIGINS=domains from which authenticated requests can come</b></li>
+                    <li><b>DJANGO_SUPERUSER_USERNAME=application admin username</b></li>
+                    <li><b>DJANGO_SUPERUSER_EMAIL=admin email</b></li>
+                    <li><b>DJANGO_SUPERUSER_PASSWORD=default password</b></li>
+                    <li><b>MONITOR_SERVER_ADDRESS=server address</b></li>
+                    <li><b>MONITOR_SERVER_PORT=server port</b></li>
                 </ul>
             </li>
-            <li>файл prod.monitor-serv-frontend содержит:
+            <li>The prod.monitor-serv-frontend file contains:
                 <ul>
-                    <li><b>REACT_APP_BACKEND_URL=адрес API-сервера</b></li>
-                    <li><b>REACT_APP_IVCS_API_URL=скоро будет удалена</b></li>
-                    <li><b>REACT_APP_DEBUG=режим отладки. в продакшн должен быть отключен</b></li>
-                    <li><b>REACT_APP_MAIL_TO_DEV=email администратора</b></li>
-                    <li><b>REACT_APP_CALL_TO_DEV=телефон администратора</b></li>
-                    <li><b>NODE_ENV=должно стоять production</b></li>
+                    <li><b>REACT_APP_BACKEND_URL=API server address</b></li>
+                    <li><b>REACT_APP_IVCS_API_URL=will soon be removed</b></li>
+                    <li><b>REACT_APP_DEBUG=debug mode. should be turned off in production</b></li>
+                    <li><b>REACT_APP_MAIL_TO_DEV=admin email</b></li>
+                    <li><b>REACT_APP_CALL_TO_DEV=admin phone number</b></li>
+                    <li><b>NODE_ENV=should be set to production</b></li>
                 </ul>
             </li>
         </ul>
     </li>
-    <li>Запускаем команду сборки docker-compose</li>
+    <li>Run the docker-compose build command</li>
     <pre>
     docker-compose -f prod.docker-compose.yml up -d --build
 </pre>
 </ul>
 </div> 
 <div id="howToUse">
-<h2>3. Как использовать?</h2>
+<h2>3. How to Use?</h2>
 <ul>
-    <li>Регистрируемся в системе
+    <li>Register in the system
     <br>
     <img src="doc_pics/register.png" alt="register">
     </li>
     <li>
-    Ожидаем активации вашего аккаунта администратором
+    Wait for your account to be activated by the administrator
     <br>
     <img src="doc_pics/register_await.png" alt="register_await">
     </li>
 </ul>
 </div>
 <footer>
-    <p>В приложении использовались иконки <b><a href="https://icons.getbootstrap.com/">Bootstrap icons</a></b></p>
+    <p>Icons used in the application are from <b><a href="https://icons.getbootstrap.com/">Bootstrap icons</a></b></p>
 </footer>
