@@ -1,0 +1,20 @@
+{
+  "MAIN_PAGE": "Главная",
+  "WELCOME_TITLE": "Инфопанель | Добро пожаловать в Инфопанель IVA MCU",
+  "WELCOME_DESCRIPTION": "Инфопанель | Добро пожаловать в Инфопанель IVA MCU",
+  "WELCOME_TEXT": " Добро пожаловать в Инфопанель IVA MCU",
+  "WELCOME_TEXT_DSCR": "Мониторинг медиа- и головных серверов системы ВКС IVA",
+  "UI": {
+    "LOGIN": "Войти",
+    "REGISTER": "Зарегистрироваться",
+    "HEADER": {
+      "AUTH": {
+        "MAIN_PAGE": "Main page",
+        "DASHBOARD": "Dashboard",
+        "ADMIN": "Admin"
+      }
+    }
+  },
+  "FOOTER": "Created by heavycream9090",
+  "VERSION": "1.0.0"
+}

@@ -37,4 +37,7 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 
+# auth backend
+./auth-backend/.venv
+
 

@@ -1,0 +1,19 @@
+{
+  "MAIN_PAGE": "Main page",
+  "WELCOME_TITLE": "IVA Dashboard | Welcome to the IVA MCU Dashboard",
+  "WELCOME_DESCRIPTION": "IVA Dashboard | Welcome to the IVA MCU Dashboard",
+  "WELCOME_TEXT": "Welcome to the IVA MCU Dashboard",
+  "WELCOME_TEXT_DSCR": "Monitoring of the head and media servers VCS IVA",
+  "UI": {
+    "LOGIN": "Login",
+    "REGISTER": "Register",
+    "HEADER": {
+      "AUTH": {
+        "MAIN_PAGE": "Main page",
+        "DASHBOARD": "Dashboard"
+      }
+    }
+  },
+  "FOOTER": "Created by heavycream9090",
+  "VERSION": "1.0.0"
+}
